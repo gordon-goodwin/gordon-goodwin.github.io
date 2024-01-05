@@ -4,7 +4,7 @@
 
 ### Category Name 1 
 
-[Project 1 Title](/pdf/sample_presentation.pdf)
+[Project 1 Title](/R_projects/Flights%20Analysis)
 <img src="images/dummy_thumbnail.jpg?raw=true"/>
 
 ---
