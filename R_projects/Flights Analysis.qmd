@@ -1,0 +1,1179 @@
+---
+title: "Flights Analysis"
+author: "Gordon Goodwin"
+format: html
+code-fold: true
+code-link: true
+code-line-numbers: true
+theme: sandstone
+toc: true
+toc-depth: 4
+toc-title: "Contents"
+number-sections: false
+editor: visual
+execute: 
+  warning: false
+  error: false
+  cache: false
+---
+
+------------------------------------------------------------------------
+
+# Introduction
+
+GG Airlines (GGA) is attempting to enter the U.S. domestic air market with an initial 5-plane investment. This analysis seeks to support the GGA expansion by using 1Q2019 U.S. aviation data to recommend 5 potential round-trip routes based on volume, profitability, and any other relevant KPIs.
+
+## Background
+
+-   Only direct dual-leg round-trip routes between medium or large U.S. airports were considered
+
+    -   Origin of Leg 1 = Destination of Leg 2 (`CLT` - `RDU` - `CLT`)
+
+-   Each of the 5 planes will be dedicated to a single route (5 planes, 5 routes)
+
+-   Punctuality is a core component of the GGA brand
+
+## Profitability Objective Function
+
+Profitability was first calculated at the individual flight level and then aggregated across routes and carriers (discussed further later). At a high level, profitability can be broken down into:
+
+$$
+Profit = [(Baggage + Fare)*Passengers]-[(OpCosts*Distance) + Delays + AirportCost]
+$$
+
+::: callout-note
+## Further detail regarding calculations and relevant assumptions can be found in the Appendix
+:::
+
+# Data Prep & Exploration
+
+This project uses aviation data from the first quarter of 2019, combining information from three datasets on `flights`, `tickets`, and `airports`. The preliminary datasets were explored, transformed, and merged to create a final dataset organized with **one row per round-trip flight**. Each round-trip flight is uniquely identified by a combination of: `carrier_code`, `plane_tail_number`, `carrier_flight_number`, and `flight_date`.
+
+```{r}
+#| label: initial load of packages, functions, data
+#| warning: false
+#| output: false
+
+# No Scientific Mode for numeric vars
+options(scipen = 999)
+
+# Source Fns
+source("Airline Functions.R")
+
+# List Data CSV Files in working directory
+list.files(pattern = ".csv") -> files2load
+
+# Iteratively load filelist and clean names while loading
+map(files2load, cleanreader) -> filelist
+
+# name dataframes to match corresponding filepath name
+names(filelist) <- str_to_lower(str_remove_all(files2load, ".csv"))
+
+## Assign objects
+list2env(filelist, .GlobalEnv)
+
+# Remove list to clear memory
+rm(filelist)
+
+```
+
+::: callout-caution
+## The above code will import all CSV files currently residing in your working directory simultaneously.
+:::
+
+## Flights
+
+After loading our `flights` dataset, we perform some basic clean-up steps by parsing the `distance` and `flight_date` fields, removing duplicate records, and filtering out flights that are cancelled or whose origin and destination IATA codes are the same.
+
+```{r}
+#| label: fix dates and distance, de-dupe, filter cancelled out
+
+# Replace fl_date, clean/parse distance from character to numeric variable
+flights |> 
+  mutate(
+    fl_date = datefixer(fl_date),
+    distance = str_replace_all(str_remove_all(distance, "\\.0"), "^-?0+", ""),
+    distance = abs(parse_number(distance))
+  ) |> 
+  # De-Dupe
+  distinct() |> 
+  # Format names for later join and clarity
+  rename(origin_iata = origin,
+         destin_iata = destination) |> 
+  # Remove flights where origin = destination, flight is cancelled, or distance invalid
+  filter(origin_iata != destin_iata,
+         cancelled == 0) -> flights
+```
+
+As @fig-flights-missingness shows below, while 5 variables in the `flights` dataset are missing values, only `air-time` and `arrival_delays` register more than 0.01% missingness. On the whole, none of the `flights` variables initially appear to be missing an impactful number of data points
+
+```{r}
+#| label: fig-flights-missingness
+#| fig-cap: Missingness patterns for variables missing values
+
+flights |> 
+  missingval_viz()
+```
+
+Lastly, records for flights missing values on any of the `arrival_delay`, `occupancy_rate`, `distance`, or `flight_number` variables are removed, as those fields are all necessary for profitability calculations.
+
+```{r}
+#| label: removal of NAs
+#| output: false
+
+# Filter out flights missing vars needed for profit aside from distance
+flights |> 
+  filter(!is.na(op_carrier_fl_num),
+         !is.na(arr_delay),
+         !is.na(occupancy_rate),
+         !is.na(distance)) -> flights
+
+```
+
+## Airports
+
+In order to facilitate joining the `airport` data to the `flights` data, the `airports` dataset needs to be cleaned and structured in a format with 1 row for each possible combination of origin and destination airports.
+
+### Airport Data Clean-Up
+
+We begin by parsing `latitude` and `longitude` from the `coordinates` field, removing duplicates, and establishing origin and destination fields.
+
+```{r}
+#| label: parse latitude and longitude, de-dupe, structure origin/destination
+
+airport_codes |> 
+  # De-dupe
+  distinct() |> 
+  # Separate Lat/Longitude and convert to Numeric form
+  separate_wider_delim(cols = coordinates,
+                       delim = ", ",
+                       names = c("latitude","longitude")) |> 
+  mutate(across(.cols = c("latitude", "longitude"),
+                .fns = ~as.numeric(.x))) |> 
+  # Create origin and destin cols necessary for join with flights data
+  mutate(origin_iata = iata_code,
+         origin_type = type,
+         destin_iata = iata_code,
+         destin_type = type,
+         origin_latitude = latitude,
+         origin_longitude = longitude,
+         destin_latitude = latitude,
+         destin_longitude = longitude) -> airport_codes
+```
+
+As @fig-flights-missingness shows, it initially appears that almost 85% of our `airport` data records are missing the `iata_code` values needed to join to our `flights` data. We are also missing some `iso_country` values, but those records are all associated with airports on the African continent.
+
+```{r}
+#| label: fig-missingness_airportcodes
+#| fig-cap: Initial missingness for airport_codes data
+
+airport_codes |> missingval_viz()
+
+```
+
+Lastly, after filtering for just U.S. med/large airports, @fig-missingness_airportcodes_USmedlarge shows that 96% of the `iata_code` records are now valid.
+
+```{r}
+#| label: fig-missingness_airportcodes_USmedlarge
+#| fig-cap: revised missingness for airport_codes data
+
+# Filter for just US medium/large airports  
+airport_codes |> 
+  filter(iso_country == "US",
+         type %in% c('medium_airport',"large_airport")) -> airport_codes_medlarge
+
+airport_codes_medlarge |> missingval_viz()
+
+```
+
+As `iata_code` is required to join to our `flights` data, we remove any remaining NA records.
+
+```{r}
+#| label: remove NA iata code 
+#| output: false
+
+# Remove missing iata code
+airport_codes_medlarge |> 
+  filter(!is.na(iata_code)) -> airport_codes_medlarge
+
+```
+
+::: callout-note
+## Several IATA codes were shared by an open and a closed airport, but only one (Austin) was a med/large U.S. airport
+:::
+
+### Airports Data Self-Join
+
+For the final formatting step, the `airports` data is self-joined to create a full cross-product grid of all possible origin and destination pairs of medium/large U.S. airports.
+
+```{r}
+#| label: create crossprod of origin/destination combos
+
+# Create grid of crossprods of origin and destination for flights data join
+airport_codes_medlarge |> 
+  # Cross Product Grid
+  crossprodder(complete = F,
+               origin_iata, destin_iata) |> 
+  # Inner Join back to self to pull in origin section metadata
+  inner_join(airport_codes_medlarge |> 
+               select(origin_iata, origin_type,
+                      origin_latitude, origin_longitude),
+             by = "origin_iata") |> 
+  # Inner Join back to self to pull in destination section metadata
+  inner_join(airport_codes_medlarge |> 
+               select(destin_iata, destin_type,
+                      destin_latitude, destin_longitude),
+             by = "destin_iata") -> airport_codes_medlarge
+
+# Glimpse
+airport_codes_medlarge |> 
+  slice_sample(n = 3) |> 
+  select(origin_iata, origin_type, destin_iata, destin_type) |> 
+  gt() |> 
+  tab_header(title = md("**Random Sample of Airport Grid for Validation**"))
+
+```
+
+## Merge Flights & Airports Data
+
+The cross-product grid of origin/destination `airport` pairs is then joined to the `flights` data to create an intermediate dataset containing both origin and destination medium/large `flights` and `airports` data. First, the fields in both datasets are compared to derive the primary keys (`origin_iata`, `destin_iata`)
+
+```{r}
+#| label: check common and unique columns prior to join
+
+# Cross-check common and unique columns before join
+compare_df_cols(airport_codes,
+                flights)
+
+# Store common cols as primary keys
+compare_df_cols(airport_codes,
+                flights)$common_cols -> primarykeys_airports_flights
+
+```
+
+Next, the join is performed and the output validated:
+
+```{r}
+#| label: join airport crossprod grid to flights
+
+# inner join flights to med/large US airport origin/destination pairs
+flights |> 
+  inner_join(airport_codes_medlarge,
+             by = primarykeys_airports_flights) -> flights_medlarge
+
+# Check
+flights_medlarge |> 
+  select(op_carrier, tail_num, origin_iata, origin_city_name,origin_type,
+         destin_iata, dest_city_name,destin_type) |> 
+  head(n = 1) |> 
+  gt() |> 
+  tab_header(title = md("**Validation Sample Showing Airport Info Pulled In**"))
+
+```
+
+## Round-Trip Routes
+
+A self-join is employed upon the`flights/airports` data to isolate only those routes where the destination of leg 1 is the origin of leg 2, and the destination of leg 2 is the origin of leg 1. In this join, the "right side" effectively serves as leg 1, the "left side" serves as leg 2, and each flight is uniquely identified via a combination of `carrier`, `carrier_flight_number`, `tail_number`, and `flight_date` primary key fields.
+
+```{r}
+#| label: self-join and filter to isolate round-trip routes
+
+# Round Trip identified by: origin 1 = dest 2, dest 2 = origin 1
+flights_medlarge |> 
+  # Self Join where "Right" side = Leg 1, "Left" side = Leg 2
+  inner_join(flights_medlarge, 
+             by = c("op_carrier", 
+                    "op_carrier_fl_num", 
+                    "tail_num","fl_date"),
+             relationship = "many-to-many",
+             suffix = c("_leg1","_leg2")) |> 
+  filter(
+    # Filter for round trip: origin 1 = dest 2, dest 2 = origin 1
+    origin_iata_leg1 == destin_iata_leg2,
+    destin_iata_leg1 == origin_iata_leg2
+  ) |> 
+  arrange(op_carrier, fl_date, op_carrier_fl_num,fl_date) -> flights_medlarge_roundtrip
+
+```
+
+Before checking the final results, a few final clean-up steps are taken to:
+
+-   Create a single-field round-trip route identifier (e.g. `CLT-RDU`)
+
+-   Filter out the now-redundant secondary rows for each round-trip flight
+
+    -   (all necessary info for both legs is now in a single row).
+
+-   Create custom `distance_crowfly` fields using point-to-point calculations from the `latitude` and `longitude` fields to validate the original `distance` values.
+
+```{r}
+#| label: clean, de-dupe, create custom distance crowfly metric
+
+flights_medlarge_roundtrip |> 
+  # round all numeric cols to 2 digits for clarity
+  mutate(across(where(is.numeric),
+                ~round(.x, 2))) |> 
+  # Create single field identifying the route and calculate crow-fly distance
+  mutate(route_iata = paste(origin_iata_leg1, destin_iata_leg1, sep = "-"),
+         route_city_name = paste(origin_city_name_leg1, 
+                                 dest_city_name_leg1, sep = "-"),
+         # Crow-Fly distance for each leg and then total crow fly
+         distance_crowfly_leg1 = crowfly_distance_miles(lat1 = origin_latitude_leg1,
+                                                        lon1 = origin_longitude_leg1,
+                                                        lat2 = destin_latitude_leg1,
+                                                        lon2 = destin_longitude_leg1),
+         distance_crowfly_leg2 = crowfly_distance_miles(lat1 = origin_latitude_leg2,
+                                                        lon1 = origin_longitude_leg2,
+                                                        lat2 = destin_latitude_leg2,
+                                                        lon2 = destin_longitude_leg2),
+         distance_crowfly_total = distance_crowfly_leg1 + distance_crowfly_leg2) |> 
+  # Round to 2 digits for numeric cols
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~round(.x, 2))) |> 
+  # De-Dupe
+  distinct() |> 
+  # Filter out redundant secondary rows for each flight
+  # we have 1 row per round-trip flight with all info for both legs on 1 row
+  filter(row_number() == 1,
+         .by = c(fl_date, op_carrier, 
+                 tail_num, op_carrier_fl_num)) -> flights_medlarge_roundtrip 
+
+# Random sample a few rows to validate process
+flights_medlarge_roundtrip |> 
+  slice_sample(n = 3) |> 
+  select(origin_iata_leg1, destin_iata_leg1, distance_leg1,
+         origin_iata_leg2, destin_iata_leg2, distance_leg2) |> 
+  gt() |> 
+  tab_header(title = md("**Random Sample of Round-Trips to Validate**"))
+
+```
+
+Last, the `distance_crowfly` metrics are used to quickly validate the original `distance` values. As seen below in @fig-distance_issues for the `Charlotte-Raleigh` route, the 2 values aren't identical but are close enough to be confident in the original `distance` values.
+
+```{r}
+#| label: fig-distance_issues
+#| fig-cap: Distance Values Inaccurately Low
+
+# Display improvement for Charlotte to RDU
+flights_medlarge_roundtrip |> 
+  filter(route_iata == "CLT-RDU") |> 
+  distinct(route_iata, distance_leg1, distance_crowfly_leg1) |> 
+  gt() |> 
+  tab_header(title = md("**Original and Custom Distance Metrics**"),
+             subtitle = md("*Charlotte-Raleigh route*"))
+```
+
+::: callout-note
+## While crowfly_distance has relatively inaccurate raw values, it correctly rank orders routes by distance
+:::
+
+## Tickets
+
+The final `tickets` data contains a sample of tickets that can be joined to our `flights/airports` data to get `ticket_fare` information for the profitability calculations.
+
+### Tickets Data Clean-Up
+
+To prepare the `tickets` data to be joined to our `flights/airports` data, initial clean-up steps are taken to remove duplicates, retain only round-trip flights, parse the ticket_fare values, and create an origin/destination structure.
+
+```{r}
+#| label: de-dupe and clean tickets
+
+# De-Dupe and filter for round trip
+tickets |> 
+  # De-Dupe
+  distinct() |> 
+  # Keep only round-trip
+  filter(roundtrip == 1) |> 
+  # Parse ticket fare
+  mutate(itin_fare = parse_number(itin_fare)) |> 
+  # Rename fields to be consistent with flights/airports data
+  rename(origin_iata_leg1 = origin, 
+         destin_iata_leg1 = destination,
+         op_carrier = reporting_carrier) |> 
+  mutate(origin_iata_leg2 = destin_iata_leg1,
+         destin_iata_leg2 = origin_iata_leg1,
+         route_iata = paste(origin_iata_leg1, 
+                            destin_iata_leg1, sep = "-")) |> 
+  # Keep only necessary fields
+  select(itin_id, op_carrier, route_iata,origin_iata_leg1, destin_iata_leg1,
+         origin_iata_leg2, destin_iata_leg2, itin_fare) -> ticketsround
+
+```
+
+As seen below in @fig-tickets_missingness, a small proportion of `ticket_fare` values are missing.
+
+```{r}
+#| label: fig-tickets_missingness
+#| fig-cap: Missing data for round-trip tickets
+
+# Missing tickets values for round trip routes
+ticketsround |> missingval_viz()
+```
+
+Those records are removed, as `ticket_fare` is needed for profitability calculations.
+
+```{r}
+#| label: Remove NA fares
+#| output: false
+
+ticketsround |> filter(!is.na(itin_fare)) -> ticketsround
+```
+
+### Aggregate Tickets Data
+
+Initially the plan was to calculate an `average_ticket_fare` for each `route`, but review of the `ticket_fare` distribution in @fig-ticket_fare_outliers shows significant price variability amongst carriers, along with several major outliers
+
+```{r}
+#| label: fig-ticket_fare_outliers
+#| fig-cap: Boxplots of fare prices by carrier
+
+# Significant inter-carrier fare variability and outliers
+ticketsround |> 
+  doublebox_viz(op_carrier, itin_fare) +
+  labs(x = "Carrier", y = "Ticket Fare Distribution",
+       title = "Significant Fare Variability Amongst Carriers",
+       subtitle = "Highly skewed distribution with major outliers") +
+  scale_y_continuous(limits = c(0, 40000),
+                     breaks = seq(0, 40000, 5000),
+                     labels = \(x) paste0("$",x))
+
+```
+
+Given the carrier variability, skewness, and outliers, a group-wise median was calculated to assign `median_ticket_fare` values to each `route` and `carrier` combination. A trimmed mean was also calculated for data exploration.
+
+```{r}
+#| label: Median fare for each route/carrier combo
+
+# Trimmed Avg and Median fares calculated, only median will be used
+ticketsround |> 
+  summarize(avg_fare = roundmean(x = itin_fare, trim = 0.1),
+            med_fare = median(itin_fare),
+            .by = c(route_iata,
+                    op_carrier)) -> ticketsround_summary
+
+# Preview
+ticketsround_summary |> 
+  filter(route_iata=="CLT-RDU") |> 
+  head() |> 
+  gt() |> 
+  tab_header(title = md("**Validation Preview of Fare Summary Metrics**"))
+```
+
+## Merge Tickets to Flights/Airports
+
+The final `flights/airports/tickets` dataset is created by left-joining the `tickets` `route` and `carrier`-level summary data on fare prices to the `flights/airports` data. A left-join was used in case not all `routes` and `carriers` in the flights data are present in the `tickets` data. In such cases where `ticket_fare` values were in fact missing for a specific `carrier`, the `route`-level median was imputed. If `route`-level fares were unavailable, the `median_imputed_fare` was left `NA`.
+
+```{r}
+#| label: Merge fares to flights/airports and impute/remove NA
+#| output: false
+
+# Comparison of Common Cols to be used as primary keys for join
+compare_df_cols(ticketsround_summary, flights_medlarge_roundtrip)$common_cols -> primarykeys_tickets_airports_flights
+
+# Join med large round trip routes to tickets data
+flights_medlarge_roundtrip |> 
+  left_join(ticketsround_summary,
+            by = c(primarykeys_tickets_airports_flights)) |> 
+  ## Impute Mean/Median of route (across all carriers) where possible
+  mutate(avg_fare_imputed = if_else(is.na(avg_fare),
+                                    roundmean(avg_fare, na.rm = T),
+                                    avg_fare),
+         med_fare_imputed = if_else(is.na(med_fare),
+                                    median(med_fare, na.rm = T),
+                                    med_fare),
+         .by = c(route_iata)) -> flights_medlarge_roundtrip
+
+```
+
+Lastly, a quick validation check shows that none of the `routes` that still have missing `ticket_fare` values are in the top 50 busiest `routes`
+
+-   the lack of output indicates there were no top 50 routes that matched the `NA` `ticket_fare` criteria
+
+As `ticket_fares` are needed for profitability, and the removal impact is likely to be minimal, the remaining records with missing values were removed.
+
+```{r}
+#| label: validate missing fares are not issue for top routes
+#| output: false
+
+# Top 50 Routes
+flights_medlarge_roundtrip |> 
+  count(origin_iata_leg1, destin_iata_leg1,route_iata, sort = T) |> 
+  slice_head(n = 50) -> top50routes
+
+# Check if any flights missing ticket fares are in top 50 busiest (NO)
+flights_medlarge_roundtrip |> 
+  filter(is.na(med_fare_imputed)) |> 
+  inner_join(top50routes)
+
+# Remove remaining NA
+flights_medlarge_roundtrip |> filter(!is.na(med_fare_imputed)) -> flights_medlarge_roundtrip
+
+```
+
+# Profitability Calculations
+
+The last step is to calculate the `cost`, `revenue`, and `profit` for each flight, which will allow for analytical aggregation up to the `route` and `carrier` level. To facilitate data exploration and validation, profitability metrics are calculated for both the individual legs and the overall round-trip flight.
+
+## Revenue
+
+Revenue is comprised of `ticket_fare` and `baggage_fee` components, both of which are impacted by `passenger_counts`. To derive `passenger_counts`, the `occupancy_rates` are multiplied by an assumed max capacity of 200 passengers. These `passenger_counts`in turn serve as multipliers for the `median_ticket_fare` and `baggage_fee` calculations.
+
+```{r}
+#| label: revenue calculations
+
+# TICKET Fees = Median Fare * Estimated Passenger Count
+flights_medlarge_roundtrip |> 
+  mutate(n_passengers_leg1 = occupancy_rate_leg1*200,
+         n_passengers_leg2 = occupancy_rate_leg2*200,
+         n_passengers_total = n_passengers_leg1 + n_passengers_leg1,
+         avg_occ_rate_bothlegs = round(n_passengers_total/400, 2)) |> 
+  mutate(est_fare_revenue_total = n_passengers_total*med_fare_imputed) |> 
+# Baggage Fees = $35 * Total Number Passengers * 0.5 bags per passenger
+  mutate(n_bags_leg1 = n_passengers_leg1*0.5,
+         n_bags_leg2 = n_passengers_leg2*0.5,
+         n_bags_total = n_passengers_leg1 + n_passengers_leg2,
+         est_bag_revenue_total = n_bags_total*35) |> 
+  # Total Revenue Calc = Bag Rev + Fare Rev
+  mutate(est_all_revenue_total = est_bag_revenue_total + est_fare_revenue_total) -> flights_medlarge_roundtrip
+
+
+```
+
+## Costs
+
+Costs are comprised of `mileage_variable`, `airport_size`, and `delay_time` components. The `mileage_variable` costs are determined by an assumed \$9.18 fee per `distance` mile traveled and the `airport_size` costs are based on a \$5k/\$10k charge for medium/large airports. The `delay_time` costs are based on a \$75/min charge applied to each `arrival` and `departure` for each minute of `delay_time` past a 15-minute grace period.
+
+```{r}
+#| label: cost calculations
+
+
+# Mileage-variable costs
+flights_medlarge_roundtrip |> 
+  mutate(mileage_var_costs_leg1 = 9.18*distance_leg1,
+         mileage_var_costs_leg2 = 9.18*distance_leg2,
+         mileage_var_costs_total = mileage_var_costs_leg1 + mileage_var_costs_leg2) |> 
+  # Airport Cost = if med then 5k, if large then 10k
+  mutate(destin_airport_cost_leg1 = if_else(destin_type_leg1 == "large_airport",
+                                            true = 10000,
+                                            false = 5000),
+         destin_airport_cost_leg2 = if_else(destin_type_leg2 == "large_airport",
+                                            true = 10000,
+                                            false = 5000),
+         airport_landing_cost_total = destin_airport_cost_leg1 + destin_airport_cost_leg2) |> 
+  # Departure/Arrival Delay > 15min = $75/min
+  # Subtract 15min grace period from all 4 flight legs
+  mutate(across(.cols = contains("delay"),
+                .fns = ~.x-15,
+                .names = "{.col}_adj")) |> 
+  # Zero trunc adjusted delay time for all 4 flight legs
+  mutate(across(.cols = contains("_adj"),
+                .fns = ~zero_trunc(.x))) |> 
+  # Total adjusted delay time summed across all 4 flight legs
+  mutate(arr_dep_delay_time_total = (dep_delay_leg1_adj +
+                                       arr_delay_leg1_adj +
+                                       dep_delay_leg2_adj +
+                                       arr_delay_leg2_adj)) |> 
+  # Delay costs based on adjusted delay times for all 4 flight legs
+  mutate(dep_delay_cost_leg1 = dep_delay_leg1_adj*75,
+         arr_delay_cost_leg1 = arr_delay_leg1_adj*75, 
+         dep_delay_cost_leg2 = dep_delay_leg2_adj*75, 
+         arr_delay_cost_leg2 = arr_delay_leg2_adj*75) |> 
+  # Total delay cost based on summing across delay costs for 4 legs
+  mutate(arr_dep_delay_cost_total = (dep_delay_cost_leg1 +
+                                       dep_delay_cost_leg2 +
+                                       arr_delay_cost_leg1 +
+                                       arr_delay_cost_leg2)) |> 
+# Total Costs = milage variable + airport + delay
+  mutate(est_all_costs_total = mileage_var_costs_total +
+           airport_landing_cost_total +
+           arr_dep_delay_cost_total) -> flights_medlarge_roundtrip
+
+
+```
+
+## Profit
+
+Profit is calculated for each individual round-trip flight by subtracting the flight-level `total_costs` from the `total_revenue`.
+
+```{r}
+#| label: profit calculations
+
+# Total Profit = Total Revenue - Total Cost
+flights_medlarge_roundtrip |> 
+  mutate(est_profit_total = est_all_revenue_total - est_all_costs_total) -> flights_medlarge_roundtrip
+
+# Validate
+flights_medlarge_roundtrip |> 
+  slice_sample(n = 1) |> 
+  select(route_iata,op_carrier,tail_num, est_profit_total,est_all_revenue_total,est_all_costs_total) |> gt() |> 
+  tab_header(title = md("**Validation Sample of Flight-Level Profit Metrics**"))
+
+```
+
+# Findings
+
+We can now use our final dataset to evaluate each `route` and/or `route/carrier` combo using a variety of KPIs.
+
+## Top 10 Busiest Routes
+
+At the `route`-level, we can see in @fig-top10busiest_routes that the `LA-SanFran` (`LAX-SFO`) route was the busiest overall route in 1Q2019, followed closely by a number of routes based out of `Atlanta`.
+
+```{r}
+#| label: fig-top10busiest_routes
+#| fig-cap: Routes with the greatest number of flights
+#| 
+
+## Top 10 Flights Bar Chart
+### Round
+flights_medlarge_roundtrip |> 
+  singlebar_viz(x = route_iata, nrecs = 10) +
+  labs(x = "Route",
+       title = "Top 10 Busiest Routes & Flights Recorded in 1Q2019") 
+
+
+```
+
+Further, when just the originating airport is considered, @fig-top10busiest_originating shows that the overwhelming majority of *all* round-trip routes originated out of Atlanta (`ATL`), with Dallas-Fort Worth (`DFW`) and Charlotte (`CLT`) coming in 2nd and 3rd. We also see clear `carrier`-`origin_hub` patterns, with `Delta` dominating `Atlanta` and American Airlines and its subsidiaries covering `Charlotte` and `Dallas-Fort Worth`.
+
+```{r}
+#| label: fig-top10busiest_originating
+#| fig-cap: Originating airports with greatest number of flights
+
+flights_medlarge_roundtrip |> 
+  doublebar_viz(x = origin_iata_leg1,grp1 = op_carrier, nrecs = 10, labels = F) +
+  labs(x = "Originating Hub", y = "Flights", fill = "Carrier",
+       title = "Delta's Atlanta and AA's Charlotte/Dallas Hubs")
+```
+
+Accordingly, `route/carrier` combinations were probed to see which routes operated by specific carriers were the busiest. As shown below in @fig-top10busiest_both, `Delta` (`DL`) had the greatest number of 1Q2019 flights by far, the majority of which originated out of its main hub in `Atlanta (ATL)`. Interestingly, there were no individual `route/carrier` combinations that appeared overwhelmingly busier.
+
+```{r}
+#| label: fig-top10busiest_both
+#| fig-cap: Route-Carrier combos with greatest number of flights
+
+flights_medlarge_roundtrip |> 
+  doublebar_viz(x = op_carrier,grp1 = route_iata, nrecs = 10, labels = F) +
+  labs(x = "Carrier", y = "Flights", fill = "Route",
+       title = "Delta's Atlanta-based Round-Trip Routes were Busiest by Far")
+
+```
+
+## Top 10 Profitable Routes
+
+In orderto probe high-level profitability, estimates for each individual round-trip flight were aggregated across `routes` and `route/carrier` combinations. The `route` and `route/carrier`-level profit estimates were then rank-ordered to derive the top 10 results.
+
+::: callout-tip
+## The following profitability estimates represent two levels of summary data, as first the group-wise median fares were imputed for flight-level estimates tjat were then averaged again to create route-level profitability
+:::
+
+### Routes
+
+As seen in @fig-top10profit_routes, while most of the top 10 routes generate an average profit of between \$150,000 to \$250,000, the `Vail, CO - New York` route (`EGE - JFK`) is a significant outlier that generates an average profit of over \$500,000.
+
+```{r}
+#| label: fig-top10profit_routes
+#| fig-cap: Top 10 routes by average profit
+
+options(scipen = 999)
+
+# 10 Profitable Routes - Summary
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata,
+             # grp2 = op_carrier,
+              min_flights = 20) |> 
+  arrange(desc(avg_profit)) |> 
+  mutate(rank_profit = row_number()) |> 
+  slice_max(avg_profit, n = 10) |> 
+  mutate(across(.cols = (where(is.numeric) & !contains("occ")),
+                .fns = ~round(.x))) -> top10routes_profit_summary
+
+# Isolate just the routes for later comparisons
+top10routes_profit_summary |> pull(route_iata) -> top10routes_profit
+
+# Viz
+top10routes_profit_summary |> 
+  doublebox_viz(x = route_iata,
+                y = avg_profit) +
+  labs(x = "Route",
+       y = "Avg Profit") +
+  scale_y_continuous(breaks = seq(0, 600000, by = 50000),
+                     limits = c(0, 600000),
+                     labels = \(x) paste0("$", x)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+```
+
+This generates 2 follow-up questions:
+
+1.  What is unique about the outlier `EGE-JFK` (`Vail, CO - New York`) route?
+2.  Is there significant variation across `carriers` within specific `routes`?
+    1.  e.g. Is a `route`-level estimate reliable?
+
+#### Vail, CO - New York
+
+When comparing the `EGE-JFK` route to the other Top 10 profitable routes, @tbl-vail_NY_vs_other_top10 below shows us that:
+
+-   `Vail-NY` is a much lower-volume route, as while the `passenger_counts` are roughly equivalent, the total number of 1Q2019 `recorded_flights` is only 20% of the average flight count for the other top 10 routes
+
+-   `Vail-NY` flights cost about \$25,000 more per flight on average, but generate **\$350,000 more in average revenue** than the other Top 10 routes!
+
+```{r}
+#| label: tbl-vail_NY_vs_other_top10
+#| tbl-cap: Vail - NY route vs other Top 10 routes
+
+# Create flag separating JFK-Vail route from other top 10 and get stats
+top10routes_profit_summary |> 
+  mutate(route_jfk_ege = if_else(route_iata == "EGE-JFK",
+                                 "Vail - NYC",
+                                 "Other")) |>
+  summarize(across(where(is.numeric),
+                   ~roundmean(.x, digits = 0)),
+            .by = route_jfk_ege) |> 
+  select(route_jfk_ege, n_flights, avg_profit,
+         avg_n_passengers,avg_cost_total, avg_revenue_total) |> 
+  gt() |> 
+  tab_header(title = md("**Vail - NY has Greater Revenue than other Top 10**"))
+
+```
+
+Further, as seen below, the main driver in this revenue gap is the `ticket_fares` charged, with the `Vail-NY` route charging over 3x the other top 10 routes per passenger on average.
+
+```{r}
+
+#| label: tbl-vail_revenue_diffs
+
+# Create flag separating JFK-Vail route and get revenue info
+top10routes_profit_summary |> 
+  mutate(route_jfk_ege = if_else(route_iata == "EGE-JFK",
+                                 "Vail - NYC",
+                                 "Other")) |>
+  summarize(across(.cols = where(is.numeric),
+                   .fns = ~roundmean(.x, digits = 2)),
+            .by = route_jfk_ege) |> 
+  select(route_jfk_ege, avg_occupancy_rate, avg_bag_revenue,
+         avg_fare_revenue,avg_median_fare) |> 
+  gt() |> 
+  tab_header(title = md("**Vail - NY has 3x Higher Ticket Fares than other Top 10**"))
+```
+
+#### Carrier Variability
+
+Having determined that fare prices can be a significant driver of profit, particularly for low-volume routes, we now turn to Question 2 to probe possible profitability variations across `carriers` for these top 10 overall `routes`. As seen in @fig-top10profit_route_carrier_probe, the following top 10 overall routes do have significant differences across carriers:
+
+-   `Cincinatti-Detroit` (`CVG-DTW)`
+
+-   `Charlotte-Wilmington` (`CLT-ILM`)
+
+-   `Atlanta-Columbus, MS` `(ATL-GTR)`
+
+```{r}
+#| label: fig-top10profit_route_carrier_probe
+#| fig-cap: Carrier variability for top 10 profitable routes
+
+# Filter for those top 10 profitable routes and examine inter-carrier variation
+flights_medlarge_roundtrip |> 
+  filter(route_iata %in% top10routes_profit) |> 
+  ggplot(aes(x = route_iata,
+             fill = op_carrier,
+             y = est_profit_total)) +
+  geom_boxplot() +
+  theme_minimal() +
+  coord_flip() +
+  theme(plot.title = element_text(face = "bold", size = 14),
+        plot.subtitle = element_text(face = "italic"),
+        plot.caption = element_text(color = "firebrick"),
+        axis.title = element_text(face = "bold")) +
+  labs(y = "Profit ($) per Round Trip Flight",
+       fill = "Carrier",
+       x = "Route",
+       title = "Top 10 Most Profitable Routes Overall",
+       subtitle = "Variation in Profitability by Carrier",
+       caption = "Only routes w/20+ flights recorded included in profitability")
+
+```
+
+This is significant because it suggests that:
+
+-   Not all carriers experience the same profitability on these Top 10 routes
+
+-   There may be other routes that provide even greater profitability for specific carriers
+
+### Routes & Carriers
+
+Given the inter-carrier variability in profit that was observed, profitability statistics were next calculated for specific `route/carrier` combos.
+
+```{r}
+#| label: fig-top10profit_routescarriers
+#| fig-cap: Top 10 routes & carriers ordered by average profit
+
+# 10 proftiable Route/Carrier Combos - Summary Stats
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata,
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+   mutate(route_carrier = paste(route_iata, op_carrier, sep = "_via_")) |> 
+  arrange(desc(avg_profit)) |> 
+  mutate(rank_profit = row_number()) |> 
+  slice_max(avg_profit, n = 10) |> 
+  mutate(across(.cols = (where(is.numeric) & !contains("occ")),
+                  .fns = ~round(.x))) -> top10routes_carriers_profit_summary
+
+# Identify routes in overall top 10 profit and route/carrier version
+top10routes_carriers_profit_summary |> pull(route_iata) -> top10routes_carriers_profit
+top10routes_profit_summary |> pull(route_iata) -> top10routes_profit
+
+# Visualize
+top10routes_carriers_profit_summary |> 
+  doublebox_viz(x = route_carrier,
+                y = avg_profit) +
+  labs(x = "Route & Carrier",
+       y = "Avg. Profit") +
+  scale_y_continuous(breaks = seq(0, 600000, by = 50000),
+                     limits = c(0, 600000),
+                     labels = \(x) paste0("$", x)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+```
+
+As seen above in @fig-top10profit_route_carrier_probe, there are a number of `routes` operated by specific `carriers` that did not appear in the overall T10 profit route list due to some `carriers` performing poorly on those `routes`
+
+-   `CLT-RDU`, `DFW-HSV`, `DTW-ROC`, `MSP-OMA`
+
+This can be seen in further detail by looking at the inter-carrier variation for these additional routes in @fig-top10profit_discreps, where we see major differences in profit across carriers.
+
+::: callout-important
+## Takeaway: Certain routes may in fact have the potential to be highly profitable but do not appear so at first due to lower-performing carriers
+:::
+
+```{r}
+#| label: fig-top10profit_discreps
+#| fig-cap: Top routes with major profit discrepancies across carriers
+
+# IATA route codes for the new top routes
+setdiff(top10routes_carriers_profit, top10routes_profit) -> discreps
+
+# Viz - Filter for newer top routes and show carrier variability
+flights_medlarge_roundtrip |> 
+  filter(route_iata %in% discreps) |> 
+  ggplot(aes(x = route_iata,
+             fill = op_carrier,
+             y = est_profit_total)) +
+  geom_boxplot() +
+  theme_minimal() +
+  coord_flip() +
+  theme(plot.title = element_text(face = "bold", size = 14),
+        plot.subtitle = element_text(face = "italic"),
+        plot.caption = element_text(color = "firebrick"),
+        axis.title = element_text(face = "bold")) +
+  labs(y = "Profit ($) per Round Trip Flight",
+       fill = "Carrier",
+       x = "Route",
+       title = "Variation in Profitability by Carrier",
+       subtitle = "Routes that are highly profitable for some carriers but not others",
+       caption = "Only routes w/20+ flights recorded included in profitability")
+
+```
+
+#### Charlotte-Raleigh
+
+Of particular note is the `Charlotte-Raleigh` `(CLT-RDU)` route, where the regional carrier `OH` (a subsidiary of `American Airlines AA`) generates a massively greater average profit than `AA`. As with the `Vail-NY` route, this difference is driven by higher `fare_prices`.
+
+```{r}
+#| label: tbl-charlotte_rdu_comparisons
+#| tbl-cap: Charlotte-Raleigh differences in fares by carrier
+
+flights_medlarge_roundtrip |> 
+  filter(route_iata == "CLT-RDU") |> 
+  summarize(avg_profit = roundmean(est_profit_total),
+            avg_revenue = roundmean(est_all_revenue_total),
+            avg_occupany = roundmean(avg_occ_rate_bothlegs),
+            avg_fare = roundmean(med_fare_imputed),
+            .by = op_carrier) |> 
+  gt() |> 
+  tab_header(title = md("**Revenue and Fare Differences for CLT-RDU Route**"),
+             subtitle = md("*Regional subsidiary generates higher revenue due to 3.5x higher ticket prices*"))
+
+```
+
+#### Profit, Revenue, Cost Interaction
+
+Lastly, the distribution and trade-off relationships between profit and its constituent components is directly visualized below, along with callouts for the top 10 most-profitable.
+
+```{r}
+
+#| label: fig-top10profit_tradeoff
+#| fig-cap: Profit as a function of cost and revenue with top 10 highlighted
+
+# Base plot of cost, revenue, profit
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata,
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+  arrange(desc(avg_profit)) |> 
+  mutate(rank_profit = row_number()) |> 
+  #slice_max(avg_profit, n = 10) |> 
+  mutate(across(.cols = (where(is.numeric) & !contains("occ")),
+                .fns = ~round(.x))) |> 
+  ggplot(aes(x = avg_cost_total,
+             y = avg_revenue_total,
+             color = avg_profit)) +
+  geom_point() +
+  theme_minimal() +
+  scale_color_viridis_c(option = "inferno", direction = -1) +
+  scale_y_continuous(limits = c(0, 600000),
+                     breaks = seq(0, 600000, 100000),
+                     labels = \(x) paste0("$",x)) +
+  scale_x_continuous(limits = c(0, 100000),
+                     breaks = seq(0, 100000, 10000),
+                     labels = \(x) paste0("$",x)) +
+  labs(x = "Avg Total Cost",
+       y = "Avg Total Revenue",
+       color = "Avg Profit",
+       title = "Total Revenue, Cost, and Profit for all Routes/Carriers",
+       subtitle = "Top 10 Profitable Routes/Carriers are Highlighted") -> p1
+
+# Identify Top 10 profitable route/carrier combos to create labels
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata, 
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+  arrange(desc(avg_profit)) |>
+  mutate(route_carrier = paste(route_iata, op_carrier, sep = "_via_")) |> 
+  slice_max(avg_profit, n = 10) |> 
+  select(route_carrier, avg_cost_total, avg_revenue_total, avg_profit) -> top10labels
+
+# Add labels to main plot to call out top 10
+p1 +
+  geom_label_repel(data = top10labels,
+                   aes(x = avg_cost_total, y = avg_revenue_total, label = route_carrier),
+                   box.padding = 0.5,
+                   point.padding = 1,
+                   force = 1,
+                   max.overlaps = 100,
+                   segment.color = "black",
+                   segment.size = 0.5,
+                   color = "black",
+                   size = 3) 
+```
+
+Finally, the summary statistics for the top 10 most profitable `routes/carriers` are displayed below
+
+```{r}
+#| label: tbl-top10routecarrier_final
+#| tbl-cap: Summary stats for top 10 profitable routes by specific carriers
+
+
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata, 
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+  arrange(desc(avg_profit)) |>
+  mutate(route_carrier = paste(route_iata, op_carrier, sep = "_via_"),
+         rank_profit = row_number()) |> 
+  slice_max(avg_profit, n = 10) |>
+  select(rank_profit,route_iata, op_carrier, avg_profit, avg_revenue_total, avg_cost_total) |> 
+  gt() |> 
+  tab_header(title = md("**Summary Statistics for Top 10 Profitable Routes & Carriers**"))
+  
+
+```
+
+## Drivers & KPIs
+
+Based on the above profitability analyses, we have some general ideas about what drives success:
+
+-   Smaller regional airlines and/or low-volume routes can be highly successful by leveraging `ticket_fare` prices
+
+-   Routes alone aren't a guarantee of success due to variability across carriers
+
+### Profitability Heatmap
+
+For the final analysis, correlation heatmaps were used upon the full set of `routes/carriers` to uncover the greatest drivers of profitability. @fig-heatmaps_drivers_routecarriers shows that:
+
+-   The biggest positive driver of `average_profit` is the `average_ticket_fare` charged, followed to a much lesser extent by `passenger` and `baggage` counts.
+
+-   The `average_ticket_fare` has a moderate positive correlation with `distance` and a mild negative correlation with `delay_time`,
+
+    -   Longer flights tend to command higher fares, while longer delay times command reduced fares
+
+-   The `average_profit` of a route is also negatively impacted slightly by `airport_costs` and `distance`
+
+    -   Even though greater distances yield higher fares, it appears insufficient to offset the profit decrease resulting from increased turn-around time, lower volume and increased delay potential
+
+```{r}
+#| label: fig-heatmaps_drivers_routecarriers
+#| fig-cap: Correlation heatmap displaying key profitability components
+
+# Summary Stats for key profit components by route/carrier w 10+ flights
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata, 
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+  arrange(desc(avg_profit)) |> 
+  select(`Flights (#)` = n_flights,
+         `Planes (#)` = n_planes,
+         `Days Flown (#)` = n_flightdays,
+         `Avg. Profit ($)` = avg_profit,
+         `Fare Price ($)` = avg_median_fare, 
+         `Bags (#)` = avg_n_bags,
+         `Passengers (#)` = avg_n_passengers,
+         `Distance` = avg_distance,
+         `Airport Costs` = avg_airport_costs, 
+         `Delay Time` = avg_delay_time) -> key_driver_summary
+
+# Correlation Matrix
+cor(key_driver_summary) -> profit_cormat_routes_carriers
+# P-values for test of signifance re: correlations
+cor_pmat(key_driver_summary) -> profit_cormat_routes_carriers_pvals
+
+# Prettier with LABELS
+ggcorrplot(profit_cormat_routes_carriers, method = "square",
+           hc.order = T, outline.color = "grey30",lab_size = 3,
+           lab = T)
+
+```
+
+### Driver Takeaways
+
+Based on the heatmap results, the following is concluded about profitability drivers:
+
+1.  `ticket_fares` are by far the best lever for raising `profitability`
+2.  Shorter `distance` flights can help boost profit by decreasing turn-around time and delays, while optimizing the number of possible flights
+3.  Maximizing `occupancy_rates` boosts profit by raising total revenue from `ticket_fare` and `baggage_fees`, and is especially critical for carriers with only a small number of planes.
+
+# Final Recommendation
+
+Based on the findings detailed above, the limitations imposed by only having 5 planes, and the brand commitment to punctuality, the following approach is suggested:
+
+1.  Identify the top 25 most-profitable specific `route/carrier` combinations
+2.  Use quantile ranks to filter these 25 flights for those with higher `ticket_fares`, shorter `distances`, lower `delay_times`, and greater `occupancy_rates`
+    1.  Focusing on reduced delay_times and distance also supports the key brand component of punctuality
+3.  Emulate the approach of highly-profitable low-volume regional airlines
+
+## Top 5 Recommended Routes
+
+In following this approach, we land upon the final 5 routes:
+
+```{r}
+#| label: tbl-top5routes
+#| tbl-cap: Final top 5 routes based on profit, delay, distance, occupancy, and fares 
+
+# Summary Stats for flights ordered by average profit
+flights_medlarge_roundtrip |> 
+  flightdicer(grp1 = route_iata, 
+              grp2 = op_carrier,
+              min_flights = 10) |> 
+  arrange(desc(avg_profit)) |>
+  # Filter for top 25 profit levels
+  slice_max(avg_profit, n = 25) |> 
+  # Filter for top quantile fare and occupancy rate, low tile distance and delay
+  filter(avg_median_fare_decile == 20,
+         avg_occupancy_rate_decile >= 15,
+         avg_distance_decile <= 5,
+         avg_delay_time_decile <= 5) |> 
+  select(route_iata, op_carrier, avg_profit) -> finaltop5
+
+# Pull in full route name for clarity
+finaltop5 |> 
+  left_join(flights_medlarge_roundtrip |> 
+              distinct(route_iata, route_city_name),
+            by = c("route_iata")) |> 
+  gt() |> 
+  tab_header(title = md("**Final Top 5 Routes**"))
+
+```
+
+::: callout-note
+## Quantiles used for selecting routes range from 1 to 20 on each metric, where the 20th quantile corresponds to the top 5% raw values of each metric, and the 1st quintile equates to the bottom 5% raw values
+:::
+
+## ROI to Break Even
+
+Using the average profitability estimates for our final top 5 flights, we can calculate the estimated number of flights required for each to recoup the initial \$90m investment per plane. As shown below, **each of the 5 routes will require between 300 - 500 flights to break even**.
+
+```{r}
+#| label: breakeven roi
+
+finaltop5 |> 
+  mutate(n_flights_breakeven = round(90000000/avg_profit)) |> 
+  gt() |> 
+  tab_header(title = md("**Number of Flights Required to Recoup Plane Investment**"))
+
+```
+
+## KPI Monitoring
+
+The following KPIs should be monitored to track progress going forward:
+
+1.  All metrics involved in profitability calculations
+    1.  `distance`, `number_flights`, `occupancy_rate`, `ticket_fares`, `operational_costs`, `baggage_fees`, `delay_time`
+2.  Proportion of on-time flights and resulting customer satisfaction (via survey data)
+3.  Number of round-trip flights that a single plane can take in a single flight day
+    1.  Monitor demand and `occupancy_rate` to gauge if customer appetite is there for 2+ flights a day on the shorter-distance routes
+
+### Additional Considerations & Limitations
+
+The following considerations should also be taken into account:
+
+1.  All analyses are based only on 1Q2019 data, and the world has certainly changed since then
+2.  Seasonality is not taken into account, and that is arguably one of the biggest factors in airline profit
+    1.  Especially critical given `ticket_fares` are the biggest lever in profitability
+3.  Profitability estimates don't take into account the infrastructure and efficiency advantage that some of the major carriers have, particularly at their hubs (e.g. Delta's `ATL` hub)
+    1.  Unrealistic to truly assume static universal operational costs
+    2.  Hub-based model is critical to modern airline efficiency
+
+------------------------------------------------------------------------
+
+# Appendix
+
+## Cost & Revenue Assumptions
+
+Calculations included the following assumptions:
+
+### Costs
+
+-   Mileage-variable costs totaling \$9.18/mile
+
+    -   \$8.00 for fuel, oil, maintenance, crew
+
+    -   \$1.18 for depreciation, insurance, other
+
+    -   Plane make/model variations not considered
+
+-   Airport operational costs based on landing airport size assessed once per flight leg
+
+    -   \$5000 for medium-size
+
+    -   \$10000 for large-size
+
+-   Delay costs can be assessed a total of 4 times as there are 2 flight legs that each have a departure and an arrival
+
+    -   Each departure and arrival given initial 15 minute grace period
+
+    -   \$75 charged for every minute of delays past the grace period
+
+    -   Delays calculated separately for each departure and arrival, such that early arrivals or departures do not detract from earlier delay costs
+
+-   Plane cost fixed at \$90 million per plane
+
+    -   Plane cost was *not* considered in profitability, but *was* considered when calculating expected break-even points
+
+### Revenue
+
+-   Max passenger capacity of 200 passengers for all 5 planes
+
+    -   Plane make/model variability not considered
+
+    -   Number of passengers per flight leg calculated based on occupancy rates
+
+-   Baggage fees of \$35 per bag assessed based on an expectation of 1 bag checked for 50% of passengers per flight leg
+
+    -   Baggage fees were first calculated *per flight leg* based on the expected number of passengers and then summed across both legs
+
+-   Ticket prices are assessed using an estimated median fixed fee per route
+
+    -   fares estimated from incomplete representative sample
+    -   seasonality ignored
+    -   plane make/model variability ignored
+
+------------------------------------------------------------------------
