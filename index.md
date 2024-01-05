@@ -4,8 +4,7 @@
 
 ### Category Name 1 
 
-[Project 1 Title](/R_projects/Flights%20Analysis)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
+[Project 1 Title](/R_projects/Flights%20Analysis.html)
 
 ---
 [Project 3 Title](http://example.com/)
