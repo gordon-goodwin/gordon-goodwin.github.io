@@ -2,23 +2,15 @@
 
 ---
 
-### Category Name 1 
+### Personal Hobby Projects
 
-[Project 1 Title](/R_projects/Flights%20Analysis.html)
+- [Flights Analysis](/R_projects/Flights%20Analysis.html)
 
----
-[Project 3 Title](http://example.com/)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
 
----
+### People Analytics Projects
 
-### Category Name 2
+- [Employee Attrition & Survival Analysis](http://example.com/)
 
-- [Project 1 Title](http://example.com/)
-- [Project 2 Title](http://example.com/)
-- [Project 3 Title](http://example.com/)
-- [Project 4 Title](http://example.com/)
-- [Project 5 Title](http://example.com/)
 
 ---
 
