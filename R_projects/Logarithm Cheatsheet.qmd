@@ -1,0 +1,492 @@
+---
+title: "Logarithmic Modeling"
+author: "Gordon Goodwin"
+format: html
+code-fold: true
+code-link: true
+code-line-numbers: true
+theme: cosmos
+toc: true
+toc-depth: 4
+toc-title: "Contents"
+number-sections: true
+editor: visual
+self-contained: true
+whitespace: small
+execute: 
+  warning: false
+  error: false
+  cache: false
+---
+
+```{r}
+#| label: packages
+#| echo: false
+#| include: false
+
+library(tidyverse)
+library(janitor)
+library(ggthemes)
+library(latex2exp)
+library(patchwork)
+```
+
+# Logarithm Overview
+
+**Logarithms** and **exponents** are **inverse operations**
+
+-   Logs represent the power to which a base must be raised to obtain a certain value,
+
+-    Exponents express the result of raising a base to a given power
+
+## Exponents
+
+**Exponents**: $y=b^x$ = raising a base number *b* to the *x^th^* power = multiplying a base *b* by itself *x* times
+
+-   "What do I get if I raise base *b* to the power of *x*?"
+
+-   For base = 2 and power *x* = 3....
+
+$$
+y = b^x = 2^3 = 2*2*2 = 8
+$$
+
+## Logarithms
+
+**Logarithms**: $y = log_b(x)$ = the *exponential power* that the base *b* must be raised to *in order to yield* *x*
+
+-   "What power do I need to raise my base *b* to in order to *get* *x*?"
+
+-   For base = 2 and *x* = 3...
+
+$$
+y = log_b(x) = log_2(8) = 3
+$$
+
+::: callout-tip
+## Taking the log of a number is essentially measuring the order of magnitude of that number
+:::
+
+## Natural Logarithms
+
+**Natural Log**: $y=ln(x)=log_e(x)$ refers to a logarithm with base *e*
+
+-   Natural Logs have special properties that make them extremely useful in a number of applied settings such as modeling compounding interest/returns and exponential growth or decay
+
+::: callout-note
+## Natural Logs are almost always denoted directly as ln(x)
+:::
+
+------------------------------------------------------------------------
+
+## Range & Domain of Logs
+
+For all possible (positive) bases, if $y=log_b(x)$ is *valid*, then $x>0$. This follows from the fact that, for all possible exponents, $b^y\leq 0$ is impossible
+
+-   For $y=log_b(x)$, as *x* gets closer to zero, $y\rightarrow-\infty$
+
+```{r}
+#| label: logarithm plot
+
+df <- data.frame(x = seq(-10, 10, .1))
+
+df |>
+  mutate(ln_e = log(x),
+         log_2 = log(x, base = 2),
+         log_10 = log(x, base = 10)) |> 
+  pivot_longer(cols = ln_e:log_10,
+               names_to = "Base",
+              values_to = "logs") |> 
+  ggplot(aes(x = x, y = logs, color = Base)) + 
+  geom_line(linewidth = 1) +
+  theme_minimal() +
+  scale_y_continuous(limits = c(-10, 10, 1), 
+                     breaks = seq(-10, 10, 1)) + 
+  scale_x_continuous(limits = c(-10, 10, 1), 
+                     breaks = seq(-10, 10, 1)) + 
+  geom_hline(yintercept = 0, lty = 2) + 
+  geom_vline(xintercept = 0, lty = 2) +
+  scale_color_brewer(palette = "Dark2") +
+  theme(legend.position = "top",
+        legend.key = element_rect(fill = "grey90"),
+        legend.text = element_text(face = "bold"),
+        title = element_text(size = 14)) +
+  labs(title = TeX("Plots of $y = \\log_{b}(x)$"),
+       x = "X",
+       y = "log(x)") + 
+  # Natural Log
+  annotate(geom='text', x=8, y=1.5, 
+           color = "#1b9e77",
+           size = 4,
+           label=TeX("$y = \\ln_{e}(x)$"), 
+           parse=TRUE) +
+  # Log 2
+  annotate(geom='text', x=8, y=4, 
+           color = "#7570b3",
+           size = 4,
+           label=TeX("$y = \\log_{2}(x)$"), 
+           parse=TRUE) +
+  # Log 10
+  annotate(geom='text', x=8, y=-1,
+           size = 4,
+           color = "#d95f02",
+           label=TeX("$y = \\log_{10}(x)$"), 
+           parse=TRUE) +
+  annotate("segment", x = 3, xend = 0.5, y = -5, yend = -6,
+           colour = "blue", size = 1.5, arrow = arrow()) +
+  annotate(geom='text', x=5.75, y=-4,
+           size = 3.5,
+           color = "blue",
+           label= 
+             TeX(r"(As $x$ approaches $0$, $log_b(x)$ approaches -infinity)"),
+           parse=TRUE)
+
+
+```
+
+------------------------------------------------------------------------
+
+## Inverse Relationship 
+
+Logs and exponents are essentially inverses of one another:
+
+1.  If $y=log_b(x)$ then $b^y = x$
+2.  If $b^y=x$ then $y=log_b(x)$
+
+Example: If $y = log_{2}(8)=3$ then $2^3=8$
+
+Put more simply, exponentiation and logarithms "undo" each other!
+
+------------------------------------------------------------------------
+
+## Log Change of Base
+
+The logarithm change of base formula allows us to express a logarithm in one base in terms of logarithms in another base
+
+$$
+log_b(x)=\frac{log_c(x)}{log_c(b)}
+$$
+
+In other words, a given logarithm of *x* with base *b* can be re-expressed as the ratio of $\frac{log(x)}{log(b)}$, both with a common new base *c*
+
+**Example**:
+
+$$
+log_2(16)=4=\frac{log_{4}(16)}{log_{4}(2)}=\frac{2}{0.5}=4
+$$
+
+------------------------------------------------------------------------
+
+# Properties of Logs & Exponents
+
+Below are some commonly-used rules and properties for manipulating exponents and logarithms:
+
+|             Exponents             |            Logarithms            | Natural Logs  |
+|:---------------------------------:|:--------------------------------:|:-------------:|
+|         $a^m*a^n=a^{m+n}$         |     $log(x*y)=log(x)+log(y)$     |  $ln(e^x)=x$  |
+|          $(ab)^m=a^mb^m$          | $log(\frac{x}{y})=log(x)-log(y)$ | $e^{ln(x)}=x$ |
+|     $\frac{a^m}{a^n}=a^{m-n}$     |       $log(x^y)=y*log(x)$        |   $ln(e)=1$   |
+|         $a^{m^n}=a^{m*n}$         |           $log_b(1)=0$           |   $ln(1)=0$   |
+| $(\frac{a}{b})^m=\frac{a^m}{b^m}$ |                                  |               |
+|       $a^{1/n}=\sqrt[n]{n}$       |                                  |               |
+|      $a^{m/n}=\sqrt[n]{a^m}$      |                                  |               |
+|      $a^{-n}=\frac{1}{a^n}$       |                                  |               |
+
+: Exponent & Log Properties
+
+------------------------------------------------------------------------
+
+# Applications of Logs & Exponents
+
+## Exponents
+
+Exponents are commonly used to model...you guessed it - exponential growth! Some examples include:
+
+-   Compounding interest
+
+    -   $Final Amount=Principal*(1+\frac{r}{n})^{nt}$
+    -   *r* = annual interest rate, *n* = \# of times compounded annually, and *t* = time
+
+-   Engineering Decay
+
+    -   $N(t)=N_0 * e^{-\lambda t}$
+
+    -   $N(0)$ = starting amount, $N(t)$ = amount at time *t*, $\lambda$ = decay constant
+
+We can see one such application highlighted below in @fig-compounding:
+
+```{r}
+#| label: fig-compounding
+#| fig-cap: Exponential Growth of $100 Investment Compounded Annually
+
+# Fn takes in: Principal, Time, Interest Rate, # times compounded annually
+# Fn returns: amount at Time = t
+compounder <- function(P, r, n, t){
+  
+  amount <- P*(1 + (r/n))^(n*t)
+  
+  # return final amount
+  amount
+  
+}
+
+# DF of Times 1:20
+investment_df <- data.frame(time = 1:20)
+
+# Plot Exponential Growth of a $100 investment compounded annually
+investment_df |> 
+  # $100 initial investment at 10% interest compounded 1x annually
+  mutate(amount = compounder(P = 100, r = .1, n = 1, t = time)) |> 
+  ggplot(aes(x = time,
+             y = amount)) +
+  geom_line(color = "springgreen4", linewidth = 1) +
+  scale_x_continuous(limits = c(0, 20),
+                     breaks = seq(0, 20, 1)) +
+  scale_y_continuous(limits = c(0, 1000),
+                     breaks = seq(0, 1000, 100),
+                     labels = scales::label_dollar(prefix = "$", suffix = "")) +
+  theme_minimal() +
+  labs(x = "Time (Years)",
+       y = "Amount",
+       title = "Exponential Growth Model for Compound Interest",
+       subtitle = "$100 Initial Investment Compounding 1x Annually for 20 Years") +
+  annotate(geom='text', x=7, y=350, 
+           color = "blue",
+           size = 5,
+           label=TeX("$y = \\ln_{e}(x)$"), 
+           label = TeX(r"($y=100*(1+\frac{0.10}{1})^{n*t}$)"),
+           parse=TRUE) +
+  theme(plot.title = element_text(size = 18, color = "firebrick"))
+```
+
+## Logarithms
+
+Logarithms are commonly used in applied settings to model a variety of contexts, such as proportionate change relationships between variables, *solving* exponential equations, and expressing raw magnitudes in more manageable relative scales. Examples include:
+
+-   Earthquake Richter Scale
+
+    -   $M=log_{10}(\frac{A}{A_0})$
+
+    -   *M* = Richter magnitude, *A* = seismic wave raw amplitude, *Ao* = reference amplitude
+
+-   Audio Decibel Signal Processing
+
+    -   $L=10*log_{10}(\frac{I}{I_0})$
+
+    -   *L* = decibels, *I* = sound intensity, *Io* = reference intensity
+
+We can see the usefulness of log models highlighted below with earthquake data, as quake magnitudes measured on the Richter Log 10 scale provide a much simpler quake-to-quake comparison (intuitive 1-10 scale and greater inter-quake variation).
+
+```{r}
+
+# Load quake data
+data(quakes)
+
+# Plot Richter Log10 Scale
+quakes |> 
+  ggplot(aes(x = stations, y = mag)) +
+  geom_point(aes(color = mag)) +
+  scale_color_viridis_c(option = "inferno") +
+  #theme_minimal() +
+  scale_x_continuous(breaks = seq(0, 200, 25),
+                     limits = c(0, 200)) +
+  labs(x = "# Stations Reporting",
+       y = "Richter Magnitude (Log 10 Scale)") +
+  theme(legend.position = "bottom")-> p3
+
+# Plot Exponentiated Raw Magnitude Scale
+quakes |> 
+  ggplot(aes(x = stations, y = exp(mag))) +
+  geom_point(aes(color = exp(mag))) +
+  scale_color_viridis_c(option = "inferno") +
+ # theme_minimal() +
+  scale_x_continuous(breaks = seq(0, 200, 25),
+                     limits = c(0, 200)) +
+  labs(x = "# Stations Reporting",
+       y = "Raw Magnitude (Exponentiated Richter)") +
+  theme(legend.position = "bottom")-> p4
+
+# Display side-by-side
+p3 + p4 + plot_annotation(title = "Richter Scale Magnitude vs Raw Magnitude",
+                          theme = theme(plot.title = element_text(size = 18,
+                                                                  color = "firebrick")))
+
+```
+
+------------------------------------------------------------------------
+
+### Log-Normal Distributions
+
+**Log-Normal**: Models the distribution of a (positively-skewed) random variable whose *logarithm* is normally distributed.
+
+-   Log-normal distributions are particularly useful for modeling **positive assymetry**:
+
+    -   *X* is constrained to only values of $x > 0$
+
+    -   *X* is positively-skewed
+
+::: callout-tip
+## The constraint arises because it is impossible to take the log of numbers \<= 0. Therefore, if the log of x *does* exist and follows a normal distribution, all values of *x* must be \> 0 by default
+:::
+
+Examples of applications for the log-normal distribution include:
+
+-   Modeling salary or other financial data that is often highly positively-skewed
+
+-   Engineering reliability analyses where the time-to-failure is modeled (*x* \> 0)
+
+-   Service times or time-in-queue, where time \> 0 and positively-skewed
+
+::: callout-important
+## This highlights another important quality of logs, namely that they can also be used to transform right-skewed data into following a more normal distribution
+:::
+
+```{r}
+#| label: lognormal illustration
+
+# Create DF of skewed salary and log salary data
+data.frame(salary = rbeta(1000, shape1 = 1, shape2 = 50)*10000) |> 
+  mutate(log_salary = log(salary)) -> wages
+
+# Plot of Salary
+ggplot(wages,aes(x = salary)) + 
+  geom_histogram(color = "black", fill = "grey") -> p1
+# Plot of Log Salary
+ggplot(wages,aes(x = log_salary)) + 
+  geom_histogram(color = "black", fill = "skyblue3") +
+  scale_x_continuous(limits = c(0, 8))-> p2
+
+# Combine 
+p1 / p2 + plot_annotation(title = "Skewed Salary vs Log-Normal Salary",
+                          theme = theme(plot.title = element_text(size = 18,
+                                                                  color = "firebrick")))
+```
+
+------------------------------------------------------------------------
+
+### Proportionate Changes
+
+For small changes in *x*, the difference in logs can approximate the proportionate change:
+
+$$
+log(x_1) - log(x_0) \approx \frac{x_1-x_0}{x_0}=\frac{\Delta x}{x_0}
+$$
+
+If we rewrite $log(x_1)-log(x_0)$ as $\Delta log(x)$, then we can also derive:
+
+$$
+100*\Delta log(x)\approx\ \frac{x_1-x_0}{x_0}*100 \approx\Delta x\%
+$$
+
+**Example**: If starting revenue (x0) is \$100 and ending revenue (x1) is \$110, then revenue has increased by 10%. This can be approximated with logs, as shown below:
+
+$$
+log_{10}(110)-log_{10}(100)=log_{10}(\frac{110}{100})\approx\frac{110-100}{100}=.10
+$$
+
+$$
+100*\Delta log(x)=\%\Delta x=100*0.10=10\%
+$$
+
+::: callout-tip
+## Building off of the relationship between differences in logs and proportionate changes, we can now use logs to model the proportionate change in one variable "caused" by a change in another variable
+:::
+
+------------------------------------------------------------------------
+
+### Log Regression Models
+
+One of the most powerful uses for logarithms is in regression modeling. Specifically, we can leverage log approximation of proportionate changes to model multivariate relationships that simple linear models are unable to capture. This flows from the observation that:
+
+**If** $100*\Delta log(x) \approx \Delta x\%$, **then** $100*\Delta log(y) \approx \Delta y\%$.
+
+At a high level, there are 4 types of log-regression models:
+
+1.  **Linear**:
+    1.  $y=\beta_0 + \beta_1x_1 + \epsilon$
+    2.  "1-unit $\Delta x$ results in a $\beta_1$-unit $\Delta y$"
+2.  **Log-Log**:
+    1.  $log(y)=\beta_0+\beta_1*log(x_1)+\epsilon$
+    2.  "A $1\%\Delta x$ results in a $\beta_1$% $\Delta y$"
+3.  **Log-Linear**:
+    1.  $log(y)=\beta_0+\beta_1*x_1+\epsilon$
+    2.  "A 1-unit $\Delta x$ results in a $(\beta_1*100)$% $\Delta y$"
+4.  **Linear-Log**:
+    1.  $y=\beta_0+\beta_1*log(x_1)+\epsilon$
+    2.  "A $1\%\Delta x$ results in a $(\frac{\beta_1}{100})$-unit $\Delta y$"
+
+::: callout-important
+## Note For the log-linear and linear-log models, we multiply or divide (respectively) our Betas by 100. This stems from the observation that we have to multiply log changes by 100 to derive percentage changes
+:::
+
+As seen above, when interpreting models involving logarithms, we have to multiply the log change by 100 in order to derive an approximated % change. As a reminder, this flows from:
+
+------------------------------------------------------------------------
+
+#### Linear Model
+
+The **traditional linear** model approximates the **expected** $\Delta y$ **associated with a 1-unit** $\Delta x$
+
+Given the traditional linear model of form:
+
+$$
+demand=\beta_0+\beta_1*price+\epsilon
+$$
+
+and the fitted model:
+
+$$
+demand=4.9+1.25*price+\epsilon
+$$
+
+::: callout-note
+## Interpretation = "For every 1-unit (dollar) increase in price, demand is expected to increase by 1.25 units"
+:::
+
+#### Log-Log Model
+
+The **double-log** model approximates the **expected** $\%\Delta y$ **associated with a** $1\%\Delta x$
+
+Given the general form:
+
+$$
+log(demand)=\beta_0+\beta_1*log(price)+\epsilon
+$$ and the fitted model:
+
+$$
+log(demand)=5.3+9.4*log(price)
+$$
+
+::: callout-note
+## Interpretation = "For every 1% increase in price, demand is expected to increase by 9.4%"
+:::
+
+#### Log-Linear Model
+
+The **log-linear** model approximates the **expected** $\%\Delta y$ **associated with a 1-unit** $\Delta x$
+
+Given the general form:
+
+$$ log(demand)=\beta_0+\beta_1*price+\epsilon $$ and the fitted model:
+
+$$ log(demand)=2.8+.032*price $$
+
+::: callout-note
+## Interpretation = "For every 1-unit increase in price, demand is expected to increase by 3.2%"
+:::
+
+#### Linear-Log Model
+
+The **log-linear** model approximates the **expected** $\Delta y$ **associated with a** $1\%\Delta x$
+
+Given the general form:
+
+$$ demand=\beta_0+\beta_1*log(price)+\epsilon $$ and the fitted model:
+
+$$ demand=7.2+ 43.2*price $$
+
+::: callout-note
+## Interpretation = "For every 1% change in price, demand is expected to increase by 0.43 units"
+:::
+
+------------------------------------------------------------------------
