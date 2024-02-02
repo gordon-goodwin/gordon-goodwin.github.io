@@ -11,7 +11,9 @@
 
 - [Employee Attrition & Survival Analysis](http://example.com/)
 
+### Tutorials & Guides
 
+- [Logarithmic Modeling](/R_projects/bob.html)
 ---
 
 
