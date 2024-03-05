@@ -14,7 +14,7 @@
 
 ### Tutorials & Guides
 
-- [Logarithmic Modeling](/R_projects/bob.html)
+- [Logarithmic Modeling](/R_projects/Logarithm%20Cheatsheet.html)
   
 ---
 
