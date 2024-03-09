@@ -5,19 +5,19 @@ format: html
 code-fold: true
 code-link: true
 code-line-numbers: true
-theme: sandstone
+theme: cosmos
 toc: true
 toc-depth: 4
 toc-title: "Contents"
-number-sections: false
+number-sections: true
 editor: visual
+self-contained: true
+whitespace: small
 execute: 
   warning: false
   error: false
   cache: false
 ---
-
-------------------------------------------------------------------------
 
 # Introduction
 
