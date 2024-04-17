@@ -9,7 +9,7 @@
 
 ### People Analytics Projects
 
-- [Simpson's Paradox](/R_projects/SimpsonsParadox.html)
+- [Simpson's Paradox](/R_projects/SimpsonParadox.html)
 - [Employee Attrition & Survival Analysis](http://example.com/)
 
 
