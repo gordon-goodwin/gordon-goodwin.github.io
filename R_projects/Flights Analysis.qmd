@@ -5,7 +5,7 @@ format: html
 code-fold: true
 code-link: true
 code-line-numbers: true
-theme: cosmos
+theme: cerulean
 toc: true
 toc-depth: 4
 toc-title: "Contents"
@@ -19,9 +19,13 @@ execute:
   cache: false
 ---
 
-# Introduction
+In this project, we'll take the perspective of a data analyst working for a **major overseas airline company** called `GG Airlines` that is contemplating an **expansion into the U.S. domestic air market**.
 
-GG Airlines (GGA) is attempting to enter the U.S. domestic air market with an initial 5-plane investment. This analysis seeks to support the GGA expansion by using 1Q2019 U.S. aviation data to recommend 5 potential round-trip routes based on volume, profitability, and any other relevant KPIs.
+The company's C.E.O wants to start small with an **initial 5-plane investment** before committing further resources, and has us asked us to identify **key drivers of flight profitability** and recommend a **set of optimal routes** given company objectives and constraints.
+
+# Objective
+
+The goal of this analysis is to support GGA's expansion by using 1Q2019 U.S. aviation data to recommend **5 potential round-trip routes** based on **volume, profitability, and any other relevant KPIs**.
 
 ## Background
 
