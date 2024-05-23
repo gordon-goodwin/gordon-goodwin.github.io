@@ -5,7 +5,7 @@
 ### People Analytics Projects
 
 - [Simpson's Paradox](/R_projects/SimpsonParadox.html)
-- [Psychometric Review - Python Competency](/R_projects/Redacted%20Report.pdf)
+- [Psychometric Review of Python Competency Assessment](/R_projects/Redacted%20Report.pdf)
 - [Employee Attrition & Survival Analysis - WIP](http://example.com/)
 
 
