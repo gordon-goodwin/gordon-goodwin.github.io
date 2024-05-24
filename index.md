@@ -2,6 +2,7 @@
 
 Thanks for stopping by! 
 Below you'll find a sample of professional and personal projects I've created over the last few years. If you have any questions or comments, please don't hesitate to reach out on LinkedIn! 
+
 ---
 
 ### People Analytics Projects
