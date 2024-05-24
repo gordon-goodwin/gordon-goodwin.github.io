@@ -23,6 +23,7 @@ Below you'll find a sample of professional and personal projects I've created ov
 
 - [Logarithmic Modeling](/R_projects/Logarithm%20Cheatsheet.html)
   - Tutorial explaining applications of logarithmic and exponential modeling
+    
 ---
 
 
