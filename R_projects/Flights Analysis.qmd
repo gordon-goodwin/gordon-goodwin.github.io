@@ -1,5 +1,5 @@
 ---
-title: "Flights Analysis"
+title: "Airline Profitability"
 author: "Gordon Goodwin"
 format: html
 code-fold: true
@@ -9,7 +9,7 @@ theme: cerulean
 toc: true
 toc-depth: 4
 toc-title: "Contents"
-number-sections: true
+number-sections: false
 editor: visual
 self-contained: true
 whitespace: small
@@ -22,6 +22,10 @@ execute:
 In this project, we'll take the perspective of a data analyst working for a **major overseas airline company** called `GG Airlines` that is contemplating an **expansion into the U.S. domestic air market**.
 
 The company's C.E.O wants to start small with an **initial 5-plane investment** before committing further resources, and has us asked us to identify **key drivers of flight profitability** and recommend a **set of optimal routes** given company objectives and constraints.
+
+::: callout-note
+## This is meant as a demonstration of my analytic thought process, not just a stand-alone final work product!
+:::
 
 # Objective
 
@@ -39,7 +43,7 @@ The goal of this analysis is to support GGA's expansion by using 1Q2019 U.S. avi
 
 ## Profitability Objective Function
 
-Profitability was first calculated at the individual flight level and then aggregated across routes and carriers (discussed further later). At a high level, profitability can be broken down into:
+Profitability was first calculated at the individual flight level and then aggregated across routes and carriers (discussed further later). At a high level, profitability can be broken down into revenue-generating fees minus operational and logistical costs:
 
 $$
 Profit = [(Baggage + Fare)*Passengers]-[(OpCosts*Distance) + Delays + AirportCost]
@@ -51,7 +55,11 @@ $$
 
 # Data Prep & Exploration
 
-This project uses aviation data from the first quarter of 2019, combining information from three datasets on `flights`, `tickets`, and `airports`. The preliminary datasets were explored, transformed, and merged to create a final dataset organized with **one row per round-trip flight**. Each round-trip flight is uniquely identified by a combination of: `carrier_code`, `plane_tail_number`, `carrier_flight_number`, and `flight_date`.
+This project uses three real FAA data sets from the Q1 2019 related to `flights`, `tickets`, and `airports`. Our goal is to use these 3 data sets to create a final data frame organized with **one row per round-trip route** that contains all data needed to calculate profitability for each route.
+
+**Note**: Each round-trip flight is uniquely identified by a combination of: `carrier_code`, `plane_tail_number`, `carrier_flight_number`, and `flight_date`.
+
+We'll start by loading all 3 preliminary data sets:
 
 ```{r}
 #| label: initial load of packages, functions, data
@@ -87,6 +95,10 @@ rm(filelist)
 
 ## Flights
 
+We begin with the `flights` data set, which will form the foundation that we join our `tickets` and `airports` data sets to.
+
+### Data Prep
+
 After loading our `flights` dataset, we perform some basic clean-up steps by parsing the `distance` and `flight_date` fields, removing duplicate records, and filtering out flights that are cancelled or whose origin and destination IATA codes are the same.
 
 ```{r}
@@ -109,7 +121,13 @@ flights |>
          cancelled == 0) -> flights
 ```
 
-As @fig-flights-missingness shows below, while 5 variables in the `flights` dataset are missing values, only `air-time` and `arrival_delays` register more than 0.01% missingness. On the whole, none of the `flights` variables initially appear to be missing an impactful number of data points
+### Missing Flights Data
+
+After our initial wrangling steps, we need to check for missing data. We first select for any variables with \> 0.01% missing data, and then visualize both the % of *valid* data remaining and the raw count of missing observations for each.
+
+As @fig-flights-missingness shows below, only `air-time` and `arrival_delays` register more than 0.01% missingness, and both of those still have over 99% valid records.
+
+**TLDR:** None of the `flights` variables initially appear to be missing an impactful number of data points
 
 ```{r}
 #| label: fig-flights-missingness
@@ -119,7 +137,9 @@ flights |>
   missingval_viz()
 ```
 
-Lastly, records for flights missing values on any of the `arrival_delay`, `occupancy_rate`, `distance`, or `flight_number` variables are removed, as those fields are all necessary for profitability calculations.
+While only `air-time` and `arrival_delays` register more than 0.01% missingness, the `occupancy_rate`, `distance`, or `flight_number` variables all had a tiny number of missing rows (\< 0.01%).
+
+As these variables are critical to profitability calculations, all records missing values on any of these variables are removed.
 
 ```{r}
 #| label: removal of NAs
@@ -136,11 +156,19 @@ flights |>
 
 ## Airports
 
-In order to facilitate joining the `airport` data to the `flights` data, the `airports` dataset needs to be cleaned and structured in a format with 1 row for each possible combination of origin and destination airports.
+Our `airports` data set contains information on the airports each route departs/arrives in, which is needed to calculate operational & logistical costs.
 
-### Airport Data Clean-Up
+Remember, our goal is to have a final format where each single row contains all necessary info on both the origin and destination legs of each route's flights.
 
-We begin by parsing `latitude` and `longitude` from the `coordinates` field, removing duplicates, and establishing origin and destination fields.
+To facilitate joining our `airports` data to the `flights` data, we will transform the `airports` data to have 1 row for each possible combination of origin and destination airports.
+
+### Data Prep
+
+The `airports` data has a single row and code for each airport, so we duplicate each airport's code and label them as `origin_iata` and `destination_iata` codes.
+
+This will allow us to create a cross-product grid of all possible origin and destination airport combinations, which can *then* be joined to all of the `flights` records such that origin and destination airport info is available for each flight.
+
+Finally, we'll also parse `latitude` and `longitude` from the `coordinates` field and remove any duplicate rows.
 
 ```{r}
 #| label: parse latitude and longitude, de-dupe, structure origin/destination
@@ -165,7 +193,13 @@ airport_codes |>
          destin_longitude = longitude) -> airport_codes
 ```
 
-As @fig-flights-missingness shows, it initially appears that almost 85% of our `airport` data records are missing the `iata_code` values needed to join to our `flights` data. We are also missing some `iso_country` values, but those records are all associated with airports on the African continent.
+### Missing Airport Data
+
+As before, we now need to identify any variables with at least 0.01% missing data and visualize both the % of *valid* data remaining and the raw number of missing records.
+
+As @fig-missingness_airportcodes shows, it appears that almost 85% of our `airport` data records are missing the `iata_code` values needed to join to our `flights` data.
+
+We are also missing some `iso_country` values, but those records are all associated with airports on the African continent.
 
 ```{r}
 #| label: fig-missingness_airportcodes
@@ -175,7 +209,7 @@ airport_codes |> missingval_viz()
 
 ```
 
-Lastly, after filtering for just U.S. med/large airports, @fig-missingness_airportcodes_USmedlarge shows that 96% of the `iata_code` records are now valid.
+Lastly, after filtering for just U.S. medium and large airports, @fig-missingness_airportcodes_USmedlarge shows that 96% of the `iata_code` records are now valid.
 
 ```{r}
 #| label: fig-missingness_airportcodes_USmedlarge
@@ -190,7 +224,7 @@ airport_codes_medlarge |> missingval_viz()
 
 ```
 
-As `iata_code` is required to join to our `flights` data, we remove any remaining NA records.
+While we've resolved the majority of our missing `iata_code` values, we still need to remove any remaining records with null values, as this field is needed as a join key.
 
 ```{r}
 #| label: remove NA iata code 
@@ -206,9 +240,9 @@ airport_codes_medlarge |>
 ## Several IATA codes were shared by an open and a closed airport, but only one (Austin) was a med/large U.S. airport
 :::
 
-### Airports Data Self-Join
+### Airports Data Cross-Product Self-Join
 
-For the final formatting step, the `airports` data is self-joined to create a full cross-product grid of all possible origin and destination pairs of medium/large U.S. airports.
+For our final wrangling step, we will use our new `origin_iata_code` and `destination_code` fields as keys for a self-join to create a full cross-product grid of all possible origin and destination pairs of medium & large U.S. airports.
 
 ```{r}
 #| label: create crossprod of origin/destination combos
@@ -240,7 +274,11 @@ airport_codes_medlarge |>
 
 ## Merge Flights & Airports Data
 
-The cross-product grid of origin/destination `airport` pairs is then joined to the `flights` data to create an intermediate dataset containing both origin and destination medium/large `flights` and `airports` data. First, the fields in both datasets are compared to derive the primary keys (`origin_iata`, `destin_iata`)
+Now we we can join our `flights` data to our grid of origin/destination `airport` pairs to pull in metadata about the airports associated with each flight's origin and destination.
+
+We can do a quick comparison to see which data fields are unique and which are common to both data sets.
+
+In this case, the `origin_iata_code` and `destination_iata_code` fields will serve as our primary keys for the join:
 
 ```{r}
 #| label: check common and unique columns prior to join
@@ -277,7 +315,15 @@ flights_medlarge |>
 
 ## Round-Trip Routes
 
-A self-join is employed upon the`flights/airports` data to isolate only those routes where the destination of leg 1 is the origin of leg 2, and the destination of leg 2 is the origin of leg 1. In this join, the "right side" effectively serves as leg 1, the "left side" serves as leg 2, and each flight is uniquely identified via a combination of `carrier`, `carrier_flight_number`, `tail_number`, and `flight_date` primary key fields.
+Currently our merged `flights` and `airports` data is structured with 1 row per *flight*, but our final format needs to have 1 row per *round-trip route*, wherein each row reflects *both route legs*.
+
+We can accomplish this by *self-joining* our intermediate data set to itself such that the "left side/first copy" represents the route's Leg #1, and the "right side/second copy" represents Leg #2.
+
+Lastly, as our analysis is constrained to only *round-trip* routes, we now need to isolate only those routes where the destination of leg 1 is the origin of leg 2, and the destination of leg 2 is the origin of leg 1
+
+::: callout-warning
+## If this is hard to follow, my apologies! Please check out the sample below to get a visual example of what we're trying to accomplish
+:::
 
 ```{r}
 #| label: self-join and filter to isolate round-trip routes
@@ -300,7 +346,9 @@ flights_medlarge |>
 
 ```
 
-Before checking the final results, a few final clean-up steps are taken to:
+### Crowflies Route Distance & Route Clean-Up
+
+Before proceeding to our `tickets` data, we have a few final clean-up steps:
 
 -   Create a single-field round-trip route identifier (e.g. `CLT-RDU`)
 
@@ -308,7 +356,9 @@ Before checking the final results, a few final clean-up steps are taken to:
 
     -   (all necessary info for both legs is now in a single row).
 
--   Create custom `distance_crowfly` fields using point-to-point calculations from the `latitude` and `longitude` fields to validate the original `distance` values.
+We will also create a custom distance field that calculates the `point-to-point` or `crow-flies` distance for each flight/route.
+
+We will use this field for validity checks of our pre-existing `distance` field, as well as for missing records.
 
 ```{r}
 #| label: clean, de-dupe, create custom distance crowfly metric
@@ -352,7 +402,9 @@ flights_medlarge_roundtrip |>
 
 ```
 
-Last, the `distance_crowfly` metrics are used to quickly validate the original `distance` values. As seen below in @fig-distance_issues for the `Charlotte-Raleigh` route, the 2 values aren't identical but are close enough to be confident in the original `distance` values.
+We can now use our new `distance_crowfly` metrics to validate the original `distance` values.
+
+As an example, we can see below in @fig-distance_issues that for the `Charlotte-Raleigh` route, the 2 values aren't identical but are close enough to be confident in the original `distance` values.
 
 ```{r}
 #| label: fig-distance_issues
@@ -377,7 +429,7 @@ The final `tickets` data contains a sample of tickets that can be joined to our 
 
 ### Tickets Data Clean-Up
 
-To prepare the `tickets` data to be joined to our `flights/airports` data, initial clean-up steps are taken to remove duplicates, retain only round-trip flights, parse the ticket_fare values, and create an origin/destination structure.
+We start by filtering for ticket info corresponding to round-trip flights only, parsing the `ticket_fare` values, and creating an origin/destination structure that matches our `airports/flights` data.
 
 ```{r}
 #| label: de-dupe and clean tickets
@@ -404,7 +456,11 @@ tickets |>
 
 ```
 
-As seen below in @fig-tickets_missingness, a small proportion of `ticket_fare` values are missing.
+### Missing Tickets Data
+
+As before, we now need to identify any variables with at least 0.01% missing data and visualize both the % of *valid* data remaining and the raw number of missing records.
+
+As seen below in @fig-tickets_missingness, only the `ticket_fare` field has at least 0.01% missingness, and even then only a tiny proportion of the `ticket_fare` values are missing.
 
 ```{r}
 #| label: fig-tickets_missingness
@@ -414,7 +470,7 @@ As seen below in @fig-tickets_missingness, a small proportion of `ticket_fare` v
 ticketsround |> missingval_viz()
 ```
 
-Those records are removed, as `ticket_fare` is needed for profitability calculations.
+Those null records are removed, as `ticket_fare` is needed for profitability calculations.
 
 ```{r}
 #| label: Remove NA fares
@@ -425,7 +481,13 @@ ticketsround |> filter(!is.na(itin_fare)) -> ticketsround
 
 ### Aggregate Tickets Data
 
-Initially the plan was to calculate an `average_ticket_fare` for each `route`, but review of the `ticket_fare` distribution in @fig-ticket_fare_outliers shows significant price variability amongst carriers, along with several major outliers
+Next we need to aggregate our `tickets` data so that we have 1 row with a single estimated `ticket_fare` per `route`.
+
+::: callout-note
+## For simplicity, this analysis assumes all ticket fares are created equal, with no distinction between passenger class, age, or other factors.
+:::
+
+We could calculate an `average_ticket_fare` for each route, but a review of the `ticket_fare` distribution in @fig-ticket_fare_outliers shows significant price variability amongst carriers, along with several major outliers
 
 ```{r}
 #| label: fig-ticket_fare_outliers
@@ -443,7 +505,7 @@ ticketsround |>
 
 ```
 
-Given the carrier variability, skewness, and outliers, a group-wise median was calculated to assign `median_ticket_fare` values to each `route` and `carrier` combination. A trimmed mean was also calculated for data exploration.
+Given the carrier variability, skewness, and outliers, a group-wise `median_ticket_fare` was calculated for each `route` and `carrier` combination.
 
 ```{r}
 #| label: Median fare for each route/carrier combo
@@ -463,9 +525,13 @@ ticketsround_summary |>
   tab_header(title = md("**Validation Preview of Fare Summary Metrics**"))
 ```
 
-## Merge Tickets to Flights/Airports
+## Merge Tickets to Flights & Airports
 
-The final `flights/airports/tickets` dataset is created by left-joining the `tickets` `route` and `carrier`-level summary data on fare prices to the `flights/airports` data. A left-join was used in case not all `routes` and `carriers` in the flights data are present in the `tickets` data. In such cases where `ticket_fare` values were in fact missing for a specific `carrier`, the `route`-level median was imputed. If `route`-level fares were unavailable, the `median_imputed_fare` was left `NA`.
+For our final formatting step, we need to join our `tickets` data to our `flights/airports` data.
+
+We use a left-join was in case not all `routes` and `carriers` in the `flights/airports` data are present in the `tickets` data.
+
+In cases where `ticket_fare` values were in fact missing for a specific `carrier`, the *route-level* median was imputed instead. If route-level fares were also unavailable, the `median_imputed_fare` was left `NA`.
 
 ```{r}
 #| label: Merge fares to flights/airports and impute/remove NA
@@ -489,11 +555,11 @@ flights_medlarge_roundtrip |>
 
 ```
 
-Lastly, a quick validation check shows that none of the `routes` that still have missing `ticket_fare` values are in the top 50 busiest `routes`
+Fortunately, a quick validation check shows that none of the `routes` that still have missing `ticket_fare` values are in the top 50 busiest `routes`
 
--   the lack of output indicates there were no top 50 routes that matched the `NA` `ticket_fare` criteria
+-   lack of output indicates there were no top 50 routes that matched the `NA` `ticket_fare` criteria
 
-As `ticket_fares` are needed for profitability, and the removal impact is likely to be minimal, the remaining records with missing values were removed.
+As `ticket_fares` are needed for profitability, and the removal impact is likely to be minimal, the remaining records with `NA` values were removed.
 
 ```{r}
 #| label: validate missing fares are not issue for top routes
@@ -516,11 +582,15 @@ flights_medlarge_roundtrip |> filter(!is.na(med_fare_imputed)) -> flights_medlar
 
 # Profitability Calculations
 
-The last step is to calculate the `cost`, `revenue`, and `profit` for each flight, which will allow for analytical aggregation up to the `route` and `carrier` level. To facilitate data exploration and validation, profitability metrics are calculated for both the individual legs and the overall round-trip flight.
+The last step is to calculate the `cost`, `revenue`, and `profit` for each flight, which we can then aggregate up to the `route` and `carrier` level. T
+
+To facilitate data exploration and validation, profitability metrics are calculated for both the individual legs and the overall round-trip flight.
 
 ## Revenue
 
-Revenue is comprised of `ticket_fare` and `baggage_fee` components, both of which are impacted by `passenger_counts`. To derive `passenger_counts`, the `occupancy_rates` are multiplied by an assumed max capacity of 200 passengers. These `passenger_counts`in turn serve as multipliers for the `median_ticket_fare` and `baggage_fee` calculations.
+Revenue is comprised of `ticket_fare` and `baggage_fee` components, both of which are impacted by `passenger_counts`.
+
+To derive `passenger_counts`, the `occupancy_rates` are multiplied by an assumed max capacity of 200 passengers. These `passenger_counts`in turn serve as multipliers for the `median_ticket_fare` and `baggage_fee` calculations.
 
 ```{r}
 #| label: revenue calculations
@@ -545,7 +615,13 @@ flights_medlarge_roundtrip |>
 
 ## Costs
 
-Costs are comprised of `mileage_variable`, `airport_size`, and `delay_time` components. The `mileage_variable` costs are determined by an assumed \$9.18 fee per `distance` mile traveled and the `airport_size` costs are based on a \$5k/\$10k charge for medium/large airports. The `delay_time` costs are based on a \$75/min charge applied to each `arrival` and `departure` for each minute of `delay_time` past a 15-minute grace period.
+Costs are comprised of `mileage_variable`, `airport_size`, and `delay_time` components.
+
+-    `mileage_variable` costs are determined by an assumed \$9.18 fee per `distance` mile traveled.
+
+-    `airport_size` costs are based on a \$5k/\$10k charge for medium/large airports.
+
+-    `delay_time` costs are based on a \$75/min charge applied to each `arrival` and `departure` for each minute of `delay_time` past a 15-minute grace period.
 
 ```{r}
 #| label: cost calculations
@@ -637,7 +713,9 @@ flights_medlarge_roundtrip |>
 
 ```
 
-Further, when just the originating airport is considered, @fig-top10busiest_originating shows that the overwhelming majority of *all* round-trip routes originated out of Atlanta (`ATL`), with Dallas-Fort Worth (`DFW`) and Charlotte (`CLT`) coming in 2nd and 3rd. We also see clear `carrier`-`origin_hub` patterns, with `Delta` dominating `Atlanta` and American Airlines and its subsidiaries covering `Charlotte` and `Dallas-Fort Worth`.
+Further, when just the originating airport is considered, @fig-top10busiest_originating shows that the overwhelming majority of *all* round-trip routes originated out of Atlanta (`ATL`), with Dallas-Fort Worth (`DFW`) and Charlotte (`CLT`) coming in 2nd and 3rd.
+
+We also see clear `carrier`-`origin_hub` patterns, with `Delta` dominating `Atlanta` and American Airlines and its subsidiaries covering `Charlotte` and `Dallas-Fort Worth`.
 
 ```{r}
 #| label: fig-top10busiest_originating
@@ -649,7 +727,11 @@ flights_medlarge_roundtrip |>
        title = "Delta's Atlanta and AA's Charlotte/Dallas Hubs")
 ```
 
-Accordingly, `route/carrier` combinations were probed to see which routes operated by specific carriers were the busiest. As shown below in @fig-top10busiest_both, `Delta` (`DL`) had the greatest number of 1Q2019 flights by far, the majority of which originated out of its main hub in `Atlanta (ATL)`. Interestingly, there were no individual `route/carrier` combinations that appeared overwhelmingly busier.
+Accordingly, `route/carrier` combinations were probed to see which routes operated by specific carriers were the busiest.
+
+As shown below in @fig-top10busiest_both, `Delta` (`DL`) had the greatest number of 1Q2019 flights by far, the majority of which originated out of its main hub in `Atlanta (ATL)`.
+
+Interestingly, there were no individual `route/carrier` combinations that appeared overwhelmingly busier.
 
 ```{r}
 #| label: fig-top10busiest_both
@@ -664,7 +746,9 @@ flights_medlarge_roundtrip |>
 
 ## Top 10 Profitable Routes
 
-In orderto probe high-level profitability, estimates for each individual round-trip flight were aggregated across `routes` and `route/carrier` combinations. The `route` and `route/carrier`-level profit estimates were then rank-ordered to derive the top 10 results.
+In order to probe high-level profitability, estimates for each individual round-trip flight were aggregated across `routes` and `route/carrier` combinations.
+
+These `route` and `route/carrier`-level profit estimates were then rank-ordered to derive the top 10 results.
 
 ::: callout-tip
 ## The following profitability estimates represent two levels of summary data, as first the group-wise median fares were imputed for flight-level estimates tjat were then averaged again to create route-level profitability
@@ -707,7 +791,7 @@ top10routes_profit_summary |>
 
 ```
 
-This generates 2 follow-up questions:
+This generates **2 follow-up questions**:
 
 1.  What is unique about the outlier `EGE-JFK` (`Vail, CO - New York`) route?
 2.  Is there significant variation across `carriers` within specific `routes`?
@@ -762,7 +846,9 @@ top10routes_profit_summary |>
 
 #### Carrier Variability
 
-Having determined that fare prices can be a significant driver of profit, particularly for low-volume routes, we now turn to Question 2 to probe possible profitability variations across `carriers` for these top 10 overall `routes`. As seen in @fig-top10profit_route_carrier_probe, the following top 10 overall routes do have significant differences across carriers:
+Having determined that fare prices can be a significant driver of profit, particularly for low-volume routes, we now turn to Question 2 to probe possible profitability variations across `carriers` for these top 10 overall `routes`.
+
+As seen in @fig-top10profit_route_carrier_probe, the following top 10 overall routes do have significant differences across carriers:
 
 -   `Cincinatti-Detroit` (`CVG-DTW)`
 
@@ -1093,7 +1179,9 @@ finaltop5 |>
 
 ## ROI to Break Even
 
-Using the average profitability estimates for our final top 5 flights, we can calculate the estimated number of flights required for each to recoup the initial \$90m investment per plane. As shown below, **each of the 5 routes will require between 300 - 500 flights to break even**.
+Using the average profitability estimates for our final top 5 flights, we can calculate the estimated number of flights required for each to recoup the initial \$90m investment per plane.
+
+As shown below, **each of the 5 routes will require between 300 - 500 flights to break even**.
 
 ```{r}
 #| label: breakeven roi
