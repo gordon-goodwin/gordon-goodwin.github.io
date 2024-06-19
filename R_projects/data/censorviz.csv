@@ -1,0 +1,7 @@
+Employee,Hire Date,Status,Max Recorded Seniority Months,Max Date Recorded,Analysis Date,Notes
+1,2023-01-01,Censored,12,01/01/2024,01/01/2024,Term-Free after 12m
+2,2023-01-01,Termed,5,6/1/2023,01/01/2024,Termed before 12m
+3,2023-01-01,Censored,5,6/1/2023,01/01/2024,Censored before 12m (Transfer)
+4,2023-01-01,Termed,9,10/1/2023,01/01/2024,Termed before 12m
+5,2023-01-01,Censored,7,8/1/2023,01/01/2024,Censored before 12m (Transfer)
+6,2023-01-01,Censored,12,01/01/2024,01/01/2024,Term-Free after 12m
