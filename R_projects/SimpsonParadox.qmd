@@ -46,7 +46,7 @@ In our first example, imagine we've been asked to **examine the** **relationship
 
 -   The CPO launched a new compensation structure about a year ago that was designed to reflect this.
 
-<span style="color:green; font-weight=bold">**Has the new structure been effective? Is there a stronger association between salary and seniority?**</span>
+[**Has the new structure been effective? Is there a stronger association between salary and seniority?**]{style="color:green; font-weight=bold"}
 
 ------------------------------------------------------------------------
 
@@ -231,7 +231,7 @@ dat2main |>
 
 We start our review by taking a quick look at the overall correlation between salary and seniority.
 
-When we do so, the data shows a surprising trend - <span style="color:red; font-weight:italic">it appears that salary and seniority are negatively related!</span>
+When we do so, the data shows a surprising trend - [it appears that salary and seniority are negatively related!]{style="color:red; font-weight:italic"}
 
 Ugh - the CPO is *not* going to be happy!
 
@@ -250,7 +250,10 @@ dat2main |>
   labs(x = "Seniority Years", y = "Salary",
        title = "Salary Appears Negatively Related to Seniority") +
   theme_bw(base_size = 14) +
-  theme(plot.title = element_text(face = "italic", color = "#cf3a36")) 
+  theme(plot.title = element_text(face = "italic", color = "#cf3a36")) -> p1
+
+# Display
+p1
 
 ```
 
@@ -311,7 +314,10 @@ dat2main |>
   theme(legend.position = "bottom") +
   labs(x = "Seniority Years", y = "Salary", color = "Department",
        title = "Trend Reversal when Controlling for Departments") +
-  theme(plot.title = element_text(face = "italic", color = "blue")) 
+  theme(plot.title = element_text(face = "italic", color = "blue")) -> p2
+
+# Display
+p2
 ```
 
 Whoa! Now our initial negative trend has reversed!
@@ -343,13 +349,17 @@ tidy(m2) |>
 ## Data Science serves as the "reference" group in our model, so the negative slopes for HR and Finance indicate lower average salaries relative to the DS team.
 :::
 
+Let's take one last side-by-side look:
+
+![](cs1_sidebyside.png)
+
 ------------------------------------------------------------------------
 
 ### Explanation
 
 So how did this happen?
 
-<span style="color:purple; font-weight:bold">How can salary be positively related to seniority within all 3 departments*, but not overall?*</span>
+[How can salary be positively related to seniority within all 3 departments*, but not overall?*]{style="color:purple; font-weight:bold"}
 
 The paradox arises because **average salary and seniority levels both vary significantly between departments**.
 
@@ -483,7 +493,7 @@ dat1combined |> head()
 
 We start our review by taking a quick look at the overall relationship between referral status (Referred vs Applied) and job satisfaction (Favorable vs Unfavorable).
 
-Once again our initial review is surprising - it suggests that <span style="color:red"> *employees sourced via referral are actually **less likely to be satisfied** than employees who applied traditionally!* </span>
+Once again our initial review is surprising - it suggests that [*employees sourced via referral are actually **less likely to be satisfied** than employees who applied traditionally!*]{style="color:red"}
 
 Dang it! How are going to explain this to the CPO?
 
@@ -597,7 +607,7 @@ dat1combined |>
 
 Deja-vu! Our initial trend has reversed!
 
-<span style="color:green; font-weight:bold">Referred employees are *more* likely to be satisfied than traditionally-sourced employees *within both work location subgroups*</span>
+[Referred employees are *more* likely to be satisfied than traditionally-sourced employees *within both work location subgroups*]{style="color:green; font-weight:bold"}
 
 When we use a logistic regression model to predict satisfaction ratings from referral status and work location, the results are similar:
 
@@ -638,9 +648,9 @@ tidy(m3) |>
 
 Again we ask, so why did this happen?
 
-<span style="color:purple; font-weight:bold">How can referred employees be more satisfied within both work locations *but not overall?*</span>
+[How can referred employees be more satisfied within both work locations *but not overall?*]{style="color:purple; font-weight:bold"}
 
-<span style="color:red">*The paradox arises because referral status and job satisfaction are **imbalanced across work locations*****.**</span>
+[*The paradox arises because referral status and job satisfaction are **imbalanced across work locations*****.**]{style="color:red"}
 
 As seen in the plot below:
 
@@ -720,7 +730,7 @@ dat1combined |>
 
 ```
 
-<span style="color:green; font-weight:bold">In summary, while referred employees are less likely to rate their job satisfaction favorably when viewed *collectively*, that trend *reverses* after controlling for *disparities between work locations*.</span>
+[In summary, while referred employees are less likely to rate their job satisfaction favorably when viewed *collectively*, that trend *reverses* after controlling for *disparities between work locations*.]{style="color:green; font-weight:bold"}
 
 ------------------------------------------------------------------------
 
