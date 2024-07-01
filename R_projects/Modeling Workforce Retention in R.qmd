@@ -1,0 +1,388 @@
+---
+title: "Modeling Workforce Retention in R"
+author: "Gordon Goodwin"
+format: html
+code-fold: true
+code-link: true
+code-line-numbers: true
+theme: cerulean
+toc: true
+toc-depth: 4
+toc-title: "Contents"
+toc-location: right
+number-sections: false
+editor: visual
+self-contained: true
+whitespace: small
+link-external-icon: true
+execute: 
+  warning: false
+  error: false
+  cache: false
+---
+
+This guide illustrates how **survival analysis** techniques can be used to analyze & predict **employee attrition & retention** using `R`.
+
+# Case Study
+
+For this guide, we'll use an illustrative case study based on real scenarios from my professional experience.
+
+::: callout-note
+## The data used here can be found on my [Github page](https://github.com/gordon-goodwin/gordon-goodwin.github.io/tree/main/R_projects/data) and was simulated to protect confidentiality, but still reflects real patterns and insights. Please reach out with Q's!
+:::
+
+## Context
+
+GMG Automotives is a regional automotive manufacturer with 3 production facilities in `Denver CO`, `Tampa FL`, and `Charlotte NC`.
+
+-   All 3 facilities have been open \~1 year (opened June 2023).
+
+-   All 3 facilities have a "cohort-style" hiring strategy, with 2 main hire classes that started in June 2023 and Jan 2024 respectively.
+
+-   Plant Mgmt had hoped that the Jan 2024 hire class would be sufficient to maintain sufficient staffing levels for at least 6 months (June 2024).
+
+## Problem
+
+Over last few months, the Chief HR Officer (CHRO) has received anecdotal reports from plant management that [employee turnover is alarmingly high and trending upwards]{style="color:red"}
+
+-   The Talent Aquisition (TA) team is [having difficulty drafting a hiring strategy]{style="color:red"} that will support a [stable average headcount of 200 employees at each facility]{style="color:green"}
+
+## Objective
+
+Model **employee attrition**, identify **risk factors**, and **predict retention probabilities** over time.
+
+### Business Questions
+
+-   [*What % of employees can be expected to retain past the training (30d) and probationary (90d) periods?*]{style="color:blue"}
+
+-   [*Are there any risk factors that may impact the probability an employee retains?*]{style="color:blue"}
+
+    -   Facility (`Denver`, `Tampa`, `Charlotte`)
+
+    -   Hire Cohort (`June 2023`, `Jan 2024`)
+
+-   [*How can we leverage this information to inform workforce planning strategy?*]{style="color:blue"}
+
+    -   Goal = stable headcount of 200 employees at each facility
+
+------------------------------------------------------------------------
+
+## Data
+
+We have obtained basic HR data that reflects the most recent employee information, `employment status`, and `seniority time` available for each employee.
+
+```{r}
+#| label: setup
+
+# No Scientific Notation
+options(scipen = 999)
+
+# Source Functions
+library(tidyverse)
+library(tidymodels)
+library(censored)
+library(janitor)
+library(ggfun)
+library(survminer)
+library(ggsurvfit)
+library(patchwork)
+library(gt)
+
+# Read Data
+read_csv("Survival Analysis PA Tutorial.csv") |> clean_names() -> dat1
+
+# Format
+dat1 |> 
+  mutate(hire_date = mdy(hire_date),
+         max_date_recorded = mdy(max_date_recorded),
+         hire_date = factor(hire_date),
+         facility = factor(facility),
+         transfer = factor(transfer),
+         manager = factor(manager),
+         termination_status = factor(termination,
+                                     labels = c("Active","Termed"))) -> dat1
+
+
+# Preview
+dat1 |> 
+  select(emp_id, facility, manager, hire_date,
+         seniority_recorded, termination_status) |> 
+  gt::gt_preview()
+
+```
+
+This data format is known as **time-to-event** data, as it allows us to answer questions about how long an object or subject can be expected to "survive" before some event of interest occurs.
+
+[In employee attrition contexts, the "subjects" are employees, the "event" is termination, and our objective is to **model how long employees can be expected to retain before terminating**.]{style="color:purple"}
+
+# Results
+
+Our results are organized into 3 main sections:
+
+1.  **Headcount Trends**
+2.  **Baseline Retention**
+3.  **Group Differences**
+
+## Headcount
+
+***Have staffing thresholds consistently been met in 2024 across all 3 facilities?***
+
+Visualizing our headcount trends across facilities reveals [**2 main problems**]{style="color:red"}:
+
+-   Both the **`Tampa FL`** and **`Charlotte NC`** facilities currently have staffing levels [**below** the 200-employee threshold needed to sustain operations]{style="color:red"}
+
+-   While all 3 facilities have followed the same hiring strategy, differences in attrition have led to [headcount discrepancies that **get wider over time**]{style="color:red"}
+
+```{r}
+#| label: headcount
+
+# Read Data
+read_csv("Headcount Trend PA Tutorial.csv") |> clean_names() -> dat2
+
+# Format
+dat2 |> 
+  mutate(date = mdy(date),
+         facility = factor(facility)) -> dat2
+
+# Plot
+dat2 |> 
+  ggplot(aes(x = date,
+             y = headcount,
+             color = facility,
+             group = facility)) +
+  geom_point() +
+  geom_line(linewidth = 0.75) +
+  scale_x_date(date_breaks = "1 month",
+               date_labels = "%b-%Y") +
+  scale_y_continuous(breaks = seq(0, 300, 50),
+                     limits = c(0, 300)) +
+  scale_color_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  geom_hline(yintercept = 200, lty = 2, linewidth = 0.75, color = "blue") +
+  theme_bw(base_size = 14) +
+  theme(legend.position = "top",
+        plot.title = element_text(face = "italic",color = "firebrick"),
+        axis.text.x = element_text(angle = 45, vjust =1, hjust=1)) +
+  labs(x = "Date", y = "Headcount", color = "Facility",
+       title = "Headcount by Facility")
+
+```
+
+## Baseline Retention
+
+***How long can the typical GMG Auto employee be expected to retain after hire?***
+
+Below, our **baseline retention curve** displays the probability of an employee retaining past a given seniority point:
+
+-   [*Roughly **\~80%** of employees can be expected to **retain past training (30d)***]{style="color:purple"}
+
+-   [*Around **\~60%** of employees can be expected to **retain past probation (90d)***]{style="color:blue"}
+
+-   [*A little over **40%** of employees can be expected to **retain past 6m***]{style="color:orange"}
+
+-   [*Less than **20%** of employees can be expected to **retain past 12m***]{style="color:red"}
+
+```{r}
+#| label: baseline retention
+
+# Plot Survival Curve using prebuilt fns
+survfit2(Surv(seniority_recorded, termination) ~ 1, data = dat1) |>
+  ggsurvfit() +
+  labs(
+    x = "Seniority Days",
+    y = "Retention Probability",
+    title = "GMG Automotive Baseline Employee Retention"
+  ) +
+  add_confidence_interval() + 
+  # add_censor_mark() +
+  # add_risktable(risktable_stats = c("n.risk",
+  #                                  "n.event")) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365)) +
+  geom_vline(xintercept = 30, color = "red", linewidth = .8, lty = 2) +
+  geom_vline(xintercept = 90, color = "sienna", linewidth = .8, lty = 2) +
+      geom_vline(xintercept = 180, color = "purple", linewidth = .8, lty = 2) +
+    geom_vline(xintercept = 365, color = "green4", linewidth = .8, lty = 2) +
+  theme(plot.title = element_text(face = "italic"))
+```
+
+We can also format this retention curve as a **survival table**:
+
+```{r}
+#| label: overall survtable
+
+## Fit Kaplan Maier Survival Model
+survfit(Surv(time = seniority_recorded,
+             event = termination) ~ 1,
+        data = dat1) -> survmod_overall
+
+# Table of summary results
+data.frame(time = survmod_overall$time,
+           n_risk = survmod_overall$n.risk,
+           n_event = survmod_overall$n.event,
+           n_censored = survmod_overall$n.censor,
+           survival = survmod_overall$surv,
+           std_error = survmod_overall$std.err,
+           ci_95_lower = survmod_overall$lower,
+           ci_95_upper = survmod_overall$upper) |> 
+  mutate(across(where(is.numeric),
+                ~round(.x, 2)))-> survtab_overall
+
+survtab_overall |> 
+  filter(time %in% c(90, 180, 365)) |> 
+  select(`Seniority Days` = time, 
+         `Retention Rate` = survival,
+         `Conf Int Lower` = ci_95_lower,
+         `Conf Int Upper` = ci_95_upper) |> 
+  gt() |> 
+    tab_header(title = "Retention at 3m, 6m, & 12m Seniority",
+               subtitle = "GMG Automotive Employees") |> 
+  fmt_percent(columns = c(`Retention Rate`), decimals = 0)
+
+```
+
+## Group Differences
+
+In order to probe for **group differences** and **risk factors** in attrition and retention rates, we've now calculated **group-level** retention curves and tables**.**
+
+### Facilities
+
+***Do retention rates vary by facility? Can an employee's facility predict their odds of terminating?***
+
+The **retention curve** below supports the following insights:
+
+-   *Retention rates **do** vary significantly by facility*
+
+    -   Employees at the **`Denver, CO`** facility have the **greatest chance of retaining** over time.
+
+    -   Employees at the **`Charlotte NC`** facility have the **lowest chance of retaining** over time.
+
+    -   **`Tampa FL`** falls somewhere in the middle
+
+```{r}
+#| label: facilitysurvival
+
+
+# Plot Curve - ggsurvfit
+survfit2(Surv(time = seniority_recorded,
+              event = termination) ~ facility,
+         data = dat1) |> 
+  ggsurvfit(linewidth = 0.8) +
+  # add_confidence_interval() + 
+  add_pvalue() +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365)) +
+  geom_vline(xintercept = 30, color = "red", linewidth = .65, lty = 2) +
+  geom_vline(xintercept = 90, color = "sienna", linewidth = .65, lty = 2) +
+      geom_vline(xintercept = 180, color = "purple", linewidth = .65, lty = 2) +
+    geom_vline(xintercept = 365, color = "green4", linewidth = .65, lty = 2) +
+  scale_color_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(x = "Seniority Days",y = "Retention Probability",
+       color = "Facility",fill = "Facility",
+       title = "Employee Retention by Facility") +
+  theme(legend.position = "top",
+        plot.title = element_text(face = "italic"),
+        legend.key = element_rect(fill = "grey90"))
+
+```
+
+As seen below, we can also use a **hazard model** to quantify the impact that an employee's facility assignment has upon their **odds of terminating**.
+
+Using `Denver CO` as the reference group, we can see that:
+
+-   *Employees at the* **`Tampa FL`** *facility are **\~1.6x more likely to terminate** over time than their* **`Denver CO`** *peers.*
+
+-   *Employees at the* **`Charlotte NC`** *facility are **\~2.4x more likely to terminate** over time than their peers at the* **`Denver CO`** facility.
+
+```{r}
+#| label: facility hazards regression
+
+# Facility as a covariate for the hazard of termination
+coxmod_facility <- coxph(Surv(time = seniority_recorded,
+                               event = termination) ~ facility,
+                          data = dat1)
+
+# Output
+coxmod_facility |> gtsummary::tbl_regression(exp = T) 
+
+```
+
+### Hire Cohorts
+
+***Is employee retention getting worse? Are the Jan 2024 hires more likely to terminate?***
+
+The **retention curve** below supports the following insights:
+
+-   *Employees hired in the* **`Jan 2024`** *cohort **retain worse** than those in the* **`June 2023`** *cohort*
+
+-   *The gap in retention probabilities appears to get **wider over time***
+
+    -   At the **30d** mark, the retention rate for the `June 2023` is **only 7pp greater** than that of the `Jan 2024` cohort (82% vs 75%)
+
+    -   At the **90d** mark, the `June 2023` cohort has a retention rate that is **over 20pp greater** than the `Jan 2024` cohort (70% vs 50%)
+
+```{r}
+#| label: cohort survival
+
+
+# Plot Curve - ggsurvfit
+survfit2(Surv(time = seniority_recorded,
+              event = termination) ~ hire_date,
+         data = dat1) |> 
+  ggsurvfit(linewidth = 0.8) +
+  # add_confidence_interval() + 
+  add_pvalue() +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365)) +
+  geom_vline(xintercept = 30, color = "red", linewidth = .65, lty = 2) +
+  geom_vline(xintercept = 90, color = "sienna", linewidth = .65, lty = 2) +
+      geom_vline(xintercept = 180, color = "purple", linewidth = .65, lty = 2) +
+    geom_vline(xintercept = 365, color = "green4", linewidth = .65, lty = 2) +
+  scale_color_manual(values = c("blue", "red","#0c7156")) +
+  scale_fill_manual(values = c("blue", "red","#0c7156")) +
+  labs(x = "Seniority Days",y = "Retention Probability",
+       color = "Hire Class",fill = "Hire Class",
+       title = "Employee Retention by Hire Class") +
+  theme(legend.position = "top",
+        plot.title = element_text(face = "italic"),
+        legend.key = element_rect(fill = "grey90"))
+```
+
+Similarly, as shown below, a **hazard model** shows that:
+
+-   *Employees from the* `Jan 2024` hire class *are **over 2.4x more likely to terminate** over time than employees hired in the* **`June 2023`** cohort.
+
+```{r}
+#| label: cohort hazard
+
+# Hire Cohort as a covariate for the hazard of termination
+coxmod_hiredate <- coxph(Surv(time = seniority_recorded,
+                               event = termination) ~ hire_date,
+                          data = dat1)
+
+# Output
+coxmod_hiredate |> gtsummary::tbl_regression(exp = T) 
+
+```
+
+# Conclusions
+
+Our analysis supports 3 primary conclusions & recommendations:
+
+1.  **Attrition & retention rates vary significantly between facilities**, which in turn leads to inconsistent headcount fluctuations.
+    1.  [*We should consider interviewing both staff and management at the `Denver CO` facility to understand why their employees retain so much better.*]{style="color:green"}
+    2.  [*We should similarly interview the `Charlotte NC` facility to understand why their employees retain so poorly*]{style="color:green"}
+2.  **A uniform hiring strategy for all 3 locations will not be sufficient** to maintain a 200-employee threshold at each facility until attrition rates are consistent.
+    1.  [*We should consider a 3-tiered approach to hire targets that prioritizes allocation in order of* `Charlotte NC`*,* `Tampa FL`, and then `Denver CO`.]{style="color:green"}
+3.  **Underlying attrition rates seem to be getting worse**, as the `Jan 2024` cohort is retaining at a significantly lower rate than the `June 2023` class.
+    1.  [*We should consult plant management to see if there has been any external change or seasonal variations in workload that might explain the recent decline*]{style="color:green"}
+    2.  [*We should consider increasing the next hire class size above for all 3 facilities to be safe*]{style="color:green"}
