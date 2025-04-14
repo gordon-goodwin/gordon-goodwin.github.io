@@ -24,7 +24,7 @@ setup_fonts <- function() {
   
   # Enable showtext
   showtext_auto(enable = TRUE)
-  showtext_opts(dpi = 320, regular.wt = 300, bold.wt = 800)
+  showtext_opts(dpi = 320, regular.wt = 400, bold.wt = 700)
 }
 
 

@@ -25,7 +25,7 @@ get_theme_colors <- function(palette = NULL) {
 ### -> Args for Colors and Fonts List Item References
 create_base_theme <- function(colors = get_theme_colors()) {
   
-  theme_minimal(base_size = 12, base_family = fonts$text) +
+  theme_minimal(base_family = fonts$text) +
     theme(
       
       plot.title.position   = "plot",
@@ -39,6 +39,10 @@ create_base_theme <- function(colors = get_theme_colors()) {
       # Panel Grid
       panel.grid.major = element_line(color = "grey88"),
       panel.grid.minor = element_line(color = "grey88"),
+      
+      # Facet Panels/Strips
+      strip.background = element_roundrect(fill = "#1a318b",color = NA, r = 0.15),
+      strip.text = element_text(color = "white", face = "bold"),
       
       # Set Plot margins
       # plot.margin = margin(t = 10, r = 20, b = 10, l = 20),

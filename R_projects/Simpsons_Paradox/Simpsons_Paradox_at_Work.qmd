@@ -1,0 +1,700 @@
+---
+title: "One Chart, Two Realities: Simpson's Paradox at Work"
+subtitle: "A People Analytics Guide to Spotting Trend Reversals in Workforce Data"
+description: "Two case studies illustrating how apparent trends in workforce data can reverse dramatically across or within subgroups."
+author: "Gordon Goodwin"
+date: "2025-04-06"
+categories: ["People Analytics", "Simpon's Paradox", "R Programming", "Data Visualization","Confounding Factors"]
+format:
+  html:
+    toc: true
+    toc-depth: 5
+    toc-title: "Contents"
+    toc-location: right
+    number-sections: false
+    code-link: true
+    code-fold: true
+    code-tools: true
+    code-line-numbers: true
+    code-summary: "Code"
+    self-contained: true
+    theme: 
+      light: [flatly]
+      dark: [darkly]
+editor_options: 
+  chunk_output_type: inline
+execute: 
+  cache: false                                                   
+  error: false
+  message: false
+  warning: false
+---
+
+------------------------------------------------------------------------
+
+![Illustration of Simpson's Paradox at work. Compensation within the general employee population is negatively related to seniority, but the trend reverses when the data are sliced by org. Within each department, employees with higher seniority levels tend to command higher salaries.](images/cs1b_sidebyside.png){#fig-1}
+
+# Overview
+
+**Simpson's Paradox** is a phenomenon where an observed statistical relationship or trend reverses when the data are collapsed across or stratified by subgroups.
+
+In workforce data, Simpson's Paradox typically manifests in one of 2 main ways:
+
+-   **Top-Down**: an association observed within an employee population reverses when data are sliced by smaller employee subgroups.
+
+-   **Bottom's Up**: an association first observed within employee subgroups reverses when data from the groups are combined.
+
+In this guide we'll use 2 people analytics case studies to illustrate how to identify and control for the paradox using `R`.
+
+------------------------------------------------------------------------
+
+# Case Study #1
+
+The Chief People Officer (CPO) of a small but growing tech company has asked us to examine the relationship between **employee compensation** and **seniority**
+
+-   The CPO is a staunch advocate of rewarding seniority with increased compensation opportunities.
+
+-   The CPO launched a new compensation structure about a year ago that was designed to reflect this.
+
+In order to determine whether the new compensation structure has been effective, the CPO wants to know if there is a **strong association between salary and seniority**.
+
+------------------------------------------------------------------------
+
+## Packages & Set-Up
+
+```{r}
+#| label: load
+#| warning: false
+#| message: false      
+#| output: false
+
+knitr::opts_chunk$set(dev = "ragg_png")
+# No Scientific Notation
+options(scipen = 999)
+
+# Packages
+library(tidyverse)
+library(tidymodels)
+library(censored)
+library(janitor)
+library(ggfun)
+library(survminer)
+library(ggsurvfit)
+library(patchwork)
+library(ggfortify)
+library(ggridges)
+library(tidycmprsk)
+library(skimr)
+library(GGally)
+
+
+# Source Helper/Utility Functions
+## Fonts
+source("font_setup.R")
+
+## Theme
+source("theme_setup.R")
+
+
+
+# Visualization Parameters (Themes & Fonts)
+
+# FONTS
+## Adds Google Fonts & Sets Config 
+setup_fonts()
+
+## Ties Font Family Names to List for Referencing
+fonts <- get_font_families()
+
+
+
+# COLORS
+## Ties Default  Colors & Specified Palette to List References
+colors <- get_theme_colors(
+  palette = c(
+    "#663171",
+    "#ea7428",
+    "#0c7156",
+    "black",
+    "firebrick",
+    "#f9d14a",
+    "#ff6153",
+    "#1a318b",
+    "#ce9462",
+    "#3b3a3e",
+    "#6d2f20",
+    "skyblue1",
+    "white",
+    "wheat"
+  )
+)
+
+
+
+
+# THEMES
+
+## CREATE BASE THEME - uses font and color list refs internally
+base_theme <- create_base_theme(colors = colors)
+
+
+## Specify more theme elements to add to base theme (optional)
+theme1 <- extend_base_theme(
+  
+  base_theme = base_theme,
+  extended_elements = 
+    theme(
+      plot.title = element_text(color = "grey20")
+    )
+)
+
+
+# Set Theme
+theme_set(theme1)
+
+```
+
+## Load & Preview Data
+
+First we'll load and preview our dataset, which contains basic HR info for a sample of 150 company employees across 3 departments:
+
+```{r}
+#| label: read_data1
+#| warn: false
+#| message: false
+
+
+# READ DATA
+read_csv("Simpson_Paradox_Data_CS1.csv") -> dat1main
+
+
+## Preview
+dat1main |> head()
+```
+
+## Analysis
+
+### Initial Trend
+
+We'll start by plotting the relationship between salary and seniority for *all* employees.
+
+When we do so, it appears that employee compensation is **negatively** associated with years of seniority!
+
+![Illustration of the initial trend: When salary is plotted against seniority years for the general employee population, compensation appears to have a negative relationship with seniority.](images/cs1_maintrend.png){#fig-2}
+
+```{r}
+#| label: viz1_maintrend
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+# Plot
+dat1main |> 
+  ggplot(aes(x = seniority_years,
+             y = salary_k)) +
+  geom_point(size = 1, alpha = 0.7) +
+  geom_smooth(method = "lm", se = F) +
+  scale_x_continuous(breaks = seq(0, 10, 1)) +
+  scale_y_continuous(labels = scales::label_dollar(suffix = "k")) +
+  labs(x = "Seniority Years", y = "Salary",
+       title = "Salary Appears Negatively Related to Seniority") +
+  theme(plot.title = element_text(color = "firebrick")) -> p1main
+
+
+p1main
+
+```
+
+We can confirm this trend with a **linear regression model**:
+
+-   **Each additional year of seniority is associated with a \$22,000 decrease in average salary.**
+
+```{r}
+#| label: mod1_maintrend
+#| warn: false
+
+
+# Regression Model: Salary ~ Seniority
+# Linear Regression Model
+m1 <- lm(salary ~ seniority_years, data = dat1main)
+
+# Tidy Model Output instead of ugly base R summary
+tidy(m1)
+```
+
+------------------------------------------------------------------------
+
+### Trend Reversal
+
+When we slice our data by department, however, there is a definite trend reversal!
+
+**For employees assigned to the same department, higher salaries are *positively* related to greater seniority.**
+
+![Illustration of the trend reversal: Within each departmental subgroup, employees with higher seniority levels tend to also have higher salaries.](images/cs1_reversal.png){#fig-3}
+
+```{r}
+#| label: viz1b_reversal
+#| warning: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+# Plot - WITHIN GROUPS
+dat1main |> 
+  ggplot(aes(x = seniority_years,
+             y = salary_k,
+             color = department)) +
+  geom_point(size = 1, alpha = 0.7) +
+  geom_smooth(method = "lm", se = F) +
+  scale_x_continuous(breaks = seq(0, 10, 1)) +
+  scale_y_continuous(labels = label_dollar(suffix = "k")) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(x = "Seniority Years", y = "Salary", color = "Department",
+       title = "Trend Reversal When Sliced by Department") +
+  theme(plot.title = element_text(color = "royalblue"),
+        legend.text = element_text(family = fonts$title)) -> p1reverse
+
+
+p1reverse 
+
+```
+
+A **multivariate regression model** confirms this:
+
+-   **After controlling for departmental differences, each additional year of seniority is now associated with a \$13,500 increase in average salary!**
+
+-   Compared to the Data Science employees (our model reference group), Product team members earn \$57K less on average, and HR employees earn \$113.6K less!
+
+```{r}
+#| label: mod1b_reversal
+#| warn: false
+#| message: false
+
+
+# Regression Model: Salary ~ Seniority
+# Linear Regression Model
+m1b_reversal <- lm(salary ~ seniority_years + department, data = dat1main)
+
+# Tidy Model Output 
+tidy(m1b_reversal)
+
+```
+
+------------------------------------------------------------------------
+
+### Explaining the Reversal
+
+***So how is it that the initial trend completely reversed when we sliced by department?***
+
+When we visualize all of our variables simultaneously, we can see that:
+
+-   **Salary & Seniority both vary by department, but in opposite directions**
+
+-   **Salary** (top right & bottom right boxes):Data Science employees tend to be the highest paid, HR employees tend to be the lowest paid, and Product employees fall in the middle.
+
+-   **Seniority** (middle col/top and middle rows): On average, HR employees are the longest-tenured, Data Science employees are the newest, and Product employees are again somewhere in the middle.
+
+-   **Salary and seniority are negatively correlated overall, but positively correlated within departments** (far right col/middle row). This is the Paradox in a nutshell.
+
+![Pairs Matrix showing the univariate and bivariate distributions of department, salary, and seniority.](images/cs1_ggpairs.png){#fig-4}
+
+```{r}
+#| label: cs1_ggally_pairsplot
+#| warn: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+# Plot
+dat1main |> 
+  select(c(Department = department, 
+           `Seniority Yrs` = seniority_years, 
+           Salary = salary)) |> 
+  ggpairs(aes(color = Department, alpha = 0.4)) +
+  scale_color_manual(values = c(colors$palette[1],
+                                colors$palette[2],
+                                colors$palette[3])) +
+  scale_fill_manual(values = c(colors$palette[1],
+                                colors$palette[2],
+                                colors$palette[3])) 
+
+```
+
+### Recap
+
+Putting the pieces together, salary appears to vary negatively with seniority at the company-wide level because the *higher-seniority employees are concentrated in the lower-paying departments.*
+
+In other words, **department acts as a confounding factor for the association between salary and seniority**. Within each department, the association is positive.
+
+------------------------------------------------------------------------
+
+# Case Study #2
+
+The CPO was so impressed by our insights that he has a new project for us!
+
+Now he wants us to analyze the relationship between employee **pre-hire sourcing** and **job satisfaction**.
+
+-   Prior analyses found that employees sourced via referral performed better than those who applied traditionally.
+
+-   Job Satisfaction is a critical KPI for the CPO, and the company routinely administers Pulse surveys to monitor it.
+
+**The CPO wants us to use survey and pre-hire sourcing data to determine whether referred employees are more likely to rate their job satisfaction favorably than traditional applicants.**
+
+------------------------------------------------------------------------
+
+## Load and Preview Data
+
+Our second dataset is much larger, containing survey responses and pre-hire sourcing data for all 1000 employees who responded.
+
+-   Pre-Hire Source (Referred vs Applied)
+-   Job Satisfaction (Favorable vs Unfavorable)
+-   Location (Remote vs Office)
+
+```{r}
+#| label: read_data2
+#| warn: false
+#| message: false
+
+
+# READ DATA
+read_csv("Simpson_Paradox_Data_CS2.csv") -> dat2main
+
+
+## Preview
+dat2main |> head(n = 5)
+
+```
+
+## Analysis
+
+### Initial Trend
+
+We'll start by visualizing the initial relationship between job satisfaction and pre-hire source.
+
+At first, it appears that referred employees are **less likely** to rate their job satisfaction favorably!
+
+![Stacked-Bar (left) and Trend Line (right) plots visualizing job satisfaction favorability for referrals and traditional applicants. Both plots show that referred employees tend to have lower job satisfaction levels.](images/cs2_maintrend.png){#fig-5}
+
+```{r}
+#| label: viz2_maintrend
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+# Plot A) Stacked Bar
+dat2main |> 
+  count(referral, satisfied) |> 
+  mutate(prop = round(n/sum(n),2),
+         prop_label = glue::glue("{scales::percent(prop)} ({n})"),
+         .by = referral) |>
+  mutate(satisfied = fct_relevel(satisfied, c("Unfavorable","Favorable"))) |> 
+  # filter(satisfied == "Favorable") |> 
+  ggplot(aes(x = referral,
+             y = prop,
+             fill = satisfied)) +
+  geom_col(width = 0.4, color = "black") +
+  scale_y_continuous(labels = scales::label_percent()) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_text(aes(label = prop_label),
+            position = position_stack(vjust = .4),
+            colour = colors$palette[13], size = 3,
+            fontface = "bold") +
+  scale_fill_manual(values = c(colors$palette[5], colors$palette[3])) +
+  labs(x = "Pre-Hire Source",
+       y = "Responded Favorably",
+       fill = "Job Satisf.") +
+  theme(plot.title = element_text(color = colors$palette[1])) -> p2a
+
+
+# Plot B) Trend Line
+dat2main |> 
+  count(referral, satisfied) |> 
+  mutate(prop = n / sum(n), .by = referral) |> 
+  filter(satisfied == "Favorable") |>  # Keep only favorability data
+  ggplot(aes(x = referral, y = prop, group = 1)) +
+  geom_line(color = colors$palette[3], linewidth = 1.2, lty = 2) +
+  geom_point(size = 4, color = colors$palette[3], 
+             shape = 1, stroke = 1.5) +
+  scale_y_continuous(labels = scales::label_percent(), limits = c(0, 1)) +
+  labs(
+    x = "Pre-Hire Source",
+    y = "Responded Favorably"
+  ) +
+  geom_text(aes(label = scales::percent(prop, accuracy = 1)), 
+            vjust = -1.5,
+            color = colors$palette[4], 
+            fontface = "bold", size = 3) -> p2b
+
+
+# Side-by-Side
+p2a + p2b + 
+  plot_annotation(title = "Referrals are Less Likely to Rate Their Job Satisfaction Favorably",
+                  theme = theme(
+                    plot.title = element_text(color = colors$palette[1],size = 14,hjust = 0.5)
+                  ))
+```
+
+We can confirm this trend by using a **simple logistic regression model**:
+
+-   **In comparison to traditional applicants, referred employees are 64% as likely (36% less likely) to rate their jobs favorably**
+
+
+```{r}
+#| label: mod2_maintrend
+#| warn: false
+
+
+# Logistic Regression Model
+## -> Favorable Y/N ~ Referral Status 
+
+# Convert Satisfaction (Favorable/Unfavorable) to 1/0 for model
+dat2main$satisfied_recoded <- ifelse(dat2main$satisfied == "Favorable",1,0)
+
+# Relabel referral and location for legibility
+dat2main$referral <- factor(dat2main$referral, labels = c("No","Yes"))
+
+# Logistic regression model
+m3a <- glm(satisfied_recoded ~ referral, data = dat2main, family = "binomial")
+
+# Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)
+tidy(m3a) |> 
+  mutate(across(where(is.numeric),
+                ~round(.x, 3))) |> 
+  # Exponentiate to get odds ratio 
+  mutate(`exp(estimate)` = exp(estimate), .before = estimate)
+```
+
+
+------------------------------------------------------------------------
+
+### Trend Reversal
+
+When we slice our data by work location (Office vs Remote), however, we see another trend reversal!
+
+**Within each work modality, referred employees are more likely to be satisfed than those who applied traditionally.**
+
+![Stacked-Bar (left) and Trend Line (right) plots that facet by work location type before visualizing job satisfaction favorability by pre-hire source. Both plots show that after accounting for work modality, referred employees tend to rate their job satisfaction more favorably than traditional applicants.](images/cs2_reversal.png){#fig-6}
+
+```{r}
+#| label: cs2_reversal
+#| warn: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+# Plot A) Stacked Bar ~ Location
+dat2main |> 
+  count(referral, satisfied, location) |> 
+  mutate(prop = round(n/sum(n),2),
+         prop_label = glue::glue("{scales::percent(prop)} ({n})"),
+         .by = c(referral, location)) |>
+  mutate(satisfied = fct_relevel(satisfied, c("Unfavorable","Favorable"))) |> 
+  # filter(satisfied == "Favorable") |> 
+  ggplot(aes(x = referral,
+             y = prop,
+             fill = satisfied)) +
+  geom_col(width = 0.65, color = "black") +
+  scale_y_continuous(labels = scales::label_percent()) +
+  coord_cartesian(ylim = c(0, 1)) +
+  geom_text(aes(label = prop_label),
+            position = position_stack(vjust = .4),
+            colour = colors$palette[13], size = 2.5,
+            fontface = "bold") +
+  facet_wrap(~location) +
+  labs(x = "Pre-Hire Source",
+       y = "Responded Favorably",
+       fill = "Job Satisf.") +
+ # theme(legend.position = "right") +
+  scale_fill_manual(values = c(colors$palette[5],colors$palette[3])) -> p3a
+
+
+p3a +
+  ggtitle("Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably") +
+  theme(
+    plot.title = element_text(color = colors$palette[1]),
+  )
+
+
+
+
+# Plot B) Trend Line ~ Location
+dat2main |> 
+  count(referral, satisfied, location) |> 
+  mutate(prop = n / sum(n), .by = c(referral, location)) |> 
+  filter(satisfied == "Favorable") |>  # Keep only favorability data
+  ggplot(aes(x = referral, y = prop, color = location, group = location)) +
+  geom_line(size = 1.2, lty = 2) +
+  geom_point(size = 4, 
+             shape = 1, stroke = 1.5) +
+  geom_text(aes(label = scales::percent(prop, accuracy = 1)), 
+            vjust = -1.5,
+            color = colors$palette[4], 
+            fontface = "bold", size = 3) +
+  scale_y_continuous(labels = scales::label_percent(), limits = c(0, 1)) +
+  scale_color_manual(values = c(colors$palette[7],colors$palette[8])) +
+  facet_wrap(~location, scales = "free_y") +
+  labs(
+    x = "Pre-Hire Source",
+    y = "% Responded Favorably",
+  ) +
+  theme(legend.position = "none") -> p3b
+
+
+p3b + 
+  ggtitle("Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably") +
+  theme(
+    plot.title = element_text(color = colors$palette[1]),
+  )
+
+
+
+# SIDE BY SIDE
+p3a + p3b + 
+  plot_annotation(title = "Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably",
+                  theme = theme(
+                    plot.title = element_text(color = colors$palette[1],size = 18,hjust = 0.5)
+                  ))
+
+
+```
+
+A **multivariate logistic regression model** confirms the reversal:
+
+-   **After controlling for work environment, referred employees are \~2.5x more likely to rate their satisfaction favorably!**
+
+-   Compared to the In-Office employees (our model reference group), Remote team members are over 12.5x more likely to view their jobs favorably!
+
+```{r}
+#| label: mod2_reversal
+#| warn: false
+#| message: false
+
+
+# Logistic Regression Model
+## -> Favorable Y/N ~ Referral Status + Location
+
+# Logistic regression model
+m3 <- glm(satisfied_recoded ~ referral + location, data = dat2main, family = "binomial")
+
+# Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)
+tidy(m3) |> 
+  mutate(across(where(is.numeric),
+                ~round(.x, 3))) |> 
+  # Exponentiate to get odds ratio 
+  mutate(`exp(estimate)` = exp(estimate), .before = estimate)
+```
+
+------------------------------------------------------------------------
+
+### Explaining the Reversal
+
+***So how is it that the initial trend completely reversed when we sliced by Office/Remote status?***
+
+When we visualize all of our variables simultaneously, we can see that:
+
+-   **Office employees are less likely to be satisfied regardless of pre-hire source.**
+
+-   **Referred employees are more likely to be Office-based.**
+
+-   **Traditional Applicants are more likely to be Remote.**
+
+-   ***Within*** ***each location type*****, referred employees are more likely to be satisfied.**
+
+![Illustration of how sample size imbalances lead to a trend reversal after controlling for location type. Bubble sizing corresponds to sample size, and shows us that referred employees are heavily Office-based, while traditional applicants are predominantly Remote. Color gradient maps to the proportion who rated their jobs favorably, which shows us that Office-based employees are significantly less-satisfied than Remote workers. Finally, within each work modality, referrals are much more likely to respond favorably.](images/cs2_explainedA.png){#fig-7}
+
+```{r}
+#| label: cs2_explained_plotA
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+# Crosstab (used by plots): Prop & Counts Satisfied by Referral/Applied & Office/Remote cuts
+dat2main |> 
+  summarize(prop_satisfied = mean(satisfied == "Favorable"),
+            count_satisfied = sum(satisfied == "Favorable"),
+            count_NOTsatisfied = sum(satisfied != "Favorable"),
+            n = n(),
+            .by = c(referral, location)) |> 
+  mutate(prop_label = glue::glue("(n={n}) Satisf = {scales::percent(prop_satisfied)}")) |> 
+  arrange(referral, location) -> tab1
+
+
+tab1
+
+# Plot A) Bubble Viz
+tab1 |> 
+  mutate(referral = if_else(referral=="Yes","Referred","Applied")) |> 
+  ggplot(aes(x = referral, y = location)) +
+  geom_point(aes(size = n, color = prop_satisfied)) +
+  scale_color_gradient2(low = "#cf3a36", 
+                        mid = "grey70", 
+                        high = "#0c7156",
+                        midpoint = .5,
+                        labels = scales::label_percent()) +
+  # scale_color_viridis_c(option = "H", direction = 1) +
+  scale_size_area(max_size = 12) +
+  theme(legend.position = "right",
+        plot.title = element_text(color = colors$palette[1], size = 16),
+        legend.background = element_rect(color = colors$palette[4])) +
+  labs(x = "Source", y = "Location", 
+       size = "Emps (#)", color = "Satisfied",
+       title = "Referral Job Satisfaction is Confounded by Their Higher In-Office Presence") +
+  geom_text(aes(x = referral, 
+                y = location, 
+                label = prop_label),
+            color = colors$palette[4],
+            vjust = -2)
+
+
+```
+
+
+We can see the same sample size imbalances in a mosaic plot:
+
+![Mosaic plot visualization of the underlying sample size imbalances across (Office vs Remote) and (Referred vs Applied) subgroups. As in the bubble plot, the mosaic plot highlights the fact that traditional applicants are skewed heavily towards Remote work environments, while referred employees are much more likely to be Office-based. ](images/cs2_explainedB.png){#fig-8}
+```{r}
+#| label: cs2_explained_plotB
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+# Plot B) Mosaic Plot
+
+# Mosaic Plot of Sample Size Imbalance Across Locations
+dat2main |> 
+  mutate(referral = factor(referral, labels = c("Applied","Referred")),
+         location = fct(location),
+         satisfied = fct(satisfied)) |> 
+  ggplot() +
+  geom_mosaic(aes(x = product(location, referral), fill = location), show.legend = T) +
+ # theme_mosaic() +
+  scale_fill_manual(values = c(colors$palette[8],colors$palette[7])) +
+  coord_flip() +
+  theme(plot.title = element_text(color = colors$palette[1], size = 16),
+        legend.position = "top") +
+  labs(y = "Work Location",
+       x = "Pre-Hire Source",
+       fill = "Location",
+       title = "Work Location Imbalance Across Referral Groups") 
+
+```
+
+
+### Recap
+
+In sum, *referred employees appear to be less satisfied overall because they are heavily concentrated In-Office, and Office-based employees tend to be less satisfied than Remote teams regardless of pre-hire source.*
+
+In other words, **location type acts as a confounding factor for the association between referral status and job favorability**. Within each work modality, referred employees tend to view their jobs more favorably than traditional applicants..
