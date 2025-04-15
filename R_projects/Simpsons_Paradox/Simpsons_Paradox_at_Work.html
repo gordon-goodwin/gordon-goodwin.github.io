@@ -3191,10 +3191,10 @@ Figure 1: Illustration of Simpson’s Paradox at work. Compensation within the 
 <h1>Case Study #1</h1>
 <p>The Chief People Officer (CPO) of a small but growing tech company has asked us to examine the relationship between <strong>employee compensation</strong> and <strong>seniority</strong></p>
 <ul>
-<li><p>The CPO is a staunch advocate of rewarding seniority with increased compensation opportunities.</p></li>
-<li><p>The CPO launched a new compensation structure about a year ago that was designed to reflect this.</p></li>
+<li><p>The CPO is a staunch advocate of rewarding seniority with increased compensation.</p></li>
+<li><p>The company’s compensation strategy has been specifically designed to reflect this.</p></li>
 </ul>
-<p>In order to determine whether the new compensation structure has been effective, the CPO wants to know if there is a <strong>strong association between salary and seniority</strong>.</p>
+<p><strong>The CPO has asked us to review whether salary and seniority are in fact positively related.</strong></p>
 <hr>
 <section id="packages-set-up" class="level2">
 <h2 class="anchored" data-anchor-id="packages-set-up">Packages &amp; Set-Up</h2>
@@ -3317,8 +3317,7 @@ Figure 1: Illustration of Simpson’s Paradox at work. Compensation within the 
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
 <section id="initial-trend" class="level3">
 <h3 class="anchored" data-anchor-id="initial-trend">Initial Trend</h3>
-<p>We’ll start by plotting the relationship between salary and seniority for <em>all</em> employees.</p>
-<p>When we do so, it appears that employee compensation is <strong>negatively</strong> associated with years of seniority!</p>
+<p>When we first plot salary against seniority for the general employee population, <strong>it appears that compensation is negatively associated with years of seniority!</strong></p>
 <div id="fig-2" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3348,9 +3347,9 @@ Figure 2: Illustration of the initial trend: When salary is plotted against sen
 <span id="cb4-14"><a href="#cb4-14"></a>p1main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>We can confirm this trend with a <strong>linear regression model</strong>:</p>
+<p>A linear regression model confirms that after holding all other factors constant:</p>
 <ul>
-<li><strong>Each additional year of seniority is associated with a $22,000 decrease in average salary.</strong></li>
+<li><strong>Each additional year of seniority is associated with a $22,000 <em>decrease</em> in average salary.</strong></li>
 </ul>
 <div class="cell" data-warn="false">
 <details class="code-fold">
@@ -3375,7 +3374,7 @@ Figure 2: Illustration of the initial trend: When salary is plotted against sen
 <section id="trend-reversal" class="level3">
 <h3 class="anchored" data-anchor-id="trend-reversal">Trend Reversal</h3>
 <p>When we slice our data by department, however, there is a definite trend reversal!</p>
-<p><strong>For employees assigned to the same department, higher salaries are <em>positively</em> related to greater seniority.</strong></p>
+<p><strong>For employees in the same department, compensation is <em>positively</em> related to seniority</strong></p>
 <div id="fig-3" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3408,7 +3407,7 @@ Figure 3: Illustration of the trend reversal: Within each departmental subgroup
 <span id="cb7-17"><a href="#cb7-17"></a>p1reverse </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>A <strong>multivariate regression model</strong> confirms this:</p>
+<p>A <strong>multivariate regression model</strong> confirms this, showing that when holding all else constant:</p>
 <ul>
 <li><p><strong>After controlling for departmental differences, each additional year of seniority is now associated with a $13,500 increase in average salary!</strong></p></li>
 <li><p>Compared to the Data Science employees (our model reference group), Product team members earn $57K less on average, and HR employees earn $113.6K less!</p></li>
@@ -3475,19 +3474,18 @@ Figure 4: Pairs Matrix showing the univariate and bivariate distributions of de
 </section>
 <section id="recap" class="level3">
 <h3 class="anchored" data-anchor-id="recap">Recap</h3>
-<p>Putting the pieces together, salary appears to vary negatively with seniority at the company-wide level because the <em>higher-seniority employees are concentrated in the lower-paying departments.</em></p>
-<p>In other words, <strong>department acts as a confounding factor for the association between salary and seniority</strong>. Within each department, the association is positive.</p>
+<p><strong>Salary appears to vary negatively with seniority at the company-wide level because the higher-seniority employees are concentrated in the lower-paying departments.</strong></p>
+<p>In other words, <strong>department acts as a confounding factor for the association between salary and seniority</strong>. <em>Within each department</em>, the association is positive.</p>
 <hr>
 </section>
 </section>
 </section>
 <section id="case-study-2" class="level1">
 <h1>Case Study #2</h1>
-<p>The CPO was so impressed by our insights that he has a new project for us!</p>
-<p>Now he wants us to analyze the relationship between employee <strong>pre-hire sourcing</strong> and <strong>job satisfaction</strong>.</p>
+<p>The CPO was so impressed by our insights that he has a new project for us! Now he wants us to analyze the relationship between employee <strong>pre-hire sourcing</strong> and <strong>job satisfaction</strong>.</p>
 <ul>
-<li><p>Prior analyses found that employees sourced via referral performed better than those who applied traditionally.</p></li>
-<li><p>Job Satisfaction is a critical KPI for the CPO, and the company routinely administers Pulse surveys to monitor it.</p></li>
+<li><p>Prior analyses found that referrals tend to perform better than those who applied traditionally.</p></li>
+<li><p>Job Satisfaction is a critical KPI, and the company routinely administers surveys to monitor it.</p></li>
 </ul>
 <p><strong>The CPO wants us to use survey and pre-hire sourcing data to determine whether referred employees are more likely to rate their job satisfaction favorably than traditional applicants.</strong></p>
 <hr>
@@ -3525,8 +3523,7 @@ Figure 4: Pairs Matrix showing the univariate and bivariate distributions of de
 <h2 class="anchored" data-anchor-id="analysis-1">Analysis</h2>
 <section id="initial-trend-1" class="level3">
 <h3 class="anchored" data-anchor-id="initial-trend-1">Initial Trend</h3>
-<p>We’ll start by visualizing the initial relationship between job satisfaction and pre-hire source.</p>
-<p>At first, it appears that referred employees are <strong>less likely</strong> to rate their job satisfaction favorably!</p>
+<p>When we plot the initial relationship between job satisfaction and pre-hire source, <strong>it appears that referred employees are <em>less likely</em> to rate their job satisfaction favorably!</strong></p>
 <div id="fig-5" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3593,9 +3590,9 @@ Figure 5: Stacked-Bar (left) and Trend Line (right) plots visualizing job satis
 <span id="cb13-51"><a href="#cb13-51"></a>                  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>We can confirm this trend by using a <strong>simple logistic regression model</strong>:</p>
+<p>A <strong>logistic regression model</strong> confirms that, holding all else constant,:</p>
 <ul>
-<li><strong>In comparison to traditional applicants, referred employees are 64% as likely (36% less likely) to rate their jobs favorably</strong></li>
+<li><strong>Referred employees are 64% as likely (36% less likely) to rate their jobs favorably in comparison to traditional applicants.</strong></li>
 </ul>
 <div class="cell" data-warn="false">
 <details class="code-fold">
@@ -3723,7 +3720,7 @@ Figure 6: Stacked-Bar (left) and Trend Line (right) plots that facet by work lo
 <p>A <strong>multivariate logistic regression model</strong> confirms the reversal:</p>
 <ul>
 <li><p><strong>After controlling for work environment, referred employees are ~2.5x more likely to rate their satisfaction favorably!</strong></p></li>
-<li><p>Compared to the In-Office employees (our model reference group), Remote team members are over 12.5x more likely to view their jobs favorably!</p></li>
+<li><p><strong>Remote team members are over 12.5x more likely to rate their jobs favorably</strong> in comparison to In-Office employees (our model reference group).</p></li>
 </ul>
 <div class="cell" data-warn="false">
 <details class="code-fold">
@@ -3757,10 +3754,9 @@ Figure 6: Stacked-Bar (left) and Trend Line (right) plots that facet by work lo
 <p><strong><em>So how is it that the initial trend completely reversed when we sliced by Office/Remote status?</em></strong></p>
 <p>When we visualize all of our variables simultaneously, we can see that:</p>
 <ul>
-<li><p><strong>Office employees are less likely to be satisfied regardless of pre-hire source.</strong></p></li>
-<li><p><strong>Referred employees are more likely to be Office-based.</strong></p></li>
-<li><p><strong>Traditional Applicants are more likely to be Remote.</strong></p></li>
-<li><p><strong><em>Within</em></strong> <strong><em>each location type</em>, referred employees are more likely to be satisfied.</strong></p></li>
+<li><p>*Referred employees are more likely to be office-based, and office-based employees are less likely to be satisfied.**</p></li>
+<li><p><em>Traditional applicants are more likely to work remotely, and remote employees are more likely to be satisfied.</em></p></li>
+<li><p><strong>Within each location type, referrals are more likely to be satisfied than traditional applicants.</strong></p></li>
 </ul>
 <div id="fig-7" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -3813,7 +3809,7 @@ Figure 7: Illustration of how sample size imbalances lead to a trend reversal a
 <span id="cb19-36"><a href="#cb19-36"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>We can see the same sample size imbalances in a mosaic plot:</p>
+<p>We can see the same <strong>sample size imbalances</strong> in a <strong>mosaic plot:</strong></p>
 <div id="fig-8" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -3850,8 +3846,8 @@ Figure 8: Mosaic plot visualization of the underlying sample size imbalances ac
 </section>
 <section id="recap-1" class="level3">
 <h3 class="anchored" data-anchor-id="recap-1">Recap</h3>
-<p>In sum, <em>referred employees appear to be less satisfied overall because they are heavily concentrated In-Office, and Office-based employees tend to be less satisfied than Remote teams regardless of pre-hire source.</em></p>
-<p>In other words, <strong>location type acts as a confounding factor for the association between referral status and job favorability</strong>. Within each work modality, referred employees tend to view their jobs more favorably than traditional applicants..</p>
+<p><em>Referred employees appear to be less satisfied overall because they are predominantly office-based, and office teams tend to be less satisfied than remote teams regardless of pre-hire source.</em></p>
+<p>In other words, <strong>location type acts as a confounding factor for the association between referral status and job favorability.</strong> Location masks the fact that within each work modality, referred employees tend to view their jobs more favorably than traditional applicants.</p>
 <!-- -->
 
 </section>
@@ -4526,11 +4522,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb21-52"><a href="#cb21-52"></a></span>
 <span id="cb21-53"><a href="#cb21-53"></a>The Chief People Officer (CPO) of a small but growing tech company has asked us to examine the relationship between **employee compensation** and **seniority**</span>
 <span id="cb21-54"><a href="#cb21-54"></a></span>
-<span id="cb21-55"><a href="#cb21-55"></a><span class="ss">-   </span>The CPO is a staunch advocate of rewarding seniority with increased compensation opportunities.</span>
+<span id="cb21-55"><a href="#cb21-55"></a><span class="ss">-   </span>The CPO is a staunch advocate of rewarding seniority with increased compensation.</span>
 <span id="cb21-56"><a href="#cb21-56"></a></span>
-<span id="cb21-57"><a href="#cb21-57"></a><span class="ss">-   </span>The CPO launched a new compensation structure about a year ago that was designed to reflect this.</span>
+<span id="cb21-57"><a href="#cb21-57"></a><span class="ss">-   </span>The company&#39;s compensation strategy has been specifically designed to reflect this.</span>
 <span id="cb21-58"><a href="#cb21-58"></a></span>
-<span id="cb21-59"><a href="#cb21-59"></a>In order to determine whether the new compensation structure has been effective, the CPO wants to know if there is a **strong association between salary and seniority**.</span>
+<span id="cb21-59"><a href="#cb21-59"></a>**The CPO has asked us to review whether salary and seniority are in fact positively related.**</span>
 <span id="cb21-60"><a href="#cb21-60"></a></span>
 <span id="cb21-61"><a href="#cb21-61"></a>------------------------------------------------------------------------</span>
 <span id="cb21-62"><a href="#cb21-62"></a></span>
@@ -4650,528 +4646,520 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb21-180"><a href="#cb21-180"></a></span>
 <span id="cb21-181"><a href="#cb21-181"></a><span class="fu">### Initial Trend</span></span>
 <span id="cb21-182"><a href="#cb21-182"></a></span>
-<span id="cb21-183"><a href="#cb21-183"></a>We&#39;ll start by plotting the relationship between salary and seniority for *all* employees.</span>
+<span id="cb21-183"><a href="#cb21-183"></a>When we first plot salary against seniority for the general employee population, **it appears that compensation is negatively associated with years of seniority!**</span>
 <span id="cb21-184"><a href="#cb21-184"></a></span>
-<span id="cb21-185"><a href="#cb21-185"></a>When we do so, it appears that employee compensation is **negatively** associated with years of seniority!</span>
+<span id="cb21-185"><a href="#cb21-185"></a><span class="al">![Illustration of the initial trend: When salary is plotted against seniority years for the general employee population, compensation appears to have a negative relationship with seniority.](images/cs1_maintrend.png)</span>{#fig-2}</span>
 <span id="cb21-186"><a href="#cb21-186"></a></span>
-<span id="cb21-187"><a href="#cb21-187"></a><span class="al">![Illustration of the initial trend: When salary is plotted against seniority years for the general employee population, compensation appears to have a negative relationship with seniority.](images/cs1_maintrend.png)</span>{#fig-2}</span>
-<span id="cb21-188"><a href="#cb21-188"></a></span>
-<span id="cb21-191"><a href="#cb21-191"></a><span class="in">```{r}</span></span>
-<span id="cb21-192"><a href="#cb21-192"></a><span class="co">#| label: viz1_maintrend</span></span>
-<span id="cb21-193"><a href="#cb21-193"></a><span class="co">#| warning: false</span></span>
-<span id="cb21-194"><a href="#cb21-194"></a><span class="co">#| message: false</span></span>
-<span id="cb21-195"><a href="#cb21-195"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-196"><a href="#cb21-196"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-197"><a href="#cb21-197"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-198"><a href="#cb21-198"></a></span>
-<span id="cb21-199"><a href="#cb21-199"></a><span class="co"># Plot</span></span>
-<span id="cb21-200"><a href="#cb21-200"></a>dat1main <span class="sc">|&gt;</span> </span>
-<span id="cb21-201"><a href="#cb21-201"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> seniority_years,</span>
-<span id="cb21-202"><a href="#cb21-202"></a>             <span class="at">y =</span> salary_k)) <span class="sc">+</span></span>
-<span id="cb21-203"><a href="#cb21-203"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb21-204"><a href="#cb21-204"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F) <span class="sc">+</span></span>
-<span id="cb21-205"><a href="#cb21-205"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-206"><a href="#cb21-206"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_dollar</span>(<span class="at">suffix =</span> <span class="st">&quot;k&quot;</span>)) <span class="sc">+</span></span>
-<span id="cb21-207"><a href="#cb21-207"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seniority Years&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Salary&quot;</span>,</span>
-<span id="cb21-208"><a href="#cb21-208"></a>       <span class="at">title =</span> <span class="st">&quot;Salary Appears Negatively Related to Seniority&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-209"><a href="#cb21-209"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;firebrick&quot;</span>)) <span class="ot">-&gt;</span> p1main</span>
-<span id="cb21-210"><a href="#cb21-210"></a></span>
+<span id="cb21-189"><a href="#cb21-189"></a><span class="in">```{r}</span></span>
+<span id="cb21-190"><a href="#cb21-190"></a><span class="co">#| label: viz1_maintrend</span></span>
+<span id="cb21-191"><a href="#cb21-191"></a><span class="co">#| warning: false</span></span>
+<span id="cb21-192"><a href="#cb21-192"></a><span class="co">#| message: false</span></span>
+<span id="cb21-193"><a href="#cb21-193"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-194"><a href="#cb21-194"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-195"><a href="#cb21-195"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-196"><a href="#cb21-196"></a></span>
+<span id="cb21-197"><a href="#cb21-197"></a><span class="co"># Plot</span></span>
+<span id="cb21-198"><a href="#cb21-198"></a>dat1main <span class="sc">|&gt;</span> </span>
+<span id="cb21-199"><a href="#cb21-199"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> seniority_years,</span>
+<span id="cb21-200"><a href="#cb21-200"></a>             <span class="at">y =</span> salary_k)) <span class="sc">+</span></span>
+<span id="cb21-201"><a href="#cb21-201"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb21-202"><a href="#cb21-202"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F) <span class="sc">+</span></span>
+<span id="cb21-203"><a href="#cb21-203"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-204"><a href="#cb21-204"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_dollar</span>(<span class="at">suffix =</span> <span class="st">&quot;k&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb21-205"><a href="#cb21-205"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seniority Years&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Salary&quot;</span>,</span>
+<span id="cb21-206"><a href="#cb21-206"></a>       <span class="at">title =</span> <span class="st">&quot;Salary Appears Negatively Related to Seniority&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-207"><a href="#cb21-207"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;firebrick&quot;</span>)) <span class="ot">-&gt;</span> p1main</span>
+<span id="cb21-208"><a href="#cb21-208"></a></span>
+<span id="cb21-209"><a href="#cb21-209"></a></span>
+<span id="cb21-210"><a href="#cb21-210"></a>p1main</span>
 <span id="cb21-211"><a href="#cb21-211"></a></span>
-<span id="cb21-212"><a href="#cb21-212"></a>p1main</span>
+<span id="cb21-212"><a href="#cb21-212"></a><span class="in">```</span></span>
 <span id="cb21-213"><a href="#cb21-213"></a></span>
-<span id="cb21-214"><a href="#cb21-214"></a><span class="in">```</span></span>
+<span id="cb21-214"><a href="#cb21-214"></a>A linear regression model confirms that after holding all other factors constant:</span>
 <span id="cb21-215"><a href="#cb21-215"></a></span>
-<span id="cb21-216"><a href="#cb21-216"></a>We can confirm this trend with a **linear regression model**:</span>
+<span id="cb21-216"><a href="#cb21-216"></a><span class="ss">-   </span>**Each additional year of seniority is associated with a $22,000 *decrease* in average salary.**</span>
 <span id="cb21-217"><a href="#cb21-217"></a></span>
-<span id="cb21-218"><a href="#cb21-218"></a><span class="ss">-   </span>**Each additional year of seniority is associated with a \$22,000 decrease in average salary.**</span>
-<span id="cb21-219"><a href="#cb21-219"></a></span>
-<span id="cb21-222"><a href="#cb21-222"></a><span class="in">```{r}</span></span>
-<span id="cb21-223"><a href="#cb21-223"></a><span class="co">#| label: mod1_maintrend</span></span>
-<span id="cb21-224"><a href="#cb21-224"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-225"><a href="#cb21-225"></a></span>
-<span id="cb21-226"><a href="#cb21-226"></a></span>
-<span id="cb21-227"><a href="#cb21-227"></a><span class="co"># Regression Model: Salary ~ Seniority</span></span>
-<span id="cb21-228"><a href="#cb21-228"></a><span class="co"># Linear Regression Model</span></span>
-<span id="cb21-229"><a href="#cb21-229"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(salary <span class="sc">~</span> seniority_years, <span class="at">data =</span> dat1main)</span>
-<span id="cb21-230"><a href="#cb21-230"></a></span>
-<span id="cb21-231"><a href="#cb21-231"></a><span class="co"># Tidy Model Output instead of ugly base R summary</span></span>
-<span id="cb21-232"><a href="#cb21-232"></a><span class="fu">tidy</span>(m1)</span>
-<span id="cb21-233"><a href="#cb21-233"></a><span class="in">```</span></span>
+<span id="cb21-220"><a href="#cb21-220"></a><span class="in">```{r}</span></span>
+<span id="cb21-221"><a href="#cb21-221"></a><span class="co">#| label: mod1_maintrend</span></span>
+<span id="cb21-222"><a href="#cb21-222"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-223"><a href="#cb21-223"></a></span>
+<span id="cb21-224"><a href="#cb21-224"></a></span>
+<span id="cb21-225"><a href="#cb21-225"></a><span class="co"># Regression Model: Salary ~ Seniority</span></span>
+<span id="cb21-226"><a href="#cb21-226"></a><span class="co"># Linear Regression Model</span></span>
+<span id="cb21-227"><a href="#cb21-227"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(salary <span class="sc">~</span> seniority_years, <span class="at">data =</span> dat1main)</span>
+<span id="cb21-228"><a href="#cb21-228"></a></span>
+<span id="cb21-229"><a href="#cb21-229"></a><span class="co"># Tidy Model Output instead of ugly base R summary</span></span>
+<span id="cb21-230"><a href="#cb21-230"></a><span class="fu">tidy</span>(m1)</span>
+<span id="cb21-231"><a href="#cb21-231"></a><span class="in">```</span></span>
+<span id="cb21-232"><a href="#cb21-232"></a></span>
+<span id="cb21-233"><a href="#cb21-233"></a>------------------------------------------------------------------------</span>
 <span id="cb21-234"><a href="#cb21-234"></a></span>
-<span id="cb21-235"><a href="#cb21-235"></a>------------------------------------------------------------------------</span>
+<span id="cb21-235"><a href="#cb21-235"></a><span class="fu">### Trend Reversal</span></span>
 <span id="cb21-236"><a href="#cb21-236"></a></span>
-<span id="cb21-237"><a href="#cb21-237"></a><span class="fu">### Trend Reversal</span></span>
+<span id="cb21-237"><a href="#cb21-237"></a>When we slice our data by department, however, there is a definite trend reversal!</span>
 <span id="cb21-238"><a href="#cb21-238"></a></span>
-<span id="cb21-239"><a href="#cb21-239"></a>When we slice our data by department, however, there is a definite trend reversal!</span>
+<span id="cb21-239"><a href="#cb21-239"></a>**For employees in the same department, compensation is *positively* related to seniority**</span>
 <span id="cb21-240"><a href="#cb21-240"></a></span>
-<span id="cb21-241"><a href="#cb21-241"></a>**For employees assigned to the same department, higher salaries are *positively* related to greater seniority.**</span>
+<span id="cb21-241"><a href="#cb21-241"></a><span class="al">![Illustration of the trend reversal: Within each departmental subgroup, employees with higher seniority levels tend to also have higher salaries.](images/cs1_reversal.png)</span>{#fig-3}</span>
 <span id="cb21-242"><a href="#cb21-242"></a></span>
-<span id="cb21-243"><a href="#cb21-243"></a><span class="al">![Illustration of the trend reversal: Within each departmental subgroup, employees with higher seniority levels tend to also have higher salaries.](images/cs1_reversal.png)</span>{#fig-3}</span>
-<span id="cb21-244"><a href="#cb21-244"></a></span>
-<span id="cb21-247"><a href="#cb21-247"></a><span class="in">```{r}</span></span>
-<span id="cb21-248"><a href="#cb21-248"></a><span class="co">#| label: viz1b_reversal</span></span>
-<span id="cb21-249"><a href="#cb21-249"></a><span class="co">#| warning: false</span></span>
-<span id="cb21-250"><a href="#cb21-250"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-251"><a href="#cb21-251"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-252"><a href="#cb21-252"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-253"><a href="#cb21-253"></a></span>
-<span id="cb21-254"><a href="#cb21-254"></a></span>
-<span id="cb21-255"><a href="#cb21-255"></a><span class="co"># Plot - WITHIN GROUPS</span></span>
-<span id="cb21-256"><a href="#cb21-256"></a>dat1main <span class="sc">|&gt;</span> </span>
-<span id="cb21-257"><a href="#cb21-257"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> seniority_years,</span>
-<span id="cb21-258"><a href="#cb21-258"></a>             <span class="at">y =</span> salary_k,</span>
-<span id="cb21-259"><a href="#cb21-259"></a>             <span class="at">color =</span> department)) <span class="sc">+</span></span>
-<span id="cb21-260"><a href="#cb21-260"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb21-261"><a href="#cb21-261"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F) <span class="sc">+</span></span>
-<span id="cb21-262"><a href="#cb21-262"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-263"><a href="#cb21-263"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">suffix =</span> <span class="st">&quot;k&quot;</span>)) <span class="sc">+</span></span>
-<span id="cb21-264"><a href="#cb21-264"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>], colors<span class="sc">$</span>palette[<span class="dv">2</span>], colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
-<span id="cb21-265"><a href="#cb21-265"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seniority Years&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Salary&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Department&quot;</span>,</span>
-<span id="cb21-266"><a href="#cb21-266"></a>       <span class="at">title =</span> <span class="st">&quot;Trend Reversal When Sliced by Department&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-267"><a href="#cb21-267"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;royalblue&quot;</span>),</span>
-<span id="cb21-268"><a href="#cb21-268"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> fonts<span class="sc">$</span>title)) <span class="ot">-&gt;</span> p1reverse</span>
-<span id="cb21-269"><a href="#cb21-269"></a></span>
+<span id="cb21-245"><a href="#cb21-245"></a><span class="in">```{r}</span></span>
+<span id="cb21-246"><a href="#cb21-246"></a><span class="co">#| label: viz1b_reversal</span></span>
+<span id="cb21-247"><a href="#cb21-247"></a><span class="co">#| warning: false</span></span>
+<span id="cb21-248"><a href="#cb21-248"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-249"><a href="#cb21-249"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-250"><a href="#cb21-250"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-251"><a href="#cb21-251"></a></span>
+<span id="cb21-252"><a href="#cb21-252"></a></span>
+<span id="cb21-253"><a href="#cb21-253"></a><span class="co"># Plot - WITHIN GROUPS</span></span>
+<span id="cb21-254"><a href="#cb21-254"></a>dat1main <span class="sc">|&gt;</span> </span>
+<span id="cb21-255"><a href="#cb21-255"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> seniority_years,</span>
+<span id="cb21-256"><a href="#cb21-256"></a>             <span class="at">y =</span> salary_k,</span>
+<span id="cb21-257"><a href="#cb21-257"></a>             <span class="at">color =</span> department)) <span class="sc">+</span></span>
+<span id="cb21-258"><a href="#cb21-258"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb21-259"><a href="#cb21-259"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">&quot;lm&quot;</span>, <span class="at">se =</span> F) <span class="sc">+</span></span>
+<span id="cb21-260"><a href="#cb21-260"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-261"><a href="#cb21-261"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> <span class="fu">label_dollar</span>(<span class="at">suffix =</span> <span class="st">&quot;k&quot;</span>)) <span class="sc">+</span></span>
+<span id="cb21-262"><a href="#cb21-262"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>], colors<span class="sc">$</span>palette[<span class="dv">2</span>], colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
+<span id="cb21-263"><a href="#cb21-263"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Seniority Years&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Salary&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Department&quot;</span>,</span>
+<span id="cb21-264"><a href="#cb21-264"></a>       <span class="at">title =</span> <span class="st">&quot;Trend Reversal When Sliced by Department&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-265"><a href="#cb21-265"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">&quot;royalblue&quot;</span>),</span>
+<span id="cb21-266"><a href="#cb21-266"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> fonts<span class="sc">$</span>title)) <span class="ot">-&gt;</span> p1reverse</span>
+<span id="cb21-267"><a href="#cb21-267"></a></span>
+<span id="cb21-268"><a href="#cb21-268"></a></span>
+<span id="cb21-269"><a href="#cb21-269"></a>p1reverse </span>
 <span id="cb21-270"><a href="#cb21-270"></a></span>
-<span id="cb21-271"><a href="#cb21-271"></a>p1reverse </span>
+<span id="cb21-271"><a href="#cb21-271"></a><span class="in">```</span></span>
 <span id="cb21-272"><a href="#cb21-272"></a></span>
-<span id="cb21-273"><a href="#cb21-273"></a><span class="in">```</span></span>
+<span id="cb21-273"><a href="#cb21-273"></a>A **multivariate regression model** confirms this, showing that when holding all else constant:</span>
 <span id="cb21-274"><a href="#cb21-274"></a></span>
-<span id="cb21-275"><a href="#cb21-275"></a>A **multivariate regression model** confirms this:</span>
+<span id="cb21-275"><a href="#cb21-275"></a><span class="ss">-   </span>**After controlling for departmental differences, each additional year of seniority is now associated with a \$13,500 increase in average salary!**</span>
 <span id="cb21-276"><a href="#cb21-276"></a></span>
-<span id="cb21-277"><a href="#cb21-277"></a><span class="ss">-   </span>**After controlling for departmental differences, each additional year of seniority is now associated with a \$13,500 increase in average salary!**</span>
+<span id="cb21-277"><a href="#cb21-277"></a><span class="ss">-   </span>Compared to the Data Science employees (our model reference group), Product team members earn \$57K less on average, and HR employees earn \$113.6K less!</span>
 <span id="cb21-278"><a href="#cb21-278"></a></span>
-<span id="cb21-279"><a href="#cb21-279"></a><span class="ss">-   </span>Compared to the Data Science employees (our model reference group), Product team members earn \$57K less on average, and HR employees earn \$113.6K less!</span>
-<span id="cb21-280"><a href="#cb21-280"></a></span>
-<span id="cb21-283"><a href="#cb21-283"></a><span class="in">```{r}</span></span>
-<span id="cb21-284"><a href="#cb21-284"></a><span class="co">#| label: mod1b_reversal</span></span>
-<span id="cb21-285"><a href="#cb21-285"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-286"><a href="#cb21-286"></a><span class="co">#| message: false</span></span>
-<span id="cb21-287"><a href="#cb21-287"></a></span>
-<span id="cb21-288"><a href="#cb21-288"></a></span>
-<span id="cb21-289"><a href="#cb21-289"></a><span class="co"># Regression Model: Salary ~ Seniority</span></span>
-<span id="cb21-290"><a href="#cb21-290"></a><span class="co"># Linear Regression Model</span></span>
-<span id="cb21-291"><a href="#cb21-291"></a>m1b_reversal <span class="ot">&lt;-</span> <span class="fu">lm</span>(salary <span class="sc">~</span> seniority_years <span class="sc">+</span> department, <span class="at">data =</span> dat1main)</span>
-<span id="cb21-292"><a href="#cb21-292"></a></span>
-<span id="cb21-293"><a href="#cb21-293"></a><span class="co"># Tidy Model Output </span></span>
-<span id="cb21-294"><a href="#cb21-294"></a><span class="fu">tidy</span>(m1b_reversal)</span>
+<span id="cb21-281"><a href="#cb21-281"></a><span class="in">```{r}</span></span>
+<span id="cb21-282"><a href="#cb21-282"></a><span class="co">#| label: mod1b_reversal</span></span>
+<span id="cb21-283"><a href="#cb21-283"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-284"><a href="#cb21-284"></a><span class="co">#| message: false</span></span>
+<span id="cb21-285"><a href="#cb21-285"></a></span>
+<span id="cb21-286"><a href="#cb21-286"></a></span>
+<span id="cb21-287"><a href="#cb21-287"></a><span class="co"># Regression Model: Salary ~ Seniority</span></span>
+<span id="cb21-288"><a href="#cb21-288"></a><span class="co"># Linear Regression Model</span></span>
+<span id="cb21-289"><a href="#cb21-289"></a>m1b_reversal <span class="ot">&lt;-</span> <span class="fu">lm</span>(salary <span class="sc">~</span> seniority_years <span class="sc">+</span> department, <span class="at">data =</span> dat1main)</span>
+<span id="cb21-290"><a href="#cb21-290"></a></span>
+<span id="cb21-291"><a href="#cb21-291"></a><span class="co"># Tidy Model Output </span></span>
+<span id="cb21-292"><a href="#cb21-292"></a><span class="fu">tidy</span>(m1b_reversal)</span>
+<span id="cb21-293"><a href="#cb21-293"></a></span>
+<span id="cb21-294"><a href="#cb21-294"></a><span class="in">```</span></span>
 <span id="cb21-295"><a href="#cb21-295"></a></span>
-<span id="cb21-296"><a href="#cb21-296"></a><span class="in">```</span></span>
+<span id="cb21-296"><a href="#cb21-296"></a>------------------------------------------------------------------------</span>
 <span id="cb21-297"><a href="#cb21-297"></a></span>
-<span id="cb21-298"><a href="#cb21-298"></a>------------------------------------------------------------------------</span>
+<span id="cb21-298"><a href="#cb21-298"></a><span class="fu">### Explaining the Reversal</span></span>
 <span id="cb21-299"><a href="#cb21-299"></a></span>
-<span id="cb21-300"><a href="#cb21-300"></a><span class="fu">### Explaining the Reversal</span></span>
+<span id="cb21-300"><a href="#cb21-300"></a>***So how is it that the initial trend completely reversed when we sliced by department?***</span>
 <span id="cb21-301"><a href="#cb21-301"></a></span>
-<span id="cb21-302"><a href="#cb21-302"></a>***So how is it that the initial trend completely reversed when we sliced by department?***</span>
+<span id="cb21-302"><a href="#cb21-302"></a>When we visualize all of our variables simultaneously, we can see that:</span>
 <span id="cb21-303"><a href="#cb21-303"></a></span>
-<span id="cb21-304"><a href="#cb21-304"></a>When we visualize all of our variables simultaneously, we can see that:</span>
+<span id="cb21-304"><a href="#cb21-304"></a><span class="ss">-   </span>**Salary &amp; Seniority both vary by department, but in opposite directions**</span>
 <span id="cb21-305"><a href="#cb21-305"></a></span>
-<span id="cb21-306"><a href="#cb21-306"></a><span class="ss">-   </span>**Salary &amp; Seniority both vary by department, but in opposite directions**</span>
+<span id="cb21-306"><a href="#cb21-306"></a><span class="ss">-   </span>**Salary** (top right &amp; bottom right boxes):Data Science employees tend to be the highest paid, HR employees tend to be the lowest paid, and Product employees fall in the middle.</span>
 <span id="cb21-307"><a href="#cb21-307"></a></span>
-<span id="cb21-308"><a href="#cb21-308"></a><span class="ss">-   </span>**Salary** (top right &amp; bottom right boxes):Data Science employees tend to be the highest paid, HR employees tend to be the lowest paid, and Product employees fall in the middle.</span>
+<span id="cb21-308"><a href="#cb21-308"></a><span class="ss">-   </span>**Seniority** (middle col/top and middle rows): On average, HR employees are the longest-tenured, Data Science employees are the newest, and Product employees are again somewhere in the middle.</span>
 <span id="cb21-309"><a href="#cb21-309"></a></span>
-<span id="cb21-310"><a href="#cb21-310"></a><span class="ss">-   </span>**Seniority** (middle col/top and middle rows): On average, HR employees are the longest-tenured, Data Science employees are the newest, and Product employees are again somewhere in the middle.</span>
+<span id="cb21-310"><a href="#cb21-310"></a><span class="ss">-   </span>**Salary and seniority are negatively correlated overall, but positively correlated within departments** (far right col/middle row). This is the Paradox in a nutshell.</span>
 <span id="cb21-311"><a href="#cb21-311"></a></span>
-<span id="cb21-312"><a href="#cb21-312"></a><span class="ss">-   </span>**Salary and seniority are negatively correlated overall, but positively correlated within departments** (far right col/middle row). This is the Paradox in a nutshell.</span>
+<span id="cb21-312"><a href="#cb21-312"></a><span class="al">![Pairs Matrix showing the univariate and bivariate distributions of department, salary, and seniority.](images/cs1_ggpairs.png)</span>{#fig-4}</span>
 <span id="cb21-313"><a href="#cb21-313"></a></span>
-<span id="cb21-314"><a href="#cb21-314"></a><span class="al">![Pairs Matrix showing the univariate and bivariate distributions of department, salary, and seniority.](images/cs1_ggpairs.png)</span>{#fig-4}</span>
-<span id="cb21-315"><a href="#cb21-315"></a></span>
-<span id="cb21-318"><a href="#cb21-318"></a><span class="in">```{r}</span></span>
-<span id="cb21-319"><a href="#cb21-319"></a><span class="co">#| label: cs1_ggally_pairsplot</span></span>
-<span id="cb21-320"><a href="#cb21-320"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-321"><a href="#cb21-321"></a><span class="co">#| message: false</span></span>
-<span id="cb21-322"><a href="#cb21-322"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-323"><a href="#cb21-323"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-324"><a href="#cb21-324"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-325"><a href="#cb21-325"></a></span>
-<span id="cb21-326"><a href="#cb21-326"></a><span class="co"># Plot</span></span>
-<span id="cb21-327"><a href="#cb21-327"></a>dat1main <span class="sc">|&gt;</span> </span>
-<span id="cb21-328"><a href="#cb21-328"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="at">Department =</span> department, </span>
-<span id="cb21-329"><a href="#cb21-329"></a>           <span class="st">`</span><span class="at">Seniority Yrs</span><span class="st">`</span> <span class="ot">=</span> seniority_years, </span>
-<span id="cb21-330"><a href="#cb21-330"></a>           <span class="at">Salary =</span> salary)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-331"><a href="#cb21-331"></a>  <span class="fu">ggpairs</span>(<span class="fu">aes</span>(<span class="at">color =</span> Department, <span class="at">alpha =</span> <span class="fl">0.4</span>)) <span class="sc">+</span></span>
-<span id="cb21-332"><a href="#cb21-332"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>],</span>
-<span id="cb21-333"><a href="#cb21-333"></a>                                colors<span class="sc">$</span>palette[<span class="dv">2</span>],</span>
-<span id="cb21-334"><a href="#cb21-334"></a>                                colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
-<span id="cb21-335"><a href="#cb21-335"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>],</span>
-<span id="cb21-336"><a href="#cb21-336"></a>                                colors<span class="sc">$</span>palette[<span class="dv">2</span>],</span>
-<span id="cb21-337"><a href="#cb21-337"></a>                                colors<span class="sc">$</span>palette[<span class="dv">3</span>])) </span>
+<span id="cb21-316"><a href="#cb21-316"></a><span class="in">```{r}</span></span>
+<span id="cb21-317"><a href="#cb21-317"></a><span class="co">#| label: cs1_ggally_pairsplot</span></span>
+<span id="cb21-318"><a href="#cb21-318"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-319"><a href="#cb21-319"></a><span class="co">#| message: false</span></span>
+<span id="cb21-320"><a href="#cb21-320"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-321"><a href="#cb21-321"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-322"><a href="#cb21-322"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-323"><a href="#cb21-323"></a></span>
+<span id="cb21-324"><a href="#cb21-324"></a><span class="co"># Plot</span></span>
+<span id="cb21-325"><a href="#cb21-325"></a>dat1main <span class="sc">|&gt;</span> </span>
+<span id="cb21-326"><a href="#cb21-326"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="at">Department =</span> department, </span>
+<span id="cb21-327"><a href="#cb21-327"></a>           <span class="st">`</span><span class="at">Seniority Yrs</span><span class="st">`</span> <span class="ot">=</span> seniority_years, </span>
+<span id="cb21-328"><a href="#cb21-328"></a>           <span class="at">Salary =</span> salary)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-329"><a href="#cb21-329"></a>  <span class="fu">ggpairs</span>(<span class="fu">aes</span>(<span class="at">color =</span> Department, <span class="at">alpha =</span> <span class="fl">0.4</span>)) <span class="sc">+</span></span>
+<span id="cb21-330"><a href="#cb21-330"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>],</span>
+<span id="cb21-331"><a href="#cb21-331"></a>                                colors<span class="sc">$</span>palette[<span class="dv">2</span>],</span>
+<span id="cb21-332"><a href="#cb21-332"></a>                                colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
+<span id="cb21-333"><a href="#cb21-333"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">1</span>],</span>
+<span id="cb21-334"><a href="#cb21-334"></a>                                colors<span class="sc">$</span>palette[<span class="dv">2</span>],</span>
+<span id="cb21-335"><a href="#cb21-335"></a>                                colors<span class="sc">$</span>palette[<span class="dv">3</span>])) </span>
+<span id="cb21-336"><a href="#cb21-336"></a></span>
+<span id="cb21-337"><a href="#cb21-337"></a><span class="in">```</span></span>
 <span id="cb21-338"><a href="#cb21-338"></a></span>
-<span id="cb21-339"><a href="#cb21-339"></a><span class="in">```</span></span>
+<span id="cb21-339"><a href="#cb21-339"></a><span class="fu">### Recap</span></span>
 <span id="cb21-340"><a href="#cb21-340"></a></span>
-<span id="cb21-341"><a href="#cb21-341"></a><span class="fu">### Recap</span></span>
+<span id="cb21-341"><a href="#cb21-341"></a>**Salary appears to vary negatively with seniority at the company-wide level because the higher-seniority employees are concentrated in the lower-paying departments.**</span>
 <span id="cb21-342"><a href="#cb21-342"></a></span>
-<span id="cb21-343"><a href="#cb21-343"></a>Putting the pieces together, salary appears to vary negatively with seniority at the company-wide level because the *higher-seniority employees are concentrated in the lower-paying departments.*</span>
+<span id="cb21-343"><a href="#cb21-343"></a>In other words, **department acts as a confounding factor for the association between salary and seniority**. *Within each department*, the association is positive.</span>
 <span id="cb21-344"><a href="#cb21-344"></a></span>
-<span id="cb21-345"><a href="#cb21-345"></a>In other words, **department acts as a confounding factor for the association between salary and seniority**. Within each department, the association is positive.</span>
+<span id="cb21-345"><a href="#cb21-345"></a>------------------------------------------------------------------------</span>
 <span id="cb21-346"><a href="#cb21-346"></a></span>
-<span id="cb21-347"><a href="#cb21-347"></a>------------------------------------------------------------------------</span>
+<span id="cb21-347"><a href="#cb21-347"></a><span class="fu"># Case Study #2</span></span>
 <span id="cb21-348"><a href="#cb21-348"></a></span>
-<span id="cb21-349"><a href="#cb21-349"></a><span class="fu"># Case Study #2</span></span>
+<span id="cb21-349"><a href="#cb21-349"></a>The CPO was so impressed by our insights that he has a new project for us! Now he wants us to analyze the relationship between employee **pre-hire sourcing** and **job satisfaction**.</span>
 <span id="cb21-350"><a href="#cb21-350"></a></span>
-<span id="cb21-351"><a href="#cb21-351"></a>The CPO was so impressed by our insights that he has a new project for us!</span>
+<span id="cb21-351"><a href="#cb21-351"></a><span class="ss">-   </span>Prior analyses found that referrals tend to perform better than those who applied traditionally.</span>
 <span id="cb21-352"><a href="#cb21-352"></a></span>
-<span id="cb21-353"><a href="#cb21-353"></a>Now he wants us to analyze the relationship between employee **pre-hire sourcing** and **job satisfaction**.</span>
+<span id="cb21-353"><a href="#cb21-353"></a><span class="ss">-   </span>Job Satisfaction is a critical KPI, and the company routinely administers surveys to monitor it.</span>
 <span id="cb21-354"><a href="#cb21-354"></a></span>
-<span id="cb21-355"><a href="#cb21-355"></a><span class="ss">-   </span>Prior analyses found that employees sourced via referral performed better than those who applied traditionally.</span>
+<span id="cb21-355"><a href="#cb21-355"></a>**The CPO wants us to use survey and pre-hire sourcing data to determine whether referred employees are more likely to rate their job satisfaction favorably than traditional applicants.**</span>
 <span id="cb21-356"><a href="#cb21-356"></a></span>
-<span id="cb21-357"><a href="#cb21-357"></a><span class="ss">-   </span>Job Satisfaction is a critical KPI for the CPO, and the company routinely administers Pulse surveys to monitor it.</span>
+<span id="cb21-357"><a href="#cb21-357"></a>------------------------------------------------------------------------</span>
 <span id="cb21-358"><a href="#cb21-358"></a></span>
-<span id="cb21-359"><a href="#cb21-359"></a>**The CPO wants us to use survey and pre-hire sourcing data to determine whether referred employees are more likely to rate their job satisfaction favorably than traditional applicants.**</span>
+<span id="cb21-359"><a href="#cb21-359"></a><span class="fu">## Load and Preview Data</span></span>
 <span id="cb21-360"><a href="#cb21-360"></a></span>
-<span id="cb21-361"><a href="#cb21-361"></a>------------------------------------------------------------------------</span>
+<span id="cb21-361"><a href="#cb21-361"></a>Our second dataset is much larger, containing survey responses and pre-hire sourcing data for all 1000 employees who responded.</span>
 <span id="cb21-362"><a href="#cb21-362"></a></span>
-<span id="cb21-363"><a href="#cb21-363"></a><span class="fu">## Load and Preview Data</span></span>
-<span id="cb21-364"><a href="#cb21-364"></a></span>
-<span id="cb21-365"><a href="#cb21-365"></a>Our second dataset is much larger, containing survey responses and pre-hire sourcing data for all 1000 employees who responded.</span>
+<span id="cb21-363"><a href="#cb21-363"></a><span class="ss">-   </span>Pre-Hire Source (Referred vs Applied)</span>
+<span id="cb21-364"><a href="#cb21-364"></a><span class="ss">-   </span>Job Satisfaction (Favorable vs Unfavorable)</span>
+<span id="cb21-365"><a href="#cb21-365"></a><span class="ss">-   </span>Location (Remote vs Office)</span>
 <span id="cb21-366"><a href="#cb21-366"></a></span>
-<span id="cb21-367"><a href="#cb21-367"></a><span class="ss">-   </span>Pre-Hire Source (Referred vs Applied)</span>
-<span id="cb21-368"><a href="#cb21-368"></a><span class="ss">-   </span>Job Satisfaction (Favorable vs Unfavorable)</span>
-<span id="cb21-369"><a href="#cb21-369"></a><span class="ss">-   </span>Location (Remote vs Office)</span>
-<span id="cb21-370"><a href="#cb21-370"></a></span>
-<span id="cb21-373"><a href="#cb21-373"></a><span class="in">```{r}</span></span>
-<span id="cb21-374"><a href="#cb21-374"></a><span class="co">#| label: read_data2</span></span>
-<span id="cb21-375"><a href="#cb21-375"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-376"><a href="#cb21-376"></a><span class="co">#| message: false</span></span>
+<span id="cb21-369"><a href="#cb21-369"></a><span class="in">```{r}</span></span>
+<span id="cb21-370"><a href="#cb21-370"></a><span class="co">#| label: read_data2</span></span>
+<span id="cb21-371"><a href="#cb21-371"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-372"><a href="#cb21-372"></a><span class="co">#| message: false</span></span>
+<span id="cb21-373"><a href="#cb21-373"></a></span>
+<span id="cb21-374"><a href="#cb21-374"></a></span>
+<span id="cb21-375"><a href="#cb21-375"></a><span class="co"># READ DATA</span></span>
+<span id="cb21-376"><a href="#cb21-376"></a><span class="fu">read_csv</span>(<span class="st">&quot;Simpson_Paradox_Data_CS2.csv&quot;</span>) <span class="ot">-&gt;</span> dat2main</span>
 <span id="cb21-377"><a href="#cb21-377"></a></span>
 <span id="cb21-378"><a href="#cb21-378"></a></span>
-<span id="cb21-379"><a href="#cb21-379"></a><span class="co"># READ DATA</span></span>
-<span id="cb21-380"><a href="#cb21-380"></a><span class="fu">read_csv</span>(<span class="st">&quot;Simpson_Paradox_Data_CS2.csv&quot;</span>) <span class="ot">-&gt;</span> dat2main</span>
+<span id="cb21-379"><a href="#cb21-379"></a><span class="do">## Preview</span></span>
+<span id="cb21-380"><a href="#cb21-380"></a>dat2main <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span>
 <span id="cb21-381"><a href="#cb21-381"></a></span>
-<span id="cb21-382"><a href="#cb21-382"></a></span>
-<span id="cb21-383"><a href="#cb21-383"></a><span class="do">## Preview</span></span>
-<span id="cb21-384"><a href="#cb21-384"></a>dat2main <span class="sc">|&gt;</span> <span class="fu">head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span>
+<span id="cb21-382"><a href="#cb21-382"></a><span class="in">```</span></span>
+<span id="cb21-383"><a href="#cb21-383"></a></span>
+<span id="cb21-384"><a href="#cb21-384"></a><span class="fu">## Analysis</span></span>
 <span id="cb21-385"><a href="#cb21-385"></a></span>
-<span id="cb21-386"><a href="#cb21-386"></a><span class="in">```</span></span>
+<span id="cb21-386"><a href="#cb21-386"></a><span class="fu">### Initial Trend</span></span>
 <span id="cb21-387"><a href="#cb21-387"></a></span>
-<span id="cb21-388"><a href="#cb21-388"></a><span class="fu">## Analysis</span></span>
+<span id="cb21-388"><a href="#cb21-388"></a>When we plot the initial relationship between job satisfaction and pre-hire source, **it appears that referred employees are *less likely* to rate their job satisfaction favorably!**</span>
 <span id="cb21-389"><a href="#cb21-389"></a></span>
-<span id="cb21-390"><a href="#cb21-390"></a><span class="fu">### Initial Trend</span></span>
+<span id="cb21-390"><a href="#cb21-390"></a><span class="al">![Stacked-Bar (left) and Trend Line (right) plots visualizing job satisfaction favorability for referrals and traditional applicants. Both plots show that referred employees tend to have lower job satisfaction levels.](images/cs2_maintrend.png)</span>{#fig-5}</span>
 <span id="cb21-391"><a href="#cb21-391"></a></span>
-<span id="cb21-392"><a href="#cb21-392"></a>We&#39;ll start by visualizing the initial relationship between job satisfaction and pre-hire source.</span>
-<span id="cb21-393"><a href="#cb21-393"></a></span>
-<span id="cb21-394"><a href="#cb21-394"></a>At first, it appears that referred employees are **less likely** to rate their job satisfaction favorably!</span>
-<span id="cb21-395"><a href="#cb21-395"></a></span>
-<span id="cb21-396"><a href="#cb21-396"></a><span class="al">![Stacked-Bar (left) and Trend Line (right) plots visualizing job satisfaction favorability for referrals and traditional applicants. Both plots show that referred employees tend to have lower job satisfaction levels.](images/cs2_maintrend.png)</span>{#fig-5}</span>
-<span id="cb21-397"><a href="#cb21-397"></a></span>
-<span id="cb21-400"><a href="#cb21-400"></a><span class="in">```{r}</span></span>
-<span id="cb21-401"><a href="#cb21-401"></a><span class="co">#| label: viz2_maintrend</span></span>
-<span id="cb21-402"><a href="#cb21-402"></a><span class="co">#| warning: false</span></span>
-<span id="cb21-403"><a href="#cb21-403"></a><span class="co">#| message: false</span></span>
-<span id="cb21-404"><a href="#cb21-404"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-405"><a href="#cb21-405"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-406"><a href="#cb21-406"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-407"><a href="#cb21-407"></a></span>
-<span id="cb21-408"><a href="#cb21-408"></a></span>
-<span id="cb21-409"><a href="#cb21-409"></a><span class="co"># Plot A) Stacked Bar</span></span>
-<span id="cb21-410"><a href="#cb21-410"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-411"><a href="#cb21-411"></a>  <span class="fu">count</span>(referral, satisfied) <span class="sc">|&gt;</span> </span>
-<span id="cb21-412"><a href="#cb21-412"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> <span class="fu">round</span>(n<span class="sc">/</span><span class="fu">sum</span>(n),<span class="dv">2</span>),</span>
-<span id="cb21-413"><a href="#cb21-413"></a>         <span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::percent(prop)} ({n})&quot;</span>),</span>
-<span id="cb21-414"><a href="#cb21-414"></a>         <span class="at">.by =</span> referral) <span class="sc">|&gt;</span></span>
-<span id="cb21-415"><a href="#cb21-415"></a>  <span class="fu">mutate</span>(<span class="at">satisfied =</span> <span class="fu">fct_relevel</span>(satisfied, <span class="fu">c</span>(<span class="st">&quot;Unfavorable&quot;</span>,<span class="st">&quot;Favorable&quot;</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb21-416"><a href="#cb21-416"></a>  <span class="co"># filter(satisfied == &quot;Favorable&quot;) |&gt; </span></span>
-<span id="cb21-417"><a href="#cb21-417"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral,</span>
-<span id="cb21-418"><a href="#cb21-418"></a>             <span class="at">y =</span> prop,</span>
-<span id="cb21-419"><a href="#cb21-419"></a>             <span class="at">fill =</span> satisfied)) <span class="sc">+</span></span>
-<span id="cb21-420"><a href="#cb21-420"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-421"><a href="#cb21-421"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb21-422"><a href="#cb21-422"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-423"><a href="#cb21-423"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> prop_label),</span>
-<span id="cb21-424"><a href="#cb21-424"></a>            <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> .<span class="dv">4</span>),</span>
-<span id="cb21-425"><a href="#cb21-425"></a>            <span class="at">colour =</span> colors<span class="sc">$</span>palette[<span class="dv">13</span>], <span class="at">size =</span> <span class="dv">3</span>,</span>
-<span id="cb21-426"><a href="#cb21-426"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-427"><a href="#cb21-427"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">5</span>], colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
-<span id="cb21-428"><a href="#cb21-428"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
-<span id="cb21-429"><a href="#cb21-429"></a>       <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span>,</span>
-<span id="cb21-430"><a href="#cb21-430"></a>       <span class="at">fill =</span> <span class="st">&quot;Job Satisf.&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-431"><a href="#cb21-431"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>])) <span class="ot">-&gt;</span> p2a</span>
-<span id="cb21-432"><a href="#cb21-432"></a></span>
-<span id="cb21-433"><a href="#cb21-433"></a></span>
-<span id="cb21-434"><a href="#cb21-434"></a><span class="co"># Plot B) Trend Line</span></span>
-<span id="cb21-435"><a href="#cb21-435"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-436"><a href="#cb21-436"></a>  <span class="fu">count</span>(referral, satisfied) <span class="sc">|&gt;</span> </span>
-<span id="cb21-437"><a href="#cb21-437"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n), <span class="at">.by =</span> referral) <span class="sc">|&gt;</span> </span>
-<span id="cb21-438"><a href="#cb21-438"></a>  <span class="fu">filter</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>) <span class="sc">|&gt;</span>  <span class="co"># Keep only favorability data</span></span>
-<span id="cb21-439"><a href="#cb21-439"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> prop, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-440"><a href="#cb21-440"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">3</span>], <span class="at">linewidth =</span> <span class="fl">1.2</span>, <span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb21-441"><a href="#cb21-441"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">3</span>], </span>
-<span id="cb21-442"><a href="#cb21-442"></a>             <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">stroke =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb21-443"><a href="#cb21-443"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-444"><a href="#cb21-444"></a>  <span class="fu">labs</span>(</span>
-<span id="cb21-445"><a href="#cb21-445"></a>    <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
-<span id="cb21-446"><a href="#cb21-446"></a>    <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span></span>
-<span id="cb21-447"><a href="#cb21-447"></a>  ) <span class="sc">+</span></span>
-<span id="cb21-448"><a href="#cb21-448"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(prop, <span class="at">accuracy =</span> <span class="dv">1</span>)), </span>
-<span id="cb21-449"><a href="#cb21-449"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
-<span id="cb21-450"><a href="#cb21-450"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>], </span>
-<span id="cb21-451"><a href="#cb21-451"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="ot">-&gt;</span> p2b</span>
-<span id="cb21-452"><a href="#cb21-452"></a></span>
-<span id="cb21-453"><a href="#cb21-453"></a></span>
-<span id="cb21-454"><a href="#cb21-454"></a><span class="co"># Side-by-Side</span></span>
-<span id="cb21-455"><a href="#cb21-455"></a>p2a <span class="sc">+</span> p2b <span class="sc">+</span> </span>
-<span id="cb21-456"><a href="#cb21-456"></a>  <span class="fu">plot_annotation</span>(<span class="at">title =</span> <span class="st">&quot;Referrals are Less Likely to Rate Their Job Satisfaction Favorably&quot;</span>,</span>
-<span id="cb21-457"><a href="#cb21-457"></a>                  <span class="at">theme =</span> <span class="fu">theme</span>(</span>
-<span id="cb21-458"><a href="#cb21-458"></a>                    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>],<span class="at">size =</span> <span class="dv">14</span>,<span class="at">hjust =</span> <span class="fl">0.5</span>)</span>
-<span id="cb21-459"><a href="#cb21-459"></a>                  ))</span>
-<span id="cb21-460"><a href="#cb21-460"></a><span class="in">```</span></span>
-<span id="cb21-461"><a href="#cb21-461"></a></span>
-<span id="cb21-462"><a href="#cb21-462"></a>We can confirm this trend by using a **simple logistic regression model**:</span>
-<span id="cb21-463"><a href="#cb21-463"></a></span>
-<span id="cb21-464"><a href="#cb21-464"></a><span class="ss">-   </span>**In comparison to traditional applicants, referred employees are 64% as likely (36% less likely) to rate their jobs favorably**</span>
-<span id="cb21-465"><a href="#cb21-465"></a></span>
+<span id="cb21-394"><a href="#cb21-394"></a><span class="in">```{r}</span></span>
+<span id="cb21-395"><a href="#cb21-395"></a><span class="co">#| label: viz2_maintrend</span></span>
+<span id="cb21-396"><a href="#cb21-396"></a><span class="co">#| warning: false</span></span>
+<span id="cb21-397"><a href="#cb21-397"></a><span class="co">#| message: false</span></span>
+<span id="cb21-398"><a href="#cb21-398"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-399"><a href="#cb21-399"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-400"><a href="#cb21-400"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-401"><a href="#cb21-401"></a></span>
+<span id="cb21-402"><a href="#cb21-402"></a></span>
+<span id="cb21-403"><a href="#cb21-403"></a><span class="co"># Plot A) Stacked Bar</span></span>
+<span id="cb21-404"><a href="#cb21-404"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-405"><a href="#cb21-405"></a>  <span class="fu">count</span>(referral, satisfied) <span class="sc">|&gt;</span> </span>
+<span id="cb21-406"><a href="#cb21-406"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> <span class="fu">round</span>(n<span class="sc">/</span><span class="fu">sum</span>(n),<span class="dv">2</span>),</span>
+<span id="cb21-407"><a href="#cb21-407"></a>         <span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::percent(prop)} ({n})&quot;</span>),</span>
+<span id="cb21-408"><a href="#cb21-408"></a>         <span class="at">.by =</span> referral) <span class="sc">|&gt;</span></span>
+<span id="cb21-409"><a href="#cb21-409"></a>  <span class="fu">mutate</span>(<span class="at">satisfied =</span> <span class="fu">fct_relevel</span>(satisfied, <span class="fu">c</span>(<span class="st">&quot;Unfavorable&quot;</span>,<span class="st">&quot;Favorable&quot;</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb21-410"><a href="#cb21-410"></a>  <span class="co"># filter(satisfied == &quot;Favorable&quot;) |&gt; </span></span>
+<span id="cb21-411"><a href="#cb21-411"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral,</span>
+<span id="cb21-412"><a href="#cb21-412"></a>             <span class="at">y =</span> prop,</span>
+<span id="cb21-413"><a href="#cb21-413"></a>             <span class="at">fill =</span> satisfied)) <span class="sc">+</span></span>
+<span id="cb21-414"><a href="#cb21-414"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.4</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-415"><a href="#cb21-415"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
+<span id="cb21-416"><a href="#cb21-416"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-417"><a href="#cb21-417"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> prop_label),</span>
+<span id="cb21-418"><a href="#cb21-418"></a>            <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> .<span class="dv">4</span>),</span>
+<span id="cb21-419"><a href="#cb21-419"></a>            <span class="at">colour =</span> colors<span class="sc">$</span>palette[<span class="dv">13</span>], <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb21-420"><a href="#cb21-420"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-421"><a href="#cb21-421"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">5</span>], colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="sc">+</span></span>
+<span id="cb21-422"><a href="#cb21-422"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
+<span id="cb21-423"><a href="#cb21-423"></a>       <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span>,</span>
+<span id="cb21-424"><a href="#cb21-424"></a>       <span class="at">fill =</span> <span class="st">&quot;Job Satisf.&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-425"><a href="#cb21-425"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>])) <span class="ot">-&gt;</span> p2a</span>
+<span id="cb21-426"><a href="#cb21-426"></a></span>
+<span id="cb21-427"><a href="#cb21-427"></a></span>
+<span id="cb21-428"><a href="#cb21-428"></a><span class="co"># Plot B) Trend Line</span></span>
+<span id="cb21-429"><a href="#cb21-429"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-430"><a href="#cb21-430"></a>  <span class="fu">count</span>(referral, satisfied) <span class="sc">|&gt;</span> </span>
+<span id="cb21-431"><a href="#cb21-431"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n), <span class="at">.by =</span> referral) <span class="sc">|&gt;</span> </span>
+<span id="cb21-432"><a href="#cb21-432"></a>  <span class="fu">filter</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>) <span class="sc">|&gt;</span>  <span class="co"># Keep only favorability data</span></span>
+<span id="cb21-433"><a href="#cb21-433"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> prop, <span class="at">group =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-434"><a href="#cb21-434"></a>  <span class="fu">geom_line</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">3</span>], <span class="at">linewidth =</span> <span class="fl">1.2</span>, <span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb21-435"><a href="#cb21-435"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">3</span>], </span>
+<span id="cb21-436"><a href="#cb21-436"></a>             <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">stroke =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb21-437"><a href="#cb21-437"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-438"><a href="#cb21-438"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-439"><a href="#cb21-439"></a>    <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
+<span id="cb21-440"><a href="#cb21-440"></a>    <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span></span>
+<span id="cb21-441"><a href="#cb21-441"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-442"><a href="#cb21-442"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(prop, <span class="at">accuracy =</span> <span class="dv">1</span>)), </span>
+<span id="cb21-443"><a href="#cb21-443"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
+<span id="cb21-444"><a href="#cb21-444"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>], </span>
+<span id="cb21-445"><a href="#cb21-445"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="ot">-&gt;</span> p2b</span>
+<span id="cb21-446"><a href="#cb21-446"></a></span>
+<span id="cb21-447"><a href="#cb21-447"></a></span>
+<span id="cb21-448"><a href="#cb21-448"></a><span class="co"># Side-by-Side</span></span>
+<span id="cb21-449"><a href="#cb21-449"></a>p2a <span class="sc">+</span> p2b <span class="sc">+</span> </span>
+<span id="cb21-450"><a href="#cb21-450"></a>  <span class="fu">plot_annotation</span>(<span class="at">title =</span> <span class="st">&quot;Referrals are Less Likely to Rate Their Job Satisfaction Favorably&quot;</span>,</span>
+<span id="cb21-451"><a href="#cb21-451"></a>                  <span class="at">theme =</span> <span class="fu">theme</span>(</span>
+<span id="cb21-452"><a href="#cb21-452"></a>                    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>],<span class="at">size =</span> <span class="dv">14</span>,<span class="at">hjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb21-453"><a href="#cb21-453"></a>                  ))</span>
+<span id="cb21-454"><a href="#cb21-454"></a><span class="in">```</span></span>
+<span id="cb21-455"><a href="#cb21-455"></a></span>
+<span id="cb21-456"><a href="#cb21-456"></a>A **logistic regression model** confirms that, holding all else constant,:</span>
+<span id="cb21-457"><a href="#cb21-457"></a></span>
+<span id="cb21-458"><a href="#cb21-458"></a><span class="ss">-   </span>**Referred employees are 64% as likely (36% less likely) to rate their jobs favorably in comparison to traditional applicants.**</span>
+<span id="cb21-459"><a href="#cb21-459"></a></span>
+<span id="cb21-460"><a href="#cb21-460"></a></span>
+<span id="cb21-463"><a href="#cb21-463"></a><span class="in">```{r}</span></span>
+<span id="cb21-464"><a href="#cb21-464"></a><span class="co">#| label: mod2_maintrend</span></span>
+<span id="cb21-465"><a href="#cb21-465"></a><span class="co">#| warn: false</span></span>
 <span id="cb21-466"><a href="#cb21-466"></a></span>
-<span id="cb21-469"><a href="#cb21-469"></a><span class="in">```{r}</span></span>
-<span id="cb21-470"><a href="#cb21-470"></a><span class="co">#| label: mod2_maintrend</span></span>
-<span id="cb21-471"><a href="#cb21-471"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-472"><a href="#cb21-472"></a></span>
+<span id="cb21-467"><a href="#cb21-467"></a></span>
+<span id="cb21-468"><a href="#cb21-468"></a><span class="co"># Logistic Regression Model</span></span>
+<span id="cb21-469"><a href="#cb21-469"></a><span class="do">## -&gt; Favorable Y/N ~ Referral Status </span></span>
+<span id="cb21-470"><a href="#cb21-470"></a></span>
+<span id="cb21-471"><a href="#cb21-471"></a><span class="co"># Convert Satisfaction (Favorable/Unfavorable) to 1/0 for model</span></span>
+<span id="cb21-472"><a href="#cb21-472"></a>dat2main<span class="sc">$</span>satisfied_recoded <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(dat2main<span class="sc">$</span>satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
 <span id="cb21-473"><a href="#cb21-473"></a></span>
-<span id="cb21-474"><a href="#cb21-474"></a><span class="co"># Logistic Regression Model</span></span>
-<span id="cb21-475"><a href="#cb21-475"></a><span class="do">## -&gt; Favorable Y/N ~ Referral Status </span></span>
+<span id="cb21-474"><a href="#cb21-474"></a><span class="co"># Relabel referral and location for legibility</span></span>
+<span id="cb21-475"><a href="#cb21-475"></a>dat2main<span class="sc">$</span>referral <span class="ot">&lt;-</span> <span class="fu">factor</span>(dat2main<span class="sc">$</span>referral, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>,<span class="st">&quot;Yes&quot;</span>))</span>
 <span id="cb21-476"><a href="#cb21-476"></a></span>
-<span id="cb21-477"><a href="#cb21-477"></a><span class="co"># Convert Satisfaction (Favorable/Unfavorable) to 1/0 for model</span></span>
-<span id="cb21-478"><a href="#cb21-478"></a>dat2main<span class="sc">$</span>satisfied_recoded <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(dat2main<span class="sc">$</span>satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb21-477"><a href="#cb21-477"></a><span class="co"># Logistic regression model</span></span>
+<span id="cb21-478"><a href="#cb21-478"></a>m3a <span class="ot">&lt;-</span> <span class="fu">glm</span>(satisfied_recoded <span class="sc">~</span> referral, <span class="at">data =</span> dat2main, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
 <span id="cb21-479"><a href="#cb21-479"></a></span>
-<span id="cb21-480"><a href="#cb21-480"></a><span class="co"># Relabel referral and location for legibility</span></span>
-<span id="cb21-481"><a href="#cb21-481"></a>dat2main<span class="sc">$</span>referral <span class="ot">&lt;-</span> <span class="fu">factor</span>(dat2main<span class="sc">$</span>referral, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;No&quot;</span>,<span class="st">&quot;Yes&quot;</span>))</span>
-<span id="cb21-482"><a href="#cb21-482"></a></span>
-<span id="cb21-483"><a href="#cb21-483"></a><span class="co"># Logistic regression model</span></span>
-<span id="cb21-484"><a href="#cb21-484"></a>m3a <span class="ot">&lt;-</span> <span class="fu">glm</span>(satisfied_recoded <span class="sc">~</span> referral, <span class="at">data =</span> dat2main, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb21-485"><a href="#cb21-485"></a></span>
-<span id="cb21-486"><a href="#cb21-486"></a><span class="co"># Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)</span></span>
-<span id="cb21-487"><a href="#cb21-487"></a><span class="fu">tidy</span>(m3a) <span class="sc">|&gt;</span> </span>
-<span id="cb21-488"><a href="#cb21-488"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric),</span>
-<span id="cb21-489"><a href="#cb21-489"></a>                <span class="sc">~</span><span class="fu">round</span>(.x, <span class="dv">3</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb21-490"><a href="#cb21-490"></a>  <span class="co"># Exponentiate to get odds ratio </span></span>
-<span id="cb21-491"><a href="#cb21-491"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">exp(estimate)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">exp</span>(estimate), <span class="at">.before =</span> estimate)</span>
-<span id="cb21-492"><a href="#cb21-492"></a><span class="in">```</span></span>
-<span id="cb21-493"><a href="#cb21-493"></a></span>
+<span id="cb21-480"><a href="#cb21-480"></a><span class="co"># Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)</span></span>
+<span id="cb21-481"><a href="#cb21-481"></a><span class="fu">tidy</span>(m3a) <span class="sc">|&gt;</span> </span>
+<span id="cb21-482"><a href="#cb21-482"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric),</span>
+<span id="cb21-483"><a href="#cb21-483"></a>                <span class="sc">~</span><span class="fu">round</span>(.x, <span class="dv">3</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb21-484"><a href="#cb21-484"></a>  <span class="co"># Exponentiate to get odds ratio </span></span>
+<span id="cb21-485"><a href="#cb21-485"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">exp(estimate)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">exp</span>(estimate), <span class="at">.before =</span> estimate)</span>
+<span id="cb21-486"><a href="#cb21-486"></a><span class="in">```</span></span>
+<span id="cb21-487"><a href="#cb21-487"></a></span>
+<span id="cb21-488"><a href="#cb21-488"></a></span>
+<span id="cb21-489"><a href="#cb21-489"></a>------------------------------------------------------------------------</span>
+<span id="cb21-490"><a href="#cb21-490"></a></span>
+<span id="cb21-491"><a href="#cb21-491"></a><span class="fu">### Trend Reversal</span></span>
+<span id="cb21-492"><a href="#cb21-492"></a></span>
+<span id="cb21-493"><a href="#cb21-493"></a>When we slice our data by work location (Office vs Remote), however, we see another trend reversal!</span>
 <span id="cb21-494"><a href="#cb21-494"></a></span>
-<span id="cb21-495"><a href="#cb21-495"></a>------------------------------------------------------------------------</span>
+<span id="cb21-495"><a href="#cb21-495"></a>**Within each work modality, referred employees are more likely to be satisfed than those who applied traditionally.**</span>
 <span id="cb21-496"><a href="#cb21-496"></a></span>
-<span id="cb21-497"><a href="#cb21-497"></a><span class="fu">### Trend Reversal</span></span>
+<span id="cb21-497"><a href="#cb21-497"></a><span class="al">![Stacked-Bar (left) and Trend Line (right) plots that facet by work location type before visualizing job satisfaction favorability by pre-hire source. Both plots show that after accounting for work modality, referred employees tend to rate their job satisfaction more favorably than traditional applicants.](images/cs2_reversal.png)</span>{#fig-6}</span>
 <span id="cb21-498"><a href="#cb21-498"></a></span>
-<span id="cb21-499"><a href="#cb21-499"></a>When we slice our data by work location (Office vs Remote), however, we see another trend reversal!</span>
-<span id="cb21-500"><a href="#cb21-500"></a></span>
-<span id="cb21-501"><a href="#cb21-501"></a>**Within each work modality, referred employees are more likely to be satisfed than those who applied traditionally.**</span>
-<span id="cb21-502"><a href="#cb21-502"></a></span>
-<span id="cb21-503"><a href="#cb21-503"></a><span class="al">![Stacked-Bar (left) and Trend Line (right) plots that facet by work location type before visualizing job satisfaction favorability by pre-hire source. Both plots show that after accounting for work modality, referred employees tend to rate their job satisfaction more favorably than traditional applicants.](images/cs2_reversal.png)</span>{#fig-6}</span>
-<span id="cb21-504"><a href="#cb21-504"></a></span>
-<span id="cb21-507"><a href="#cb21-507"></a><span class="in">```{r}</span></span>
-<span id="cb21-508"><a href="#cb21-508"></a><span class="co">#| label: cs2_reversal</span></span>
-<span id="cb21-509"><a href="#cb21-509"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-510"><a href="#cb21-510"></a><span class="co">#| message: false</span></span>
-<span id="cb21-511"><a href="#cb21-511"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-512"><a href="#cb21-512"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-513"><a href="#cb21-513"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-514"><a href="#cb21-514"></a></span>
-<span id="cb21-515"><a href="#cb21-515"></a><span class="co"># Plot A) Stacked Bar ~ Location</span></span>
-<span id="cb21-516"><a href="#cb21-516"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-517"><a href="#cb21-517"></a>  <span class="fu">count</span>(referral, satisfied, location) <span class="sc">|&gt;</span> </span>
-<span id="cb21-518"><a href="#cb21-518"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> <span class="fu">round</span>(n<span class="sc">/</span><span class="fu">sum</span>(n),<span class="dv">2</span>),</span>
-<span id="cb21-519"><a href="#cb21-519"></a>         <span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::percent(prop)} ({n})&quot;</span>),</span>
-<span id="cb21-520"><a href="#cb21-520"></a>         <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span></span>
-<span id="cb21-521"><a href="#cb21-521"></a>  <span class="fu">mutate</span>(<span class="at">satisfied =</span> <span class="fu">fct_relevel</span>(satisfied, <span class="fu">c</span>(<span class="st">&quot;Unfavorable&quot;</span>,<span class="st">&quot;Favorable&quot;</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb21-522"><a href="#cb21-522"></a>  <span class="co"># filter(satisfied == &quot;Favorable&quot;) |&gt; </span></span>
-<span id="cb21-523"><a href="#cb21-523"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral,</span>
-<span id="cb21-524"><a href="#cb21-524"></a>             <span class="at">y =</span> prop,</span>
-<span id="cb21-525"><a href="#cb21-525"></a>             <span class="at">fill =</span> satisfied)) <span class="sc">+</span></span>
-<span id="cb21-526"><a href="#cb21-526"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-527"><a href="#cb21-527"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb21-528"><a href="#cb21-528"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-529"><a href="#cb21-529"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> prop_label),</span>
-<span id="cb21-530"><a href="#cb21-530"></a>            <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> .<span class="dv">4</span>),</span>
-<span id="cb21-531"><a href="#cb21-531"></a>            <span class="at">colour =</span> colors<span class="sc">$</span>palette[<span class="dv">13</span>], <span class="at">size =</span> <span class="fl">2.5</span>,</span>
-<span id="cb21-532"><a href="#cb21-532"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-533"><a href="#cb21-533"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>location) <span class="sc">+</span></span>
-<span id="cb21-534"><a href="#cb21-534"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
-<span id="cb21-535"><a href="#cb21-535"></a>       <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span>,</span>
-<span id="cb21-536"><a href="#cb21-536"></a>       <span class="at">fill =</span> <span class="st">&quot;Job Satisf.&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-537"><a href="#cb21-537"></a> <span class="co"># theme(legend.position = &quot;right&quot;) +</span></span>
-<span id="cb21-538"><a href="#cb21-538"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">5</span>],colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="ot">-&gt;</span> p3a</span>
-<span id="cb21-539"><a href="#cb21-539"></a></span>
+<span id="cb21-501"><a href="#cb21-501"></a><span class="in">```{r}</span></span>
+<span id="cb21-502"><a href="#cb21-502"></a><span class="co">#| label: cs2_reversal</span></span>
+<span id="cb21-503"><a href="#cb21-503"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-504"><a href="#cb21-504"></a><span class="co">#| message: false</span></span>
+<span id="cb21-505"><a href="#cb21-505"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-506"><a href="#cb21-506"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-507"><a href="#cb21-507"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-508"><a href="#cb21-508"></a></span>
+<span id="cb21-509"><a href="#cb21-509"></a><span class="co"># Plot A) Stacked Bar ~ Location</span></span>
+<span id="cb21-510"><a href="#cb21-510"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-511"><a href="#cb21-511"></a>  <span class="fu">count</span>(referral, satisfied, location) <span class="sc">|&gt;</span> </span>
+<span id="cb21-512"><a href="#cb21-512"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> <span class="fu">round</span>(n<span class="sc">/</span><span class="fu">sum</span>(n),<span class="dv">2</span>),</span>
+<span id="cb21-513"><a href="#cb21-513"></a>         <span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;{scales::percent(prop)} ({n})&quot;</span>),</span>
+<span id="cb21-514"><a href="#cb21-514"></a>         <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span></span>
+<span id="cb21-515"><a href="#cb21-515"></a>  <span class="fu">mutate</span>(<span class="at">satisfied =</span> <span class="fu">fct_relevel</span>(satisfied, <span class="fu">c</span>(<span class="st">&quot;Unfavorable&quot;</span>,<span class="st">&quot;Favorable&quot;</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb21-516"><a href="#cb21-516"></a>  <span class="co"># filter(satisfied == &quot;Favorable&quot;) |&gt; </span></span>
+<span id="cb21-517"><a href="#cb21-517"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral,</span>
+<span id="cb21-518"><a href="#cb21-518"></a>             <span class="at">y =</span> prop,</span>
+<span id="cb21-519"><a href="#cb21-519"></a>             <span class="at">fill =</span> satisfied)) <span class="sc">+</span></span>
+<span id="cb21-520"><a href="#cb21-520"></a>  <span class="fu">geom_col</span>(<span class="at">width =</span> <span class="fl">0.65</span>, <span class="at">color =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-521"><a href="#cb21-521"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
+<span id="cb21-522"><a href="#cb21-522"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-523"><a href="#cb21-523"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> prop_label),</span>
+<span id="cb21-524"><a href="#cb21-524"></a>            <span class="at">position =</span> <span class="fu">position_stack</span>(<span class="at">vjust =</span> .<span class="dv">4</span>),</span>
+<span id="cb21-525"><a href="#cb21-525"></a>            <span class="at">colour =</span> colors<span class="sc">$</span>palette[<span class="dv">13</span>], <span class="at">size =</span> <span class="fl">2.5</span>,</span>
+<span id="cb21-526"><a href="#cb21-526"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-527"><a href="#cb21-527"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>location) <span class="sc">+</span></span>
+<span id="cb21-528"><a href="#cb21-528"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
+<span id="cb21-529"><a href="#cb21-529"></a>       <span class="at">y =</span> <span class="st">&quot;Responded Favorably&quot;</span>,</span>
+<span id="cb21-530"><a href="#cb21-530"></a>       <span class="at">fill =</span> <span class="st">&quot;Job Satisf.&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-531"><a href="#cb21-531"></a> <span class="co"># theme(legend.position = &quot;right&quot;) +</span></span>
+<span id="cb21-532"><a href="#cb21-532"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">5</span>],colors<span class="sc">$</span>palette[<span class="dv">3</span>])) <span class="ot">-&gt;</span> p3a</span>
+<span id="cb21-533"><a href="#cb21-533"></a></span>
+<span id="cb21-534"><a href="#cb21-534"></a></span>
+<span id="cb21-535"><a href="#cb21-535"></a>p3a <span class="sc">+</span></span>
+<span id="cb21-536"><a href="#cb21-536"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-537"><a href="#cb21-537"></a>  <span class="fu">theme</span>(</span>
+<span id="cb21-538"><a href="#cb21-538"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>]),</span>
+<span id="cb21-539"><a href="#cb21-539"></a>  )</span>
 <span id="cb21-540"><a href="#cb21-540"></a></span>
-<span id="cb21-541"><a href="#cb21-541"></a>p3a <span class="sc">+</span></span>
-<span id="cb21-542"><a href="#cb21-542"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-543"><a href="#cb21-543"></a>  <span class="fu">theme</span>(</span>
-<span id="cb21-544"><a href="#cb21-544"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>]),</span>
-<span id="cb21-545"><a href="#cb21-545"></a>  )</span>
-<span id="cb21-546"><a href="#cb21-546"></a></span>
-<span id="cb21-547"><a href="#cb21-547"></a></span>
-<span id="cb21-548"><a href="#cb21-548"></a></span>
-<span id="cb21-549"><a href="#cb21-549"></a></span>
-<span id="cb21-550"><a href="#cb21-550"></a><span class="co"># Plot B) Trend Line ~ Location</span></span>
-<span id="cb21-551"><a href="#cb21-551"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-552"><a href="#cb21-552"></a>  <span class="fu">count</span>(referral, satisfied, location) <span class="sc">|&gt;</span> </span>
-<span id="cb21-553"><a href="#cb21-553"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n), <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-554"><a href="#cb21-554"></a>  <span class="fu">filter</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>) <span class="sc">|&gt;</span>  <span class="co"># Keep only favorability data</span></span>
-<span id="cb21-555"><a href="#cb21-555"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> prop, <span class="at">color =</span> location, <span class="at">group =</span> location)) <span class="sc">+</span></span>
-<span id="cb21-556"><a href="#cb21-556"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb21-557"><a href="#cb21-557"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, </span>
-<span id="cb21-558"><a href="#cb21-558"></a>             <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">stroke =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb21-559"><a href="#cb21-559"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(prop, <span class="at">accuracy =</span> <span class="dv">1</span>)), </span>
-<span id="cb21-560"><a href="#cb21-560"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
-<span id="cb21-561"><a href="#cb21-561"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>], </span>
-<span id="cb21-562"><a href="#cb21-562"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb21-563"><a href="#cb21-563"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb21-564"><a href="#cb21-564"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">7</span>],colors<span class="sc">$</span>palette[<span class="dv">8</span>])) <span class="sc">+</span></span>
-<span id="cb21-565"><a href="#cb21-565"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>location, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-566"><a href="#cb21-566"></a>  <span class="fu">labs</span>(</span>
-<span id="cb21-567"><a href="#cb21-567"></a>    <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
-<span id="cb21-568"><a href="#cb21-568"></a>    <span class="at">y =</span> <span class="st">&quot;% Responded Favorably&quot;</span>,</span>
-<span id="cb21-569"><a href="#cb21-569"></a>  ) <span class="sc">+</span></span>
-<span id="cb21-570"><a href="#cb21-570"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="ot">-&gt;</span> p3b</span>
-<span id="cb21-571"><a href="#cb21-571"></a></span>
+<span id="cb21-541"><a href="#cb21-541"></a></span>
+<span id="cb21-542"><a href="#cb21-542"></a></span>
+<span id="cb21-543"><a href="#cb21-543"></a></span>
+<span id="cb21-544"><a href="#cb21-544"></a><span class="co"># Plot B) Trend Line ~ Location</span></span>
+<span id="cb21-545"><a href="#cb21-545"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-546"><a href="#cb21-546"></a>  <span class="fu">count</span>(referral, satisfied, location) <span class="sc">|&gt;</span> </span>
+<span id="cb21-547"><a href="#cb21-547"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n), <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-548"><a href="#cb21-548"></a>  <span class="fu">filter</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>) <span class="sc">|&gt;</span>  <span class="co"># Keep only favorability data</span></span>
+<span id="cb21-549"><a href="#cb21-549"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> prop, <span class="at">color =</span> location, <span class="at">group =</span> location)) <span class="sc">+</span></span>
+<span id="cb21-550"><a href="#cb21-550"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb21-551"><a href="#cb21-551"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">4</span>, </span>
+<span id="cb21-552"><a href="#cb21-552"></a>             <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">stroke =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb21-553"><a href="#cb21-553"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> scales<span class="sc">::</span><span class="fu">percent</span>(prop, <span class="at">accuracy =</span> <span class="dv">1</span>)), </span>
+<span id="cb21-554"><a href="#cb21-554"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">1.5</span>,</span>
+<span id="cb21-555"><a href="#cb21-555"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>], </span>
+<span id="cb21-556"><a href="#cb21-556"></a>            <span class="at">fontface =</span> <span class="st">&quot;bold&quot;</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb21-557"><a href="#cb21-557"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>(), <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-558"><a href="#cb21-558"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">7</span>],colors<span class="sc">$</span>palette[<span class="dv">8</span>])) <span class="sc">+</span></span>
+<span id="cb21-559"><a href="#cb21-559"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>location, <span class="at">scales =</span> <span class="st">&quot;free_y&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-560"><a href="#cb21-560"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-561"><a href="#cb21-561"></a>    <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
+<span id="cb21-562"><a href="#cb21-562"></a>    <span class="at">y =</span> <span class="st">&quot;% Responded Favorably&quot;</span>,</span>
+<span id="cb21-563"><a href="#cb21-563"></a>  ) <span class="sc">+</span></span>
+<span id="cb21-564"><a href="#cb21-564"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="ot">-&gt;</span> p3b</span>
+<span id="cb21-565"><a href="#cb21-565"></a></span>
+<span id="cb21-566"><a href="#cb21-566"></a></span>
+<span id="cb21-567"><a href="#cb21-567"></a>p3b <span class="sc">+</span> </span>
+<span id="cb21-568"><a href="#cb21-568"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-569"><a href="#cb21-569"></a>  <span class="fu">theme</span>(</span>
+<span id="cb21-570"><a href="#cb21-570"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>]),</span>
+<span id="cb21-571"><a href="#cb21-571"></a>  )</span>
 <span id="cb21-572"><a href="#cb21-572"></a></span>
-<span id="cb21-573"><a href="#cb21-573"></a>p3b <span class="sc">+</span> </span>
-<span id="cb21-574"><a href="#cb21-574"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-575"><a href="#cb21-575"></a>  <span class="fu">theme</span>(</span>
-<span id="cb21-576"><a href="#cb21-576"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>]),</span>
-<span id="cb21-577"><a href="#cb21-577"></a>  )</span>
-<span id="cb21-578"><a href="#cb21-578"></a></span>
-<span id="cb21-579"><a href="#cb21-579"></a></span>
-<span id="cb21-580"><a href="#cb21-580"></a></span>
-<span id="cb21-581"><a href="#cb21-581"></a><span class="co"># SIDE BY SIDE</span></span>
-<span id="cb21-582"><a href="#cb21-582"></a>p3a <span class="sc">+</span> p3b <span class="sc">+</span> </span>
-<span id="cb21-583"><a href="#cb21-583"></a>  <span class="fu">plot_annotation</span>(<span class="at">title =</span> <span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>,</span>
-<span id="cb21-584"><a href="#cb21-584"></a>                  <span class="at">theme =</span> <span class="fu">theme</span>(</span>
-<span id="cb21-585"><a href="#cb21-585"></a>                    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>],<span class="at">size =</span> <span class="dv">18</span>,<span class="at">hjust =</span> <span class="fl">0.5</span>)</span>
-<span id="cb21-586"><a href="#cb21-586"></a>                  ))</span>
-<span id="cb21-587"><a href="#cb21-587"></a></span>
+<span id="cb21-573"><a href="#cb21-573"></a></span>
+<span id="cb21-574"><a href="#cb21-574"></a></span>
+<span id="cb21-575"><a href="#cb21-575"></a><span class="co"># SIDE BY SIDE</span></span>
+<span id="cb21-576"><a href="#cb21-576"></a>p3a <span class="sc">+</span> p3b <span class="sc">+</span> </span>
+<span id="cb21-577"><a href="#cb21-577"></a>  <span class="fu">plot_annotation</span>(<span class="at">title =</span> <span class="st">&quot;Referrals Within Each Location are *More* Likely to Rate Their Job Satisfaction Favorably&quot;</span>,</span>
+<span id="cb21-578"><a href="#cb21-578"></a>                  <span class="at">theme =</span> <span class="fu">theme</span>(</span>
+<span id="cb21-579"><a href="#cb21-579"></a>                    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>],<span class="at">size =</span> <span class="dv">18</span>,<span class="at">hjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb21-580"><a href="#cb21-580"></a>                  ))</span>
+<span id="cb21-581"><a href="#cb21-581"></a></span>
+<span id="cb21-582"><a href="#cb21-582"></a></span>
+<span id="cb21-583"><a href="#cb21-583"></a><span class="in">```</span></span>
+<span id="cb21-584"><a href="#cb21-584"></a></span>
+<span id="cb21-585"><a href="#cb21-585"></a>A **multivariate logistic regression model** confirms the reversal:</span>
+<span id="cb21-586"><a href="#cb21-586"></a></span>
+<span id="cb21-587"><a href="#cb21-587"></a><span class="ss">-   </span>**After controlling for work environment, referred employees are \~2.5x more likely to rate their satisfaction favorably!**</span>
 <span id="cb21-588"><a href="#cb21-588"></a></span>
-<span id="cb21-589"><a href="#cb21-589"></a><span class="in">```</span></span>
+<span id="cb21-589"><a href="#cb21-589"></a><span class="ss">-   </span>**Remote team members are over 12.5x more likely to rate their jobs favorably** in comparison to In-Office employees (our model reference group).</span>
 <span id="cb21-590"><a href="#cb21-590"></a></span>
-<span id="cb21-591"><a href="#cb21-591"></a>A **multivariate logistic regression model** confirms the reversal:</span>
-<span id="cb21-592"><a href="#cb21-592"></a></span>
-<span id="cb21-593"><a href="#cb21-593"></a><span class="ss">-   </span>**After controlling for work environment, referred employees are \~2.5x more likely to rate their satisfaction favorably!**</span>
-<span id="cb21-594"><a href="#cb21-594"></a></span>
-<span id="cb21-595"><a href="#cb21-595"></a><span class="ss">-   </span>Compared to the In-Office employees (our model reference group), Remote team members are over 12.5x more likely to view their jobs favorably!</span>
-<span id="cb21-596"><a href="#cb21-596"></a></span>
-<span id="cb21-599"><a href="#cb21-599"></a><span class="in">```{r}</span></span>
-<span id="cb21-600"><a href="#cb21-600"></a><span class="co">#| label: mod2_reversal</span></span>
-<span id="cb21-601"><a href="#cb21-601"></a><span class="co">#| warn: false</span></span>
-<span id="cb21-602"><a href="#cb21-602"></a><span class="co">#| message: false</span></span>
-<span id="cb21-603"><a href="#cb21-603"></a></span>
+<span id="cb21-593"><a href="#cb21-593"></a><span class="in">```{r}</span></span>
+<span id="cb21-594"><a href="#cb21-594"></a><span class="co">#| label: mod2_reversal</span></span>
+<span id="cb21-595"><a href="#cb21-595"></a><span class="co">#| warn: false</span></span>
+<span id="cb21-596"><a href="#cb21-596"></a><span class="co">#| message: false</span></span>
+<span id="cb21-597"><a href="#cb21-597"></a></span>
+<span id="cb21-598"><a href="#cb21-598"></a></span>
+<span id="cb21-599"><a href="#cb21-599"></a><span class="co"># Logistic Regression Model</span></span>
+<span id="cb21-600"><a href="#cb21-600"></a><span class="do">## -&gt; Favorable Y/N ~ Referral Status + Location</span></span>
+<span id="cb21-601"><a href="#cb21-601"></a></span>
+<span id="cb21-602"><a href="#cb21-602"></a><span class="co"># Logistic regression model</span></span>
+<span id="cb21-603"><a href="#cb21-603"></a>m3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(satisfied_recoded <span class="sc">~</span> referral <span class="sc">+</span> location, <span class="at">data =</span> dat2main, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
 <span id="cb21-604"><a href="#cb21-604"></a></span>
-<span id="cb21-605"><a href="#cb21-605"></a><span class="co"># Logistic Regression Model</span></span>
-<span id="cb21-606"><a href="#cb21-606"></a><span class="do">## -&gt; Favorable Y/N ~ Referral Status + Location</span></span>
-<span id="cb21-607"><a href="#cb21-607"></a></span>
-<span id="cb21-608"><a href="#cb21-608"></a><span class="co"># Logistic regression model</span></span>
-<span id="cb21-609"><a href="#cb21-609"></a>m3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(satisfied_recoded <span class="sc">~</span> referral <span class="sc">+</span> location, <span class="at">data =</span> dat2main, <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb21-610"><a href="#cb21-610"></a></span>
-<span id="cb21-611"><a href="#cb21-611"></a><span class="co"># Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)</span></span>
-<span id="cb21-612"><a href="#cb21-612"></a><span class="fu">tidy</span>(m3) <span class="sc">|&gt;</span> </span>
-<span id="cb21-613"><a href="#cb21-613"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric),</span>
-<span id="cb21-614"><a href="#cb21-614"></a>                <span class="sc">~</span><span class="fu">round</span>(.x, <span class="dv">3</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb21-615"><a href="#cb21-615"></a>  <span class="co"># Exponentiate to get odds ratio </span></span>
-<span id="cb21-616"><a href="#cb21-616"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">exp(estimate)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">exp</span>(estimate), <span class="at">.before =</span> estimate)</span>
-<span id="cb21-617"><a href="#cb21-617"></a><span class="in">```</span></span>
+<span id="cb21-605"><a href="#cb21-605"></a><span class="co"># Tidy Model Output rounded to 3 digits (Exponentiated Coefficients to get Odds Ratios)</span></span>
+<span id="cb21-606"><a href="#cb21-606"></a><span class="fu">tidy</span>(m3) <span class="sc">|&gt;</span> </span>
+<span id="cb21-607"><a href="#cb21-607"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric),</span>
+<span id="cb21-608"><a href="#cb21-608"></a>                <span class="sc">~</span><span class="fu">round</span>(.x, <span class="dv">3</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb21-609"><a href="#cb21-609"></a>  <span class="co"># Exponentiate to get odds ratio </span></span>
+<span id="cb21-610"><a href="#cb21-610"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">exp(estimate)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">exp</span>(estimate), <span class="at">.before =</span> estimate)</span>
+<span id="cb21-611"><a href="#cb21-611"></a><span class="in">```</span></span>
+<span id="cb21-612"><a href="#cb21-612"></a></span>
+<span id="cb21-613"><a href="#cb21-613"></a>------------------------------------------------------------------------</span>
+<span id="cb21-614"><a href="#cb21-614"></a></span>
+<span id="cb21-615"><a href="#cb21-615"></a><span class="fu">### Explaining the Reversal</span></span>
+<span id="cb21-616"><a href="#cb21-616"></a></span>
+<span id="cb21-617"><a href="#cb21-617"></a>***So how is it that the initial trend completely reversed when we sliced by Office/Remote status?***</span>
 <span id="cb21-618"><a href="#cb21-618"></a></span>
-<span id="cb21-619"><a href="#cb21-619"></a>------------------------------------------------------------------------</span>
+<span id="cb21-619"><a href="#cb21-619"></a>When we visualize all of our variables simultaneously, we can see that:</span>
 <span id="cb21-620"><a href="#cb21-620"></a></span>
-<span id="cb21-621"><a href="#cb21-621"></a><span class="fu">### Explaining the Reversal</span></span>
+<span id="cb21-621"><a href="#cb21-621"></a><span class="ss">-   </span>*Referred employees are more likely to be office-based, and office-based employees are less likely to be satisfied.**</span>
 <span id="cb21-622"><a href="#cb21-622"></a></span>
-<span id="cb21-623"><a href="#cb21-623"></a>***So how is it that the initial trend completely reversed when we sliced by Office/Remote status?***</span>
+<span id="cb21-623"><a href="#cb21-623"></a><span class="ss">-   </span>*Traditional applicants are more likely to work remotely, and remote employees are more likely to be satisfied.*</span>
 <span id="cb21-624"><a href="#cb21-624"></a></span>
-<span id="cb21-625"><a href="#cb21-625"></a>When we visualize all of our variables simultaneously, we can see that:</span>
+<span id="cb21-625"><a href="#cb21-625"></a><span class="ss">-   </span>**Within each location type, referrals are more likely to be satisfied than traditional applicants.**</span>
 <span id="cb21-626"><a href="#cb21-626"></a></span>
-<span id="cb21-627"><a href="#cb21-627"></a><span class="ss">-   </span>**Office employees are less likely to be satisfied regardless of pre-hire source.**</span>
+<span id="cb21-627"><a href="#cb21-627"></a><span class="al">![Illustration of how sample size imbalances lead to a trend reversal after controlling for location type. Bubble sizing corresponds to sample size, and shows us that referred employees are heavily Office-based, while traditional applicants are predominantly Remote. Color gradient maps to the proportion who rated their jobs favorably, which shows us that Office-based employees are significantly less-satisfied than Remote workers. Finally, within each work modality, referrals are much more likely to respond favorably.](images/cs2_explainedA.png)</span>{#fig-7}</span>
 <span id="cb21-628"><a href="#cb21-628"></a></span>
-<span id="cb21-629"><a href="#cb21-629"></a><span class="ss">-   </span>**Referred employees are more likely to be Office-based.**</span>
-<span id="cb21-630"><a href="#cb21-630"></a></span>
-<span id="cb21-631"><a href="#cb21-631"></a><span class="ss">-   </span>**Traditional Applicants are more likely to be Remote.**</span>
-<span id="cb21-632"><a href="#cb21-632"></a></span>
-<span id="cb21-633"><a href="#cb21-633"></a><span class="ss">-   </span>***Within*** ***each location type*****, referred employees are more likely to be satisfied.**</span>
-<span id="cb21-634"><a href="#cb21-634"></a></span>
-<span id="cb21-635"><a href="#cb21-635"></a><span class="al">![Illustration of how sample size imbalances lead to a trend reversal after controlling for location type. Bubble sizing corresponds to sample size, and shows us that referred employees are heavily Office-based, while traditional applicants are predominantly Remote. Color gradient maps to the proportion who rated their jobs favorably, which shows us that Office-based employees are significantly less-satisfied than Remote workers. Finally, within each work modality, referrals are much more likely to respond favorably.](images/cs2_explainedA.png)</span>{#fig-7}</span>
-<span id="cb21-636"><a href="#cb21-636"></a></span>
-<span id="cb21-639"><a href="#cb21-639"></a><span class="in">```{r}</span></span>
-<span id="cb21-640"><a href="#cb21-640"></a><span class="co">#| label: cs2_explained_plotA</span></span>
-<span id="cb21-641"><a href="#cb21-641"></a><span class="co">#| warning: false</span></span>
-<span id="cb21-642"><a href="#cb21-642"></a><span class="co">#| message: false</span></span>
-<span id="cb21-643"><a href="#cb21-643"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-644"><a href="#cb21-644"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-645"><a href="#cb21-645"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-646"><a href="#cb21-646"></a></span>
-<span id="cb21-647"><a href="#cb21-647"></a><span class="co"># Crosstab (used by plots): Prop &amp; Counts Satisfied by Referral/Applied &amp; Office/Remote cuts</span></span>
-<span id="cb21-648"><a href="#cb21-648"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-649"><a href="#cb21-649"></a>  <span class="fu">summarize</span>(<span class="at">prop_satisfied =</span> <span class="fu">mean</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>),</span>
-<span id="cb21-650"><a href="#cb21-650"></a>            <span class="at">count_satisfied =</span> <span class="fu">sum</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>),</span>
-<span id="cb21-651"><a href="#cb21-651"></a>            <span class="at">count_NOTsatisfied =</span> <span class="fu">sum</span>(satisfied <span class="sc">!=</span> <span class="st">&quot;Favorable&quot;</span>),</span>
-<span id="cb21-652"><a href="#cb21-652"></a>            <span class="at">n =</span> <span class="fu">n</span>(),</span>
-<span id="cb21-653"><a href="#cb21-653"></a>            <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-654"><a href="#cb21-654"></a>  <span class="fu">mutate</span>(<span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;(n={n}) Satisf = {scales::percent(prop_satisfied)}&quot;</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-655"><a href="#cb21-655"></a>  <span class="fu">arrange</span>(referral, location) <span class="ot">-&gt;</span> tab1</span>
-<span id="cb21-656"><a href="#cb21-656"></a></span>
-<span id="cb21-657"><a href="#cb21-657"></a></span>
-<span id="cb21-658"><a href="#cb21-658"></a>tab1</span>
-<span id="cb21-659"><a href="#cb21-659"></a></span>
-<span id="cb21-660"><a href="#cb21-660"></a><span class="co"># Plot A) Bubble Viz</span></span>
-<span id="cb21-661"><a href="#cb21-661"></a>tab1 <span class="sc">|&gt;</span> </span>
-<span id="cb21-662"><a href="#cb21-662"></a>  <span class="fu">mutate</span>(<span class="at">referral =</span> <span class="fu">if_else</span>(referral<span class="sc">==</span><span class="st">&quot;Yes&quot;</span>,<span class="st">&quot;Referred&quot;</span>,<span class="st">&quot;Applied&quot;</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-663"><a href="#cb21-663"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> location)) <span class="sc">+</span></span>
-<span id="cb21-664"><a href="#cb21-664"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> n, <span class="at">color =</span> prop_satisfied)) <span class="sc">+</span></span>
-<span id="cb21-665"><a href="#cb21-665"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">&quot;#cf3a36&quot;</span>, </span>
-<span id="cb21-666"><a href="#cb21-666"></a>                        <span class="at">mid =</span> <span class="st">&quot;grey70&quot;</span>, </span>
-<span id="cb21-667"><a href="#cb21-667"></a>                        <span class="at">high =</span> <span class="st">&quot;#0c7156&quot;</span>,</span>
-<span id="cb21-668"><a href="#cb21-668"></a>                        <span class="at">midpoint =</span> .<span class="dv">5</span>,</span>
-<span id="cb21-669"><a href="#cb21-669"></a>                        <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
-<span id="cb21-670"><a href="#cb21-670"></a>  <span class="co"># scale_color_viridis_c(option = &quot;H&quot;, direction = 1) +</span></span>
-<span id="cb21-671"><a href="#cb21-671"></a>  <span class="fu">scale_size_area</span>(<span class="at">max_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb21-672"><a href="#cb21-672"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>,</span>
-<span id="cb21-673"><a href="#cb21-673"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">16</span>),</span>
-<span id="cb21-674"><a href="#cb21-674"></a>        <span class="at">legend.background =</span> <span class="fu">element_rect</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>])) <span class="sc">+</span></span>
-<span id="cb21-675"><a href="#cb21-675"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Source&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Location&quot;</span>, </span>
-<span id="cb21-676"><a href="#cb21-676"></a>       <span class="at">size =</span> <span class="st">&quot;Emps (#)&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Satisfied&quot;</span>,</span>
-<span id="cb21-677"><a href="#cb21-677"></a>       <span class="at">title =</span> <span class="st">&quot;Referral Job Satisfaction is Confounded by Their Higher In-Office Presence&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-678"><a href="#cb21-678"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, </span>
-<span id="cb21-679"><a href="#cb21-679"></a>                <span class="at">y =</span> location, </span>
-<span id="cb21-680"><a href="#cb21-680"></a>                <span class="at">label =</span> prop_label),</span>
-<span id="cb21-681"><a href="#cb21-681"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>],</span>
-<span id="cb21-682"><a href="#cb21-682"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">2</span>)</span>
-<span id="cb21-683"><a href="#cb21-683"></a></span>
-<span id="cb21-684"><a href="#cb21-684"></a></span>
-<span id="cb21-685"><a href="#cb21-685"></a><span class="in">```</span></span>
-<span id="cb21-686"><a href="#cb21-686"></a></span>
-<span id="cb21-687"><a href="#cb21-687"></a></span>
-<span id="cb21-688"><a href="#cb21-688"></a>We can see the same sample size imbalances in a mosaic plot:</span>
-<span id="cb21-689"><a href="#cb21-689"></a></span>
-<span id="cb21-690"><a href="#cb21-690"></a><span class="al">![Mosaic plot visualization of the underlying sample size imbalances across (Office vs Remote) and (Referred vs Applied) subgroups. As in the bubble plot, the mosaic plot highlights the fact that traditional applicants are skewed heavily towards Remote work environments, while referred employees are much more likely to be Office-based. ](images/cs2_explainedB.png)</span>{#fig-8}</span>
-<span id="cb21-693"><a href="#cb21-693"></a><span class="in">```{r}</span></span>
-<span id="cb21-694"><a href="#cb21-694"></a><span class="co">#| label: cs2_explained_plotB</span></span>
-<span id="cb21-695"><a href="#cb21-695"></a><span class="co">#| warning: false</span></span>
-<span id="cb21-696"><a href="#cb21-696"></a><span class="co">#| message: false</span></span>
-<span id="cb21-697"><a href="#cb21-697"></a><span class="co">#| eval: false</span></span>
-<span id="cb21-698"><a href="#cb21-698"></a><span class="co">#| #out-width: 100%</span></span>
-<span id="cb21-699"><a href="#cb21-699"></a><span class="co">#| #fig-format: svg</span></span>
-<span id="cb21-700"><a href="#cb21-700"></a></span>
-<span id="cb21-701"><a href="#cb21-701"></a></span>
-<span id="cb21-702"><a href="#cb21-702"></a><span class="co"># Plot B) Mosaic Plot</span></span>
-<span id="cb21-703"><a href="#cb21-703"></a></span>
-<span id="cb21-704"><a href="#cb21-704"></a><span class="co"># Mosaic Plot of Sample Size Imbalance Across Locations</span></span>
-<span id="cb21-705"><a href="#cb21-705"></a>dat2main <span class="sc">|&gt;</span> </span>
-<span id="cb21-706"><a href="#cb21-706"></a>  <span class="fu">mutate</span>(<span class="at">referral =</span> <span class="fu">factor</span>(referral, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Applied&quot;</span>,<span class="st">&quot;Referred&quot;</span>)),</span>
-<span id="cb21-707"><a href="#cb21-707"></a>         <span class="at">location =</span> <span class="fu">fct</span>(location),</span>
-<span id="cb21-708"><a href="#cb21-708"></a>         <span class="at">satisfied =</span> <span class="fu">fct</span>(satisfied)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-709"><a href="#cb21-709"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb21-710"><a href="#cb21-710"></a>  <span class="fu">geom_mosaic</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">product</span>(location, referral), <span class="at">fill =</span> location), <span class="at">show.legend =</span> T) <span class="sc">+</span></span>
-<span id="cb21-711"><a href="#cb21-711"></a> <span class="co"># theme_mosaic() +</span></span>
-<span id="cb21-712"><a href="#cb21-712"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">8</span>],colors<span class="sc">$</span>palette[<span class="dv">7</span>])) <span class="sc">+</span></span>
-<span id="cb21-713"><a href="#cb21-713"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb21-714"><a href="#cb21-714"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">16</span>),</span>
-<span id="cb21-715"><a href="#cb21-715"></a>        <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span>) <span class="sc">+</span></span>
-<span id="cb21-716"><a href="#cb21-716"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Work Location&quot;</span>,</span>
-<span id="cb21-717"><a href="#cb21-717"></a>       <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
-<span id="cb21-718"><a href="#cb21-718"></a>       <span class="at">fill =</span> <span class="st">&quot;Location&quot;</span>,</span>
-<span id="cb21-719"><a href="#cb21-719"></a>       <span class="at">title =</span> <span class="st">&quot;Work Location Imbalance Across Referral Groups&quot;</span>) </span>
-<span id="cb21-720"><a href="#cb21-720"></a></span>
-<span id="cb21-721"><a href="#cb21-721"></a><span class="in">```</span></span>
-<span id="cb21-722"><a href="#cb21-722"></a></span>
-<span id="cb21-723"><a href="#cb21-723"></a></span>
-<span id="cb21-724"><a href="#cb21-724"></a><span class="fu">### Recap</span></span>
-<span id="cb21-725"><a href="#cb21-725"></a></span>
-<span id="cb21-726"><a href="#cb21-726"></a>In sum, *referred employees appear to be less satisfied overall because they are heavily concentrated In-Office, and Office-based employees tend to be less satisfied than Remote teams regardless of pre-hire source.*</span>
-<span id="cb21-727"><a href="#cb21-727"></a></span>
-<span id="cb21-728"><a href="#cb21-728"></a>In other words, **location type acts as a confounding factor for the association between referral status and job favorability**. Within each work modality, referred employees tend to view their jobs more favorably than traditional applicants..</span>
+<span id="cb21-631"><a href="#cb21-631"></a><span class="in">```{r}</span></span>
+<span id="cb21-632"><a href="#cb21-632"></a><span class="co">#| label: cs2_explained_plotA</span></span>
+<span id="cb21-633"><a href="#cb21-633"></a><span class="co">#| warning: false</span></span>
+<span id="cb21-634"><a href="#cb21-634"></a><span class="co">#| message: false</span></span>
+<span id="cb21-635"><a href="#cb21-635"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-636"><a href="#cb21-636"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-637"><a href="#cb21-637"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-638"><a href="#cb21-638"></a></span>
+<span id="cb21-639"><a href="#cb21-639"></a><span class="co"># Crosstab (used by plots): Prop &amp; Counts Satisfied by Referral/Applied &amp; Office/Remote cuts</span></span>
+<span id="cb21-640"><a href="#cb21-640"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-641"><a href="#cb21-641"></a>  <span class="fu">summarize</span>(<span class="at">prop_satisfied =</span> <span class="fu">mean</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>),</span>
+<span id="cb21-642"><a href="#cb21-642"></a>            <span class="at">count_satisfied =</span> <span class="fu">sum</span>(satisfied <span class="sc">==</span> <span class="st">&quot;Favorable&quot;</span>),</span>
+<span id="cb21-643"><a href="#cb21-643"></a>            <span class="at">count_NOTsatisfied =</span> <span class="fu">sum</span>(satisfied <span class="sc">!=</span> <span class="st">&quot;Favorable&quot;</span>),</span>
+<span id="cb21-644"><a href="#cb21-644"></a>            <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb21-645"><a href="#cb21-645"></a>            <span class="at">.by =</span> <span class="fu">c</span>(referral, location)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-646"><a href="#cb21-646"></a>  <span class="fu">mutate</span>(<span class="at">prop_label =</span> glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">&quot;(n={n}) Satisf = {scales::percent(prop_satisfied)}&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-647"><a href="#cb21-647"></a>  <span class="fu">arrange</span>(referral, location) <span class="ot">-&gt;</span> tab1</span>
+<span id="cb21-648"><a href="#cb21-648"></a></span>
+<span id="cb21-649"><a href="#cb21-649"></a></span>
+<span id="cb21-650"><a href="#cb21-650"></a>tab1</span>
+<span id="cb21-651"><a href="#cb21-651"></a></span>
+<span id="cb21-652"><a href="#cb21-652"></a><span class="co"># Plot A) Bubble Viz</span></span>
+<span id="cb21-653"><a href="#cb21-653"></a>tab1 <span class="sc">|&gt;</span> </span>
+<span id="cb21-654"><a href="#cb21-654"></a>  <span class="fu">mutate</span>(<span class="at">referral =</span> <span class="fu">if_else</span>(referral<span class="sc">==</span><span class="st">&quot;Yes&quot;</span>,<span class="st">&quot;Referred&quot;</span>,<span class="st">&quot;Applied&quot;</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-655"><a href="#cb21-655"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, <span class="at">y =</span> location)) <span class="sc">+</span></span>
+<span id="cb21-656"><a href="#cb21-656"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> n, <span class="at">color =</span> prop_satisfied)) <span class="sc">+</span></span>
+<span id="cb21-657"><a href="#cb21-657"></a>  <span class="fu">scale_color_gradient2</span>(<span class="at">low =</span> <span class="st">&quot;#cf3a36&quot;</span>, </span>
+<span id="cb21-658"><a href="#cb21-658"></a>                        <span class="at">mid =</span> <span class="st">&quot;grey70&quot;</span>, </span>
+<span id="cb21-659"><a href="#cb21-659"></a>                        <span class="at">high =</span> <span class="st">&quot;#0c7156&quot;</span>,</span>
+<span id="cb21-660"><a href="#cb21-660"></a>                        <span class="at">midpoint =</span> .<span class="dv">5</span>,</span>
+<span id="cb21-661"><a href="#cb21-661"></a>                        <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_percent</span>()) <span class="sc">+</span></span>
+<span id="cb21-662"><a href="#cb21-662"></a>  <span class="co"># scale_color_viridis_c(option = &quot;H&quot;, direction = 1) +</span></span>
+<span id="cb21-663"><a href="#cb21-663"></a>  <span class="fu">scale_size_area</span>(<span class="at">max_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb21-664"><a href="#cb21-664"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>,</span>
+<span id="cb21-665"><a href="#cb21-665"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">16</span>),</span>
+<span id="cb21-666"><a href="#cb21-666"></a>        <span class="at">legend.background =</span> <span class="fu">element_rect</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>])) <span class="sc">+</span></span>
+<span id="cb21-667"><a href="#cb21-667"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Source&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Location&quot;</span>, </span>
+<span id="cb21-668"><a href="#cb21-668"></a>       <span class="at">size =</span> <span class="st">&quot;Emps (#)&quot;</span>, <span class="at">color =</span> <span class="st">&quot;Satisfied&quot;</span>,</span>
+<span id="cb21-669"><a href="#cb21-669"></a>       <span class="at">title =</span> <span class="st">&quot;Referral Job Satisfaction is Confounded by Their Higher In-Office Presence&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-670"><a href="#cb21-670"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">x =</span> referral, </span>
+<span id="cb21-671"><a href="#cb21-671"></a>                <span class="at">y =</span> location, </span>
+<span id="cb21-672"><a href="#cb21-672"></a>                <span class="at">label =</span> prop_label),</span>
+<span id="cb21-673"><a href="#cb21-673"></a>            <span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">4</span>],</span>
+<span id="cb21-674"><a href="#cb21-674"></a>            <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">2</span>)</span>
+<span id="cb21-675"><a href="#cb21-675"></a></span>
+<span id="cb21-676"><a href="#cb21-676"></a></span>
+<span id="cb21-677"><a href="#cb21-677"></a><span class="in">```</span></span>
+<span id="cb21-678"><a href="#cb21-678"></a></span>
+<span id="cb21-679"><a href="#cb21-679"></a></span>
+<span id="cb21-680"><a href="#cb21-680"></a>We can see the same **sample size imbalances** in a **mosaic plot:**</span>
+<span id="cb21-681"><a href="#cb21-681"></a></span>
+<span id="cb21-682"><a href="#cb21-682"></a><span class="al">![Mosaic plot visualization of the underlying sample size imbalances across (Office vs Remote) and (Referred vs Applied) subgroups. As in the bubble plot, the mosaic plot highlights the fact that traditional applicants are skewed heavily towards Remote work environments, while referred employees are much more likely to be Office-based. ](images/cs2_explainedB.png)</span>{#fig-8}</span>
+<span id="cb21-685"><a href="#cb21-685"></a><span class="in">```{r}</span></span>
+<span id="cb21-686"><a href="#cb21-686"></a><span class="co">#| label: cs2_explained_plotB</span></span>
+<span id="cb21-687"><a href="#cb21-687"></a><span class="co">#| warning: false</span></span>
+<span id="cb21-688"><a href="#cb21-688"></a><span class="co">#| message: false</span></span>
+<span id="cb21-689"><a href="#cb21-689"></a><span class="co">#| eval: false</span></span>
+<span id="cb21-690"><a href="#cb21-690"></a><span class="co">#| #out-width: 100%</span></span>
+<span id="cb21-691"><a href="#cb21-691"></a><span class="co">#| #fig-format: svg</span></span>
+<span id="cb21-692"><a href="#cb21-692"></a></span>
+<span id="cb21-693"><a href="#cb21-693"></a></span>
+<span id="cb21-694"><a href="#cb21-694"></a><span class="co"># Plot B) Mosaic Plot</span></span>
+<span id="cb21-695"><a href="#cb21-695"></a></span>
+<span id="cb21-696"><a href="#cb21-696"></a><span class="co"># Mosaic Plot of Sample Size Imbalance Across Locations</span></span>
+<span id="cb21-697"><a href="#cb21-697"></a>dat2main <span class="sc">|&gt;</span> </span>
+<span id="cb21-698"><a href="#cb21-698"></a>  <span class="fu">mutate</span>(<span class="at">referral =</span> <span class="fu">factor</span>(referral, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Applied&quot;</span>,<span class="st">&quot;Referred&quot;</span>)),</span>
+<span id="cb21-699"><a href="#cb21-699"></a>         <span class="at">location =</span> <span class="fu">fct</span>(location),</span>
+<span id="cb21-700"><a href="#cb21-700"></a>         <span class="at">satisfied =</span> <span class="fu">fct</span>(satisfied)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-701"><a href="#cb21-701"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb21-702"><a href="#cb21-702"></a>  <span class="fu">geom_mosaic</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">product</span>(location, referral), <span class="at">fill =</span> location), <span class="at">show.legend =</span> T) <span class="sc">+</span></span>
+<span id="cb21-703"><a href="#cb21-703"></a> <span class="co"># theme_mosaic() +</span></span>
+<span id="cb21-704"><a href="#cb21-704"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(colors<span class="sc">$</span>palette[<span class="dv">8</span>],colors<span class="sc">$</span>palette[<span class="dv">7</span>])) <span class="sc">+</span></span>
+<span id="cb21-705"><a href="#cb21-705"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb21-706"><a href="#cb21-706"></a>  <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">color =</span> colors<span class="sc">$</span>palette[<span class="dv">1</span>], <span class="at">size =</span> <span class="dv">16</span>),</span>
+<span id="cb21-707"><a href="#cb21-707"></a>        <span class="at">legend.position =</span> <span class="st">&quot;top&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-708"><a href="#cb21-708"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Work Location&quot;</span>,</span>
+<span id="cb21-709"><a href="#cb21-709"></a>       <span class="at">x =</span> <span class="st">&quot;Pre-Hire Source&quot;</span>,</span>
+<span id="cb21-710"><a href="#cb21-710"></a>       <span class="at">fill =</span> <span class="st">&quot;Location&quot;</span>,</span>
+<span id="cb21-711"><a href="#cb21-711"></a>       <span class="at">title =</span> <span class="st">&quot;Work Location Imbalance Across Referral Groups&quot;</span>) </span>
+<span id="cb21-712"><a href="#cb21-712"></a></span>
+<span id="cb21-713"><a href="#cb21-713"></a><span class="in">```</span></span>
+<span id="cb21-714"><a href="#cb21-714"></a></span>
+<span id="cb21-715"><a href="#cb21-715"></a></span>
+<span id="cb21-716"><a href="#cb21-716"></a><span class="fu">### Recap</span></span>
+<span id="cb21-717"><a href="#cb21-717"></a></span>
+<span id="cb21-718"><a href="#cb21-718"></a>*Referred employees appear to be less satisfied overall because they are predominantly office-based, and office teams tend to be less satisfied than remote teams regardless of pre-hire source.*</span>
+<span id="cb21-719"><a href="#cb21-719"></a></span>
+<span id="cb21-720"><a href="#cb21-720"></a>In other words, **location type acts as a confounding factor for the association between referral status and job favorability.** Location masks the fact that within each work modality, referred employees tend to view their jobs more favorably than traditional applicants.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

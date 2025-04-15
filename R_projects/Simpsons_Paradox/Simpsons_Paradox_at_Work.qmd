@@ -52,11 +52,11 @@ In this guide we'll use 2 people analytics case studies to illustrate how to ide
 
 The Chief People Officer (CPO) of a small but growing tech company has asked us to examine the relationship between **employee compensation** and **seniority**
 
--   The CPO is a staunch advocate of rewarding seniority with increased compensation opportunities.
+-   The CPO is a staunch advocate of rewarding seniority with increased compensation.
 
--   The CPO launched a new compensation structure about a year ago that was designed to reflect this.
+-   The company's compensation strategy has been specifically designed to reflect this.
 
-In order to determine whether the new compensation structure has been effective, the CPO wants to know if there is a **strong association between salary and seniority**.
+**The CPO has asked us to review whether salary and seniority are in fact positively related.**
 
 ------------------------------------------------------------------------
 
@@ -176,9 +176,7 @@ dat1main |> head()
 
 ### Initial Trend
 
-We'll start by plotting the relationship between salary and seniority for *all* employees.
-
-When we do so, it appears that employee compensation is **negatively** associated with years of seniority!
+When we first plot salary against seniority for the general employee population, **it appears that compensation is negatively associated with years of seniority!**
 
 ![Illustration of the initial trend: When salary is plotted against seniority years for the general employee population, compensation appears to have a negative relationship with seniority.](images/cs1_maintrend.png){#fig-2}
 
@@ -207,9 +205,9 @@ p1main
 
 ```
 
-We can confirm this trend with a **linear regression model**:
+A linear regression model confirms that after holding all other factors constant:
 
--   **Each additional year of seniority is associated with a \$22,000 decrease in average salary.**
+-   **Each additional year of seniority is associated with a $22,000 *decrease* in average salary.**
 
 ```{r}
 #| label: mod1_maintrend
@@ -230,7 +228,7 @@ tidy(m1)
 
 When we slice our data by department, however, there is a definite trend reversal!
 
-**For employees assigned to the same department, higher salaries are *positively* related to greater seniority.**
+**For employees in the same department, compensation is *positively* related to seniority**
 
 ![Illustration of the trend reversal: Within each departmental subgroup, employees with higher seniority levels tend to also have higher salaries.](images/cs1_reversal.png){#fig-3}
 
@@ -262,7 +260,7 @@ p1reverse
 
 ```
 
-A **multivariate regression model** confirms this:
+A **multivariate regression model** confirms this, showing that when holding all else constant:
 
 -   **After controlling for departmental differences, each additional year of seniority is now associated with a \$13,500 increase in average salary!**
 
@@ -326,21 +324,19 @@ dat1main |>
 
 ### Recap
 
-Putting the pieces together, salary appears to vary negatively with seniority at the company-wide level because the *higher-seniority employees are concentrated in the lower-paying departments.*
+**Salary appears to vary negatively with seniority at the company-wide level because the higher-seniority employees are concentrated in the lower-paying departments.**
 
-In other words, **department acts as a confounding factor for the association between salary and seniority**. Within each department, the association is positive.
+In other words, **department acts as a confounding factor for the association between salary and seniority**. *Within each department*, the association is positive.
 
 ------------------------------------------------------------------------
 
 # Case Study #2
 
-The CPO was so impressed by our insights that he has a new project for us!
+The CPO was so impressed by our insights that he has a new project for us! Now he wants us to analyze the relationship between employee **pre-hire sourcing** and **job satisfaction**.
 
-Now he wants us to analyze the relationship between employee **pre-hire sourcing** and **job satisfaction**.
+-   Prior analyses found that referrals tend to perform better than those who applied traditionally.
 
--   Prior analyses found that employees sourced via referral performed better than those who applied traditionally.
-
--   Job Satisfaction is a critical KPI for the CPO, and the company routinely administers Pulse surveys to monitor it.
+-   Job Satisfaction is a critical KPI, and the company routinely administers surveys to monitor it.
 
 **The CPO wants us to use survey and pre-hire sourcing data to determine whether referred employees are more likely to rate their job satisfaction favorably than traditional applicants.**
 
@@ -373,9 +369,7 @@ dat2main |> head(n = 5)
 
 ### Initial Trend
 
-We'll start by visualizing the initial relationship between job satisfaction and pre-hire source.
-
-At first, it appears that referred employees are **less likely** to rate their job satisfaction favorably!
+When we plot the initial relationship between job satisfaction and pre-hire source, **it appears that referred employees are *less likely* to rate their job satisfaction favorably!**
 
 ![Stacked-Bar (left) and Trend Line (right) plots visualizing job satisfaction favorability for referrals and traditional applicants. Both plots show that referred employees tend to have lower job satisfaction levels.](images/cs2_maintrend.png){#fig-5}
 
@@ -441,9 +435,9 @@ p2a + p2b +
                   ))
 ```
 
-We can confirm this trend by using a **simple logistic regression model**:
+A **logistic regression model** confirms that, holding all else constant,:
 
--   **In comparison to traditional applicants, referred employees are 64% as likely (36% less likely) to rate their jobs favorably**
+-   **Referred employees are 64% as likely (36% less likely) to rate their jobs favorably in comparison to traditional applicants.**
 
 
 ```{r}
@@ -570,7 +564,7 @@ A **multivariate logistic regression model** confirms the reversal:
 
 -   **After controlling for work environment, referred employees are \~2.5x more likely to rate their satisfaction favorably!**
 
--   Compared to the In-Office employees (our model reference group), Remote team members are over 12.5x more likely to view their jobs favorably!
+-   **Remote team members are over 12.5x more likely to rate their jobs favorably** in comparison to In-Office employees (our model reference group).
 
 ```{r}
 #| label: mod2_reversal
@@ -600,13 +594,11 @@ tidy(m3) |>
 
 When we visualize all of our variables simultaneously, we can see that:
 
--   **Office employees are less likely to be satisfied regardless of pre-hire source.**
+-   *Referred employees are more likely to be office-based, and office-based employees are less likely to be satisfied.**
 
--   **Referred employees are more likely to be Office-based.**
+-   *Traditional applicants are more likely to work remotely, and remote employees are more likely to be satisfied.*
 
--   **Traditional Applicants are more likely to be Remote.**
-
--   ***Within*** ***each location type*****, referred employees are more likely to be satisfied.**
+-   **Within each location type, referrals are more likely to be satisfied than traditional applicants.**
 
 ![Illustration of how sample size imbalances lead to a trend reversal after controlling for location type. Bubble sizing corresponds to sample size, and shows us that referred employees are heavily Office-based, while traditional applicants are predominantly Remote. Color gradient maps to the proportion who rated their jobs favorably, which shows us that Office-based employees are significantly less-satisfied than Remote workers. Finally, within each work modality, referrals are much more likely to respond favorably.](images/cs2_explainedA.png){#fig-7}
 
@@ -659,7 +651,7 @@ tab1 |>
 ```
 
 
-We can see the same sample size imbalances in a mosaic plot:
+We can see the same **sample size imbalances** in a **mosaic plot:**
 
 ![Mosaic plot visualization of the underlying sample size imbalances across (Office vs Remote) and (Referred vs Applied) subgroups. As in the bubble plot, the mosaic plot highlights the fact that traditional applicants are skewed heavily towards Remote work environments, while referred employees are much more likely to be Office-based. ](images/cs2_explainedB.png){#fig-8}
 ```{r}
@@ -695,6 +687,6 @@ dat2main |>
 
 ### Recap
 
-In sum, *referred employees appear to be less satisfied overall because they are heavily concentrated In-Office, and Office-based employees tend to be less satisfied than Remote teams regardless of pre-hire source.*
+*Referred employees appear to be less satisfied overall because they are predominantly office-based, and office teams tend to be less satisfied than remote teams regardless of pre-hire source.*
 
-In other words, **location type acts as a confounding factor for the association between referral status and job favorability**. Within each work modality, referred employees tend to view their jobs more favorably than traditional applicants..
+In other words, **location type acts as a confounding factor for the association between referral status and job favorability.** Location masks the fact that within each work modality, referred employees tend to view their jobs more favorably than traditional applicants.
