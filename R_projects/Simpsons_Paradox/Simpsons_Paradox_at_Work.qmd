@@ -592,9 +592,9 @@ tidy(m3) |>
 
 ***So how is it that the initial trend completely reversed when we sliced by Office/Remote status?***
 
-When we visualize all of our variables simultaneously, we can see that:
+When we visualize sourcing, satisfaction, and location simultaneously, we can see that:
 
--   *Referred employees are more likely to be office-based, and office-based employees are less likely to be satisfied.**
+-   *Referred employees are more likely to be office-based, and office-based employees are less likely to be satisfied.*
 
 -   *Traditional applicants are more likely to work remotely, and remote employees are more likely to be satisfied.*
 
