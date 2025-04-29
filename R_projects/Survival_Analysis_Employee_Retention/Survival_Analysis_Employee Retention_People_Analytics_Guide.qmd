@@ -1,0 +1,231 @@
+---
+title: "Beyond Turnover: Survival Analysis & Employee Retention"
+subtitle: "A People Analytics Guide to Exploring Workforce Longevity"
+description: "Tutorial & people analytics case study illustrating how survival techniques can be used to model employee retention, improve longevity, & inform workforce planning strategy."
+author: "Gordon Goodwin"
+date: "2025-04-06"
+categories: ["People Analytics", "Survival Analysis", "R Programming", "Data Visualization","Employee Retention"]
+format:
+  html:
+    toc: true
+    toc-depth: 5
+    toc-title: "Contents"
+    toc-location: right
+    number-sections: false
+    code-link: true
+    code-fold: true
+    code-tools: true
+    code-line-numbers: true
+    code-summary: "Code"
+    self-contained: true
+    theme: 
+      light: [flatly]
+      dark: [darkly]
+editor_options: 
+  chunk_output_type: inline
+execute: 
+  cache: false                                                   
+  error: false
+  message: false
+  warning: false
+---
+
+------------------------------------------------------------------------
+
+![4-way panel plot showing employee retention curves by facility, manager, pay band, and hire cohort.](images/kmcombo_4way.png){#fig-1}
+
+# Survival Analysis & Employee Retention
+
+In the following guide, we'll use a **people analytics case study** to illustrate how modeling **employee retention** with **survival analysis** using `R` can help us answer questions like:
+
+-   **How long** do employees **typically retain** after-hire?
+
+-   What kinds of **risk factors** make employees **more likely to terminate**?
+
+-   What is the **predicted probability** that an employee **retains past a given milestone**?
+
+------------------------------------------------------------------------
+
+# Survival Analysis Overview
+
+**Survival Analysis**: a collection of statistical techniques specifically designed to handle **time-to-event** data, where the outcome of interest is the **time recorded before some event occurs**.
+
+-   **Seniority days accrued** before an **employee terminates**
+-   **Machine run-time hours** elapsed before **failure**
+-   **Days survived** after a cancer diagnosis before **death**
+
+*So what's the big deal? Why do we need a special set of techniques for that?*
+
+------------------------------------------------------------------------
+
+## Censoring
+
+**Modeling retention data over time is complex** because of **censoring**, a form of missing data that occurs because *not all employees have experienced a termination* at the time of analysis.
+
+-   **Ex:** Employees *still actively employed* are **censored** because *we don't actually know how long they'll ultimately retain before terminating.*
+
+-   **Ex:** If we're interested in a specific department, *any employee who transfers out* of that department *while still active* is **censored** because *they left the study before terminating*.
+
+For **censored employees**, we don't yet know how long they will ultimately retain before terminating, but we *do* know that *for any given time point, they retained **at least** that long.*
+
+------------------------------------------------------------------------
+
+### Example of Employee Censoring
+
+In the **censoring example** below, we have retention data for 6 employees in a specific department who were all hired within the last year.
+
+Our **goal** is to model **how long a typical department new hire** can be expected to **retain before terminating**, so we need each employee's last recorded **time-before-termination**.
+
+-   Emps x3 and x5 are the only 2 terminated employees so far, and *the only 2 for whom we actually know the true **time-to-termination***.
+
+-   Emps x1 and x6 are **censored** because they are still active department employees, *so all we know is that they have retained **at least1 year.***
+
+-   Emps x2 and x4 are **censored** because they **transferred out of the department under study**. *All we know is that they retained **at least** as long as their **time of transfer***.
+
+![Illustrated example of censoring in employee retention data where 4 out of the 6 employees shown are censored.](images/censorviz_annotated.png){#fig-2}
+
+::: callout-note
+## Technically this is a specific form known as right-censoring, which is by far the most common form of censoring, especially in employee contexts. Other forms of censoring are not covered here.
+:::
+
+### Resolving Censored Data
+
+Survival techniques are uniquely valuable because they are specifically designed to take advantage of the information that *is* available in censored data.
+
+-   We know that the censored employees retained *at least as long* as their latest observation time!
+
+**Absent that information**, our only choice would be **remove** or **ignore** the censored data
+
+-   **Removing** censored cases leaves only records for the terminated employees, which skews the data and often leads to an **underestimation of retention probabilities.**
+-   **Ignoring censoring** effectively treats the time-of-censoring (the last time recorded) as the time of termination, which **inflates termination counts** and **artificially reduces retention time**.
+-   Both approaches also **discard valuable information**, in that they ignore the knowledge that the censored employees **retained at least as long** as their latest time recorded!
+
+Both approaches also **discard the valuable information** that the censored employees **retained at least as long** as their final observation time!
+
+------------------------------------------------------------------------
+
+## Survival Modeling Framework
+
+Now we'll quickly review some of the key survival concepts and techniques.
+
+The key outcome of interest in **survival analysis** is the **time-to-event**, written in **(** $t=time$, $\delta=status$ **)** format. Each subject & study period (e.g. employee & employment period) are represented with a single ($t=time$, $\delta=status$) record that reflects the **latest time of observation** (e.g. last day employed).
+
+-   If the event ***was*** **observed** (e.g. employee terminated), then the latest time recorded is the **actual time-to-event**.
+
+    -   An employee who terminated on his 30th day after-hire: $(t=30, \delta=1)$
+
+-   If the event **was *not* observed** (e.g. no termination), then the latest time recorded reflects the employee's **time of censoring**.
+
+    -   An employee who is still active and has retained 90d thus far: $(t=90, \delta=0)$
+
+------------------------------------------------------------------------
+
+### Survival Distributions
+
+In thinking about survival analysis and employee retention, it's helpful to think of a big collection of all the individual employee ($t=time$, $\delta=status$) records, where we have each employee's latest status and time retained (retention times).
+
+Survival analysis techniques seek to model the **distribution** of $(t)$, or the ***distribution of employee retention times***, by leveraging four main functions:
+
+------------------------------------------------------------------------
+
+#### Survival Function
+
+The **survival function** $S(t)$ is simply the *probability of surviving (retaining) past time* $t$*.*
+
+Or, written more formally:
+
+$$ S(t) = P(T>t)$$
+
+**Example:** If we estimate that the probability of an employee retaining past Day 90 is 80%, then we can write the **survival function** as:
+
+$$ S(90) = P(T > 90) = 0.8 $$
+
+The survival function can also be expressed as the *complement* of the **cumulative distribution function (CDF)** $F(t)$, which represents the *probability of the event (termination) occurring on or before time* $t$:
+
+$$
+F(t) = P(T \leq t) = 1-S(t)
+$$
+
+**Example:** If employees have an estimated 80% probability of retaining past the 90d mark ($t=90$), then they have a 20% chance of terminating by Day 90:
+
+$$F(90)= 1 - P(T > 90) = 1 - S(90) = 1 - 0.8 = 0.2 = P(T\leq 90) $$
+
+::: callout-note
+## This is just a fancy way of saying that the probability of an employee retaining past a given time is equal to 1 minus the probability of terminating on or before that time.
+:::
+
+------------------------------------------------------------------------
+
+#### Probability Density Function
+
+The **probability density function**, or $PDF = p(t) = f(t)$, models the *unconditional probability of experiencing the event **exactly** at time* $t$*.*
+
+For the mathier folks out there, the PDF is the *derivative* of the CDF, and the *negative derivative* of the survival function:
+
+$$
+PDF(t) = f(t) = F'(t) = \frac{d}{dt}(1 - S(t)) = -\frac{d}{dt}S(t)
+$$
+
+**Example**: The probability of an employee *terminating* at *exactly* the instant they hit the 90d mark is equal to 1 minus the probability of *retaining* at *exactly* that same instant.
+
+------------------------------------------------------------------------
+
+#### Hazard Function
+
+*"Given you survived this far, what's the risk right now?"*
+
+The **hazard function**, also called the **risk function**, represents the *conditional probability of experiencing the event in the next instant, given survival up until time* $t$*.*
+
+Put another way, if an employee has retained until time $t$, the **hazard function** denotes the employee's ***instantaneous risk*** of terminating at time $t$.
+
+$$
+h(t) = \frac{f(t)}{S(t)} = \frac{F'}{S(t)}
+$$
+
+**Example:** The instantaneous risk of an employee terminating at *exactly* the 90d mark is equal to their probability of terminating in the next instant, conditional upon their retaining up until the 90d mark
+
+------------------------------------------------------------------------
+
+#### Accumulated Hazard Function
+
+The **accumulated hazard function** *H(t)* represents the ***accumulated risk** of experiencing the event (termination) up to time* $t$*.*
+
+For our mathier folks again, the **accumulated hazard function** is the ***integral*** of the **hazard function** up to time $t$:
+
+$$
+H(t) = \int_{0}^t h(u)du
+$$
+
+The accumulated hazard function is also related to the **survival function**:
+
+$$
+S(t) = e^{-H(t)} = \frac{1}{e^{H(t)}}
+$$
+
+or equivalently,
+
+$$
+H(t) = -ln(S(t))
+$$
+
+Super nerdy, but we're basically saying that the accumulated risk of an employee terminating up to time (t) is equal to the inverse of the order of magnitude of their survival probability.
+
+------------------------------------------------------------------------
+
+# Survival Techniques
+
+Today we'll be working with 3 main survival techniques:
+
+-   **Kaplan-Meier Retention Curves**
+
+-   **Cox Proportional Hazards Models**
+
+-   **Competing Risks Models**
+
+## Kaplan-Meier
+
+## Cox Proportional Hazards
+
+## Competing Risks
+
+------------------------------------------------------------------------
