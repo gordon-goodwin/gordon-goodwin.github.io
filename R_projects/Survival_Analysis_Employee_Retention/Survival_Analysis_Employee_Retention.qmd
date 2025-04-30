@@ -32,7 +32,7 @@ execute:
 
 ------------------------------------------------------------------------
 
-![4-way panel plot showing employee retention curves by facility, manager, pay band, and hire cohort.](images/kmcombo_4way.png){#fig-1}
+![4-way panel plot showing employee retention curves by facility, manager, pay band, and hire cohort.](images/4waycox_USE.png){#fig-1}
 
 # Survival Analysis & Employee Retention
 
@@ -43,6 +43,10 @@ In the following guide, we'll use a **people analytics case study** to illustrat
 -   What kinds of **risk factors** make employees **more likely to terminate**?
 
 -   What is the **predicted probability** that an employee **retains past a given milestone**?
+
+::: callout-important
+## The first section is a detailed overview of survival analysis and some of the underlying math. If you prefer, feel free to skip the technical stuff and jump straight to the math-free case study and R code!
+:::
 
 ------------------------------------------------------------------------
 
@@ -62,25 +66,15 @@ In the following guide, we'll use a **people analytics case study** to illustrat
 
 **Modeling retention data over time is complex** because of **censoring**, a form of missing data that occurs because *not all employees have experienced a termination* at the time of analysis.
 
--   **Ex:** Employees *still actively employed* are **censored** because *we don't actually know how long they'll ultimately retain before terminating.*
-
--   **Ex:** If we're interested in a specific department, *any employee who transfers out* of that department *while still active* is **censored** because *they left the study before terminating*.
-
-For **censored employees**, we don't yet know how long they will ultimately retain before terminating, but we *do* know that *for any given time point, they retained **at least** that long.*
-
-------------------------------------------------------------------------
-
-### Example of Employee Censoring
-
 In the **censoring example** below, we have retention data for 6 employees in a specific department who were all hired within the last year.
 
-Our **goal** is to model **how long a typical department new hire** can be expected to **retain before terminating**, so we need each employee's last recorded **time-before-termination**.
+Our **goal** is to model how long a**typical department new hire** can be expected to **retain before terminating**, but *not every employee actually has a recorded termination.*
 
--   Emps x3 and x5 are the only 2 terminated employees so far, and *the only 2 for whom we actually know the true **time-to-termination***.
+-   Emps x2 and x4 are **not censored** because they both **terminated while in the department**. We know their true times-before-termination (5 and 9 months respectively).
 
--   Emps x1 and x6 are **censored** because they are still active department employees, *so all we know is that they have retained **at least1 year.***
+-   Emps x1 and x6 are **censored** because they are **still actively employed in the department**. All we know is that they have retained at least 1 year.
 
--   Emps x2 and x4 are **censored** because they **transferred out of the department under study**. *All we know is that they retained **at least** as long as their **time of transfer***.
+-   Emps x2 and x4 are **censored** because they **transferred out of the department under study**. All we know is that they retained at least as long as their time of transfer.
 
 ![Illustrated example of censoring in employee retention data where 4 out of the 6 employees shown are censored.](images/censorviz_annotated.png){#fig-2}
 
@@ -88,19 +82,21 @@ Our **goal** is to model **how long a typical department new hire** can be expec
 ## Technically this is a specific form known as right-censoring, which is by far the most common form of censoring, especially in employee contexts. Other forms of censoring are not covered here.
 :::
 
-### Resolving Censored Data
+------------------------------------------------------------------------
+
+### Resolving Censoring in Retention Data
 
 Survival techniques are uniquely valuable because they are specifically designed to take advantage of the information that *is* available in censored data.
 
--   We know that the censored employees retained *at least as long* as their latest observation time!
+-   For **censored employees**, we don't yet know how long they will ultimately retain before terminating, but we *do* know that *for any given time point, they retained **at least** that long.*
 
 **Absent that information**, our only choice would be **remove** or **ignore** the censored data
 
 -   **Removing** censored cases leaves only records for the terminated employees, which skews the data and often leads to an **underestimation of retention probabilities.**
 -   **Ignoring censoring** effectively treats the time-of-censoring (the last time recorded) as the time of termination, which **inflates termination counts** and **artificially reduces retention time**.
--   Both approaches also **discard valuable information**, in that they ignore the knowledge that the censored employees **retained at least as long** as their latest time recorded!
+-   Both approaches also **discard valuable information**, in that they ignore the knowledge that the censored employees **retained at least as long** as their latest time recorded.
 
-Both approaches also **discard the valuable information** that the censored employees **retained at least as long** as their final observation time!
+**Survival techniques** offer a means to resolve censoring without bias or information loss.
 
 ------------------------------------------------------------------------
 
@@ -166,7 +162,7 @@ $$
 PDF(t) = f(t) = F'(t) = \frac{d}{dt}(1 - S(t)) = -\frac{d}{dt}S(t)
 $$
 
-**Example**: The probability of an employee *terminating* at *exactly* the instant they hit the 90d mark is equal to 1 minus the probability of *retaining* at *exactly* that same instant.
+**Example**: The probability of an employee *terminating* at exactly the instant they hit the 90d mark is equal to 1 minus the probability of *retaining* at exactly that same instant.
 
 ------------------------------------------------------------------------
 
@@ -208,24 +204,2561 @@ $$
 H(t) = -ln(S(t))
 $$
 
-Super nerdy, but we're basically saying that the accumulated risk of an employee terminating up to time (t) is equal to the inverse of the order of magnitude of their survival probability.
+Super nerdy, but we're basically saying that the accumulated risk of an employee terminating up to time (t) is negatively related to the order of magnitude of their survival probability.
 
 ------------------------------------------------------------------------
 
 # Survival Techniques
 
-Today we'll be working with 3 main survival techniques:
+We'll be using 3 main **survival techniques** for our tutorial:
 
--   **Kaplan-Meier Retention Curves**
+-   **Kaplan-Meier Curves**: Visualizes and estimates employees' **cumulative probability of retaining over time** (e.g. *the % of emps that can be expected to retain through each time point post-hire*).
 
--   **Cox Proportional Hazards Models**
+-   **Cox Proportional Hazards**: Quantifies the **effect of various factors** upon employees' **likelihood of terminating** and provides **predicted retention times and probabilities.**
 
--   **Competing Risks Models**
+-   **Competing Risks:** Separates terminations into **voluntary vs involuntary** **exits** and models the **cumulative probabilities over time** as **separate paths**.
+
+------------------------------------------------------------------------
 
 ## Kaplan-Meier
 
+::: callout-caution
+## Work in Progress! This is a temporary placeholder section for the math underlying the Kaplan Meier model.
+:::
+
+**Kaplan-Meier (KM) Survival Curves** allow us to estimate the **cumulative probability of** **retaining over time** (e.g. the probability of retaining past each tenure day after-hire).
+
+-   For each time point where a termination was observed, the KM curve estimates the *proportion of employees that can be expected to retain (survive) past that time point.*
+
+-   When we say "***cumulative***", we mean that the probability of retaining through Day 10 combines the probabilities of first surviving Day 1, then Day 2, ... , all the way through Day 10.
+
+------------------------------------------------------------------------
+
 ## Cox Proportional Hazards
+
+::: callout-caution
+## Work in Progress! This is a temporary placeholder section for the math underlying the Cox Proportional Hazards model.
+:::
+
+The **Cox Proportional Hazards (CPH)** regression model allows us to assess how different risk factors **increase or decrease the likelihood of an employee terminating**.
+
+-   Because termination and retention are *complementary*, Cox models also give us the ability to **predict retention probabilities and times,** and to generate **retention curves**.
+
+-   Cox models estimate **odds ratios** (also called **hazard ratios**), which estimate **how likely employees in one subgroup are to terminate** relative to employees in another subgroup.
+
+::: callout-note
+## \*\*\*Note: Cox models require an assumption of proportional hazards over time. At a high level this just means that if Denver employees have a 4x greater risk of termination than Charlotte employees, then we assume that 4:1 risk ratio is constant over all tenure time points after hire.
+:::
+
+------------------------------------------------------------------------
 
 ## Competing Risks
 
+::: callout-warning
+## Work in Progress! This is a temporary placeholder section for the math underlying the Competing Risks model. Skip ahead to the case study section on Comp Risks for now to see an overview of the CR framework.
+:::
+
+**Competing Risk (CR)** models allow us to model **voluntary vs involuntary** terminations as **competing risk pathways.**
+
+-   **Basic Idea of CR Models**: an employee can experience *either* an involuntary or voluntary term, *but not both* (e.g. voluntary vs involuntary exits "compete" with one another).
+
+-   CR models are able to account for the fact that certain types of terminations may be more likely than others (e.g. if voluntary exits are more likely than involuntary exits).
+
 ------------------------------------------------------------------------
+
+# Case Study: Employee Retention & Workforce Planning
+
+The Chief People Officer (CPO) of a small manufacturer with 3 production facilities is having **staffing difficulties** and has asked us to review **employee retention** at the company.
+
+-   All 3 facilities first opened in June 2023 and started with same number of new hires (25 each).
+
+-   All 3 facilities hired a secondary wave of new hires in January 2024 (another 25 each).
+
+-   *The company is having trouble maintaining the **staffing goal of 35 workers per facility**.*
+
+**The CPO has asked us to quantify how long the "typical" employee can be expected to retain post-hire, and to identify any possible risk factors for differential retention outlooks.**
+
+## Packages & Set-Up
+
+```{r}
+#| label: load
+#| warning: false
+#| message: false      
+#| output: false
+
+knitr::opts_chunk$set(dev = "ragg_png")
+# No Scientific Notation
+options(scipen = 999)
+
+# Packages
+library(tidyverse)
+library(tidymodels)
+library(censored)
+library(janitor)
+library(ggfun)
+library(survminer)
+library(ggsurvfit)
+library(patchwork)
+library(ggfortify)
+library(ggridges)
+library(tidycmprsk)
+library(skimr)
+library(GGally)
+library(gt)
+
+
+# Fonts (place the font and theme files in your working directory)
+source("font_setup.R")
+
+# Theme
+source("theme_setup.R")
+
+
+
+# FONTS
+## Adds Google Fonts & Sets Config
+setup_fonts()
+
+## Ties Font Family Names to List for Referencing
+fonts <- get_font_families()
+
+
+
+# COLORS
+## Ties Default Base Colors & Specified Additional Palette to List References
+colors <- get_theme_colors(
+  palette = c(
+    "#663171",
+    "sienna3",
+    "#0c7156",
+    "black",
+    "firebrick",
+    "#f9d14a",
+    "#ff6153",
+    "#1a318b",
+    "#ce9462",
+    "#3b3a3e",
+    "#6d2f20",
+    "skyblue1",
+    "white",
+    "wheat"
+  )
+)
+
+
+# THEMES
+
+## CREATE BASE THEME - uses font and color list refs internally
+base_theme <- create_base_theme(colors = colors)
+
+
+# Specify additional theme elements
+theme1 <- extend_base_theme(
+  
+  base_theme = base_theme,
+  extended_elements = 
+    theme(
+      # Add spacing between axis text and axis title
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y.left = element_text(margin = margin(r = 10)),
+      # Set plot title, axis title, and axis text to fixed sizes (not ideal)
+      #   plot.title = element_text(size = 16),
+      #  axis.title = element_text(size = 12),
+      #  axis.text = element_text(size = 10)
+    )
+)
+
+
+# Set Theme
+theme_set(theme1)
+
+
+
+
+
+
+
+### SEPARATE THEME FOR COMPETING RISKS
+theme_bw() +
+  theme(legend.position = "top",
+        strip.background = element_roundrect(fill = "#1a318b",color = NA, r = 0.15),
+        strip.text = element_text(color = "white", face = "bold"),
+        
+        # Set Plot margins (pushes plot in from edges (entire plot/labels))
+        plot.margin = margin(t = 10, r = 15, b = 10, l = 15),
+        
+        # Background elements filled using specified color palette for each element
+        plot.background  = element_rect(fill = colors$background, color = colors$background),
+        panel.background = element_rect(fill = colors$background, color = colors$background),
+        legend.background = element_rect(fill = colors$background, color = colors$background),
+        
+        # Fixed axis text & title elements tied to specified colors and fonts
+        axis.text  = element_text(
+          family = fonts$text,
+          size   = rel(0.79),
+          color  = colors$text
+        ),
+        axis.title = element_text(
+          family = fonts$subtitle,
+          size   = rel(0.93),
+          face   = "bold",
+          color  = colors$text
+        ),
+        plot.title = element_text(
+          family = fonts$title,
+          face = "bold",
+          color = colors$title
+        ),
+        plot.subtitle = element_text(
+          family = fonts$title,
+          face = "bold",
+          color = colors$subtitle
+        )) -> theme_comprisk
+
+
+```
+
+## Load & Preview Data
+
+First we'll load and preview our 2 datasets, which contains basic HR info and monthly headcount data for 150 company employees across 3 facilities:
+
+### Headcount Data
+
+Our first dataset contains monthly headcount data by facility, with 1 row (HC value) per month and facility:
+
+```{r}
+#| label: read_data1
+#| warn: false
+#| message: false
+
+# OVERVIEW: Headcount data has monthly headcounts by grouping vars
+
+# Load Headcount Data 
+dat1head <- read_csv("headcount_trend_pa_tutorial.csv") 
+
+# Clean Col Names
+dat1head |> clean_names() -> dat1head
+
+# Data Formatting
+## Dates in MDY form, Categoricals as Factors, Relabel Facility as City-State
+dat1head |> 
+  mutate(date = mdy(date),
+         facility = fct_recode(facility, 
+                               "Denver-CO" = "A: Denver",
+                               "Tampa-FL" = "B: Tampa",
+                               "Charlotte-NC" = "C: Charlotte")) |> 
+  mutate(facility = factor(facility, 
+                           levels = c("Denver-CO", "Tampa-FL","Charlotte-NC"))) -> dat1head
+
+
+# Preview
+dat1head |> head()
+```
+
+### HR & Retention Data
+
+Our second dataset contains retention and HR data, with 1 row per employee. We have a number of retention-related fields, along with each employee's manager, hire date, pay band, and work facility.
+
+```{r}
+#| label: read_data2
+#| warn: false
+#| message: false
+
+
+# OVERVIEW: Basic Employee data that can be used to model retention
+
+# Load Headcount Data 
+dat1surv <- read_csv("survival_analysis_pa_tutorial.csv") 
+
+# Clean Col Names
+dat1surv |> clean_names() -> dat1surv
+
+
+# Data Formatting
+## Dates in MDY form, Categoricals as Factors, 
+## Relabel Facility as City-State, rename salary as hourly for clarity
+dat1surv |> 
+  mutate(hire_date = mdy(hire_date),
+         hire_date_grp = factor(format(hire_date, "%B-%Y"),
+                                levels = c("June-2023","January-2024")),
+         termination_date = mdy(termination_date),
+         max_date_recorded = mdy(max_date_recorded),
+         facility = fct_recode(facility, 
+                               "Denver-CO" = "A: Denver",
+                               "Tampa-FL" = "B: Tampa",
+                               "Charlotte-NC" = "C: Charlotte"),
+         facility = factor(facility,
+                           levels = c("Denver-CO", "Tampa-FL", "Charlotte-NC")),
+         transfer_flag = factor(transfer_flag),
+         termination_type = factor(termination_type),
+         manager = factor(manager),
+         termination_status = factor(termination,
+                                     labels = c("Active","Termed"))) |> 
+  rename(pay_rate_hourly = salary) -> dat1surv
+
+
+
+# Cut Hourly Pay into bands
+quintile_breaks <- quantile(dat1surv$pay_rate_hourly, probs = seq(0, 1, by = 0.2), na.rm = TRUE)
+
+
+dat1surv |> 
+  mutate(pay_quintile = cut(pay_rate_hourly, 
+                            breaks = quintile_breaks,
+                            include.lowest = TRUE,
+                            labels = c("A: Bottom 20%",
+                                       "B: 20-40%",
+                                       "C: 40-60%",
+                                       "D: 60-80%",
+                                       "E: Top 20%"))) |> 
+  mutate(pay_quintile = factor(pay_quintile, 
+                               levels = c("A: Bottom 20%", 
+                                          "B: 20-40%", 
+                                          "C: 40-60%", 
+                                          "D: 60-80%",
+                                          "E: Top 20%")))-> dat1surv
+
+
+
+## NUMERIC CODING FOR TERMINATION TYPE
+dat1surv |> 
+  mutate(termination_type_num = case_when(is.na(termination_type) ~ 0,
+                                          termination_type == "Voluntary" ~ 1,
+                                          termination_type == "Involuntary" ~ 2)) |> 
+  mutate(termination_type_num = factor(termination_type_num,
+                                       labels = c("Active",
+                                                  "Voluntary",
+                                                  "Involuntary"))) -> dat1surv
+
+## Surv() function creates a survival object based on (Time, Status) pairs
+## (Time = time observed, Status = event occurred or not, censors denoted via +)
+
+# OVERALL SURVIVAL OBJECT (Time, Status): ANY TERM TYPE/EVENT
+dat1surv |> 
+  ## Survival Object created
+  mutate(surv_status = Surv(time = seniority_days, event = termination),
+         .after = seniority_days) -> dat1surv
+
+# COMPETING RISKS SURVIVAL OBJECT: SEPARATES VOL VS INVOL VS ACTIVE
+dat1surv |> 
+  ## Survival Object created
+  mutate(term_event_status = Surv(time = seniority_days,event = termination_type_num),
+         .after = termination_type_num) -> dat1surv
+
+
+# Reorder columns
+dat1surv |> 
+  select(emp_id, 
+         hire_date,
+         max_date_recorded,
+         termination_status,
+         termination, 
+         termination_type,
+         termination_type_num,
+         seniority_days,
+         surv_status,
+         term_event_status,
+         facility,
+         manager, 
+         hire_date_grp,
+         pay_rate_hourly,
+         pay_quintile,
+         max_seniority_poss, 
+         transfer_flag,
+         termination_date) -> dat1surv
+
+
+# Preview
+dat1surv |> glimpse()
+
+
+```
+
+------------------------------------------------------------------------
+
+## Analysis
+
+### Headcount Trends
+
+We'll start with a simple plot of headcount over time, where we see that **headcount fluctuates unevenly by facility**, and that **only Denver has consistently stayed above the 35-head goal:**
+
+![Trend lines displaying headcount levels over time by facility. The plot indicates that while all 3 facilities have hired the same number of employees in both June '23 and Jan '24, headcount levels have varied.](images/p1_headcount_trend.png){#fig-3}
+
+```{r}
+#| label: viz1_headcount_trend
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+# GOAL: Visualize headcount fluctuations over time by work facility
+
+## Plot
+dat1head |> 
+  ggplot(aes(x = date,
+             y = headcount,
+             color = facility,
+             group = facility)) +
+  geom_point(fill = NA, shape = 1, size = 2.2, stroke = 2) +
+  geom_line(linewidth = 1.2) +
+  geom_hline(yintercept = 35, lty = 2, size = 0.9, color = colors$palette[5]) +
+  #  facet_wrap(~facility, scales = "free") +
+  scale_x_date(date_breaks = "1 months",
+               date_labels = "%b-%y",
+               limits = c(as_date("2023-06-01"),
+                          as_date("2024-06-01"))) +
+  scale_y_continuous(breaks = seq(0, 50, 5),
+                     limits = c(0, 50),
+                     sec.axis = sec_axis(~ ., 
+                                         breaks = seq(0, 50, 5),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  theme(legend.key = element_rect(fill = "wheat")) +
+  labs(x = "Date", y = "Headcount", 
+       color = "Facility", title = "Headcount by Work Facility") -> p1heads
+
+# View with annotation
+p1heads + 
+  annotate("segment", 
+           x = as_date("2023-08-01"),
+           #   xend = as_date("2023-08-01"),
+           y = 42,
+           yend = 36,
+           color = "blue",
+           linewidth = 2,
+           arrow = arrow(length = unit(.2,"cm"))) +
+  annotate("rect", xmin = as_date("2023-07-01"),
+           xmax = as_date("2023-09-01"),
+           ymin = 43, ymax = 47,
+           color = "black",
+           alpha = 0.4, 
+           fill = "white") +
+  annotate(geom = "text",
+           x = as_date("2023-08-01"),
+           y = 45,
+           color = "black",
+           label = "Goal per Facility = 35",
+           fontface = "bold",
+           size = 3) 
+
+```
+
+------------------------------------------------------------------------
+
+### Termination Rates & Drivers
+
+Because all 3 facilities have had identical hiring patterns so far, any **fluctuations in headcount levels must be driven by employee exits**.
+
+When we review the company's **baseline termination rate**, we see that **roughly 75% of employees hired have terminated** at some point since their hire date!
+
+![Bar Chart showing that of the 150 employees hired by the company, only 28% (42) have remained active.](images/p1status.png){#fig-4}
+
+```{r}
+#| label: viz2_term_rate
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+# OVERALL (All Emps)
+
+
+dat1surv |> 
+  count(termination_status) |> 
+  mutate(prop = n / sum(n),
+         prop_label = glue::glue("{scales::percent(prop, accuracy = 1)} ({n})")) |> 
+  ggplot(aes(x = termination_status,
+             y = prop,
+             fill = termination_status)) +
+  geom_col(width = 0.35, color = "black") +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1)) +
+  geom_text(aes(label = prop_label),
+            position = position_stack(vjust = .5),
+            color = "black", fontface = "bold",
+            size = rel(3)) +
+  scale_fill_manual(values = c(colors$palette[12], colors$palette[7])) +
+  theme(legend.position = "none") +
+  labs(x = "Employment Status", y = "Employees (%)", 
+       title = "Roughly 75% of Employees Have Terminated Since Day 1") -> p1status
+
+
+p1status
+
+```
+
+------------------------------------------------------------------------
+
+Our next step is to identify possible **termination risk factors** to investigate further later:
+
+-   **Work Facility:** Charlotte has seen the largest number of exits, followed by Tampa, then Denver.
+
+-   **Hourly Pay:** Employees on the lower end of the pay spectrum have exited more frequently.
+
+-   **Hire Date**: The January 2024 hire class has seen *slightly* more exits than the June 2023 class.
+
+-   **Manager**: Termination rates for Jacob and Susan are identical.
+
+![4-panel stacked bar and density charts color-coded by active-vs-terminated status.](images/p2MEGACOMBO.png)
+
+```{r}
+#| label: viz2b_term_rate_facets
+#| warning: false
+#| message: false
+#| eval: false
+#| #out-width: 100%
+#| #fig-format: svg
+
+
+
+
+# FACILITY
+dat1surv |> 
+  count(facility, termination_status) |> 
+  mutate(prop_grp = n/sum(n),
+         prop_grp_label = glue::glue("{scales::percent(prop_grp)} ({n})"),
+         .by = facility) |> 
+  mutate(prop_tot = n/sum(n),
+         prop_tot_label = glue::glue("{scales::percent(prop_tot)} ({n})")) |> 
+  ggplot(aes(x = facility, 
+             y = prop_tot,
+             fill = termination_status)) +
+  geom_col(position = "stack", width = 0.5, color = colors$palette[4]) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 0.5)) +
+  geom_text(aes(label = prop_grp_label),
+            position = position_stack(vjust = 0.5),
+            fontface = "bold",
+            color = colors$palette[4], size = rel(3)) +
+  theme(legend.position = "right") +
+  scale_fill_manual(values = c(colors$palette[12],colors$palette[7])) +
+  labs(x = "Work Facility", y = "Employees (%)", fill = "Status",
+       title = "Termination Rates Vary by Work Facility") -> p2status_facility
+
+
+
+# MANAGER
+
+dat1surv |> 
+  count(manager, termination_status) |> 
+  mutate(prop_grp = n/sum(n),
+         prop_grp_label = glue::glue("{scales::percent(prop_grp)} ({n})"),
+         .by = manager) |> 
+  mutate(prop_tot = n/sum(n),
+         prop_tot_label = glue::glue("{scales::percent(prop_tot)} ({n})")) |> 
+  ggplot(aes(x = manager, 
+             y = prop_tot,
+             fill = termination_status)) +
+  geom_col(position = "stack", width = 0.35, color = colors$palette[4]) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 0.5)) +
+  geom_text(aes(label = prop_grp_label),
+            position = position_stack(vjust = 0.5),
+            fontface = "bold",
+            color = colors$palette[4], size = rel(3)) +
+  theme(legend.position = "right") +
+  scale_fill_manual(values = c(colors$palette[12],colors$palette[7])) +
+  labs(x = "Manager", y = "Employees (%)", fill = "Status",
+       title = "Termination Rates Do *Not* Vary by Manager") -> p2status_manager
+
+
+
+# HIRE DATE
+
+dat1surv |> 
+  count(hire_date_grp, termination_status) |> 
+  mutate(prop_grp = n/sum(n),
+         prop_grp_label = glue::glue("{scales::percent(prop_grp)} ({n})"),
+         .by = hire_date_grp) |> 
+  mutate(prop_tot = n/sum(n),
+         prop_tot_label = glue::glue("{scales::percent(prop_tot)} ({n})")) |> 
+  ggplot(aes(x = hire_date_grp, 
+             y = prop_tot,
+             fill = termination_status)) +
+  geom_col(position = "stack", width = 0.5, color = colors$palette[4]) +
+  scale_x_discrete(limits = rev(levels(dat1surv$hire_date_grp))) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 0.5)) +
+  geom_text(aes(label = prop_grp_label),
+            position = position_stack(vjust = 0.5),
+            fontface = "bold",
+            color = colors$palette[4], size = rel(3)) +
+  theme(legend.position = "right") +
+  scale_fill_manual(values = c(colors$palette[12],colors$palette[7])) +
+  labs(x = "Hire Class", y = "Employees (%)", fill = "Status",
+       title = "Termination Rates Vary Slightly by Hire Class") -> p2status_hireclass
+
+
+
+# HOURLY PAY DENSITY
+dat1surv |> 
+  ggplot(aes(x = pay_rate_hourly,
+             fill = termination_status)) +
+  geom_density(alpha = 0.7, color = colors$palette[4]) +
+  # geom_histogram(alpha = 0.7, binwidth = 4, color = colors$palette[4]) +
+  scale_fill_manual(values = c(colors$palette[12],colors$palette[7])) +
+  scale_x_continuous(limits = c(0, 100),
+                     breaks = seq(0, 100, 20),
+                     labels = scales::label_currency()) +
+  #  facet_wrap(vars(termination_status), ncol = 2) +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  labs(x = "Hourly Pay", fill = "Status", y = NULL,
+       title = "Lower Earners Appear More Likely to Terminate") -> p2status_pay
+
+
+
+
+# 4-way Status Plot Combo
+p2status_facility + theme(legend.position = "none") -> p2status_facility
+p2status_manager + theme(legend.position = "none") -> p2status_manager
+p2status_hireclass + theme(legend.position = "none") -> p2status_hireclass
+p2status_pay + theme(legend.position = "none") -> p2status_pay
+
+
+# Option 1 (all slices + pay)
+(p2status_facility + p2status_pay) / (p2status_manager + p2status_hireclass)
+
+```
+
+Unfortunately, **termination rates don't tell us anything about *when* employees terminate**.
+
+For that, it's time to turn to **survival methods,** starting with the **Kaplan-Meier Curve.**
+
+------------------------------------------------------------------------
+
+### Kaplan-Meier Retention Curves
+
+#### Baseline KM Retention Curve
+
+We'll start by modeling the **baseline retention curve** for all 150 employees combined:
+
+-   Around **80%** of employees are expected to **retain past 30d.**
+
+-   Around **60%** of employees are expected to **retain past 90d.**
+
+-   **Less than 20%** of employees are expected to **retain past the 1yr mark**.
+
+**Flat sections** in the KM curve occur at time points where **no terminations were observed**, meaning the **probability of retention stayed the same** during that period.
+
+![Kaplan-Meier Curve displaying the running probability of retaining past each seniority day post-hire](images/km1_overall.png){#fig-5}
+
+```{r}
+#| label: km1_baseline
+#| warning: false
+#| message: false
+#| eval: false
+
+
+
+# GOAL: Model the "pooled base rate" survival function for ALL employees OVERALL
+## Survival Function = P(survival past a certain time t)
+
+# Kaplan Meier
+
+
+
+# Preview sample to check survival object column works right
+dat1surv |> 
+  filter(emp_id %in% c("x24","x77")) |> 
+  select(emp_id, hire_date, max_date_recorded,
+         termination, seniority_days, surv_status)
+
+
+
+# Fit Kaplan Maier model
+
+## Applies "survfit" to survival object created by "Surv" 
+survfit(surv_status ~ 1,
+        data = dat1surv) -> survmod_overall
+
+
+# Median Survival Time = First Time (t) where S(t) < 0.5
+## e.g. across all employees, T = 111 days is where surv prob dips below 50%
+print(survmod_overall)
+
+# Summary - default survival table (not usable as DF)
+## For each observed time point, gives the estimated prob of surviving past T = t
+summary(survmod_overall)
+
+
+
+
+
+# SURVIVAL TABLE
+
+# extract results to a data.frame
+fortify(survmod_overall) |> 
+  mutate(across(.cols = c(surv, std.err, upper, lower),
+                .fns = ~round(.x, 3))) |> 
+  select(`Tenure Days` = time,
+         `At Risk (#)` = n.risk,
+         `Termed (#)` = n.event,
+         #  n_censor = n.censor,
+         `Retained (%)` = surv,
+         #   std_err = std.err,
+         `Conf Int (L)` = lower,
+         `Conf Int (H)` = upper) -> survtab_overall
+
+## Check
+head(survtab_overall)
+
+## PRINT
+survtab_overall |> 
+  mutate(`Retained (%)` = paste0(round(`Retained (%)`*100), "%")) |> 
+  select(`Tenure Days`,
+         `At Risk (#)`,
+         `Termed (#)`,
+         `Retained (%)`) |> 
+  filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 180, 365)) |> 
+  gt() |> 
+  cols_align(align = "center") |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  tab_header(title = md("**Baseline Employee Retention Table**"))
+
+
+## PREDICT (sort of)
+### -> NOTE: KM limited in predictions to observed times
+##### -> If time not observed in data, then just fills with prior value
+survtab_overall |> filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 180, 365))
+
+
+
+
+
+# PLOT
+## A) Survival Curve (using off-shelf functions)
+survfit2(surv_status ~ 1, data = dat1surv) |>  
+  ggsurvfit() +
+  add_confidence_interval() + 
+  # add_censor_mark() +
+  # add_risktable(risktable_stats = c("n.risk",
+  #                                  "n.event")) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, 0.01)) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+    title = "Baseline Employee Retention Curve"
+  ) +
+  theme1 -> pk1
+
+pk1
+
+## B) Manual Alternative
+# Manual Plot Alternative from Summary Survival Table
+survtab_overall |> 
+  bind_rows(tibble(
+    `Tenure Days` = 0,
+    `At Risk (#)` = 150,
+    `Termed (#)` = 0,
+    `Retained (%)` = 1,
+    `Conf Int (L)` = NA,
+    `Conf Int (H)` = NA
+  )) |> 
+  ggplot(aes(x = `Tenure Days`, y = `Retained (%)`)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  geom_ribbon(aes(ymin = `Conf Int (L)`,
+                  ymax = `Conf Int (H)`),
+              fill = "grey80",alpha = 0.3) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+    title = "Baseline Employee Retention Curve"
+  ) -> pk1b
+
+pk1b # + theme(plot.title = element_text(margin = margin(b = 10)))
+
+
+```
+
+------------------------------------------------------------------------
+
+#### KM Retention by Manager, Facility, Pay Band, & Hire Cohort
+
+Now we'll **split our retention curves by employee subgroup** in order to probe for **differential retention outlooks** across facilities, managers, hire cohorts, and pay bands:
+
+-   **Facility:** *Retention probabilities vary significantly by facility*, with Denver employees retaining the longest, followed by Tampa, and then Charlotte.
+
+-   **Hire Class:** *Retention rates vary by hire date after around the 30d mark*, with the June 2023 employees retaining at a significantly higher rate than the January 2024 hires.
+
+-   **Manager:** *Retention curves are identical across managers*, with no significant difference observed between employees reporting to Jacob versus Susan.
+
+-   **Pay Band:** *Retention varies significantly across pay bands*, with the top 20% of earners having an almost 10x higher probability of retaining past 1 year than the bottom earners.
+
+![4-way panel plot showing KM retention curves by manager, hire cohort, facility, and pay band.](images/kmcombo_4way_USE.png){#fig-6}
+
+```{r}
+#| label: km2_faceted
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# GOAL: Model survival probabilities BY GROUP
+## Approach: Kaplan Meier divided into groups
+
+## NOTE: KM curves are DESCRIPTIVE based solely on observed data
+##      => When comparing categorical grps, KM gives seperate surv probs for each 
+##      => For K > 1 predictors, KM requires stratification by all cat level combos
+##      => Log Rank test = Chi Sq Independence test = NOT TEST OF PREDICTORS!
+##            => Compares obs surv distro for curves vs expected pooled surv distro
+##            => Null H0 = "Survival distro is identical for all groups"
+##            => Alternative HA = "At least ONE grp has a diff surviv function"
+
+
+##################
+# FACILITY
+
+# KM Surv ~ Work FACILITY
+survfit(surv_status ~ facility,
+        data = dat1surv) -> survmod_facility
+
+
+
+# Summary gives GROUP_SPECIFIC survival tables
+summary(survmod_facility)
+
+# Print gives median retention time of each facility
+print(survmod_facility)
+
+
+
+# PREDICT
+# "Predict" Survival past specific times BY FACILITY
+## -> Again, KM is non-parametric so only get preds for times observed
+### -> Extrapolating to non-observed times just fills previous t-value
+summary(survmod_facility, times = c(30, 60, 90, 150, 180, 365))
+
+
+
+
+
+# SURVIVAL TABLE
+
+# extract results to a data.frame
+fortify(survmod_facility) |> 
+  mutate(across(.cols = c(surv, std.err, upper, lower),
+                .fns = ~round(.x, 2))) |> 
+  select( Facility = strata,
+          `Tenure Days` = time,
+          `At Risk (#)` = n.risk,
+          `Termed (#)` = n.event,
+          #  n_censor = n.censor,
+          `Retained (%)` = surv,
+          #  std_err = std.err,
+          `Conf Int (L)` = lower,
+          `Conf Int (H)` = upper) -> survtab_facility
+
+## Check
+survtab_facility |> head()
+
+# Wide Form for easy comparison of Retention Rates
+survtab_facility |> 
+  select(Facility, `Tenure Days`, `Retained (%)`) |> 
+  pivot_wider(names_from = Facility,
+              values_from = `Retained (%)`) |> 
+  arrange(`Tenure Days`) |> 
+  bind_rows(tibble(
+    `Tenure Days` = c(0),
+    `Denver-CO` = c(1),
+    `Tampa-FL` = c(1),
+    `Charlotte-NC` = c(1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  fill(`Denver-CO`) |> 
+  fill(`Tampa-FL`) |> 
+  fill(`Charlotte-NC`) -> survtab_facility_wide
+
+
+# PRINT
+survtab_facility_wide |> 
+  mutate(across(.cols = 2:4,
+                .fns = ~paste0(.x*100, "%"))) |> 
+  filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 180, 365)) |> 
+  gt() |> 
+  cols_align(align = "center") |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  tab_header(title = md("**Employee Retention by Facility**"))
+
+
+
+
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+
+## LOG RANK (CHI SQ TEST OF IND) TEST
+### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
+survdiff(surv_status ~ facility,
+         data = dat1surv)
+
+
+
+
+# PLOT
+## A) Off-Shelf
+survfit2(surv_status ~ facility,
+         data = dat1surv) |> 
+  ggsurvfit(size = 0.85) +
+  #  add_confidence_interval() + 
+#  add_pvalue() +
+  theme1 +
+  scale_x_continuous(limits = c(0, 365),
+                     breaks = seq(0, 365,30)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+    title = "Denver Employees Retain the Longest",
+  #  title = "Employee Retention Varies by Work Facility",
+    color = "Facility"
+  ) -> pk2a
+
+pk2a
+
+
+
+## B) Manual Alternative
+# Manual Plot Alternative from Summary Survival Table
+survtab_facility |> 
+  select(-c(`Conf Int (H)`, `Conf Int (L)`)) |> 
+  bind_rows(tibble(
+    Facility = c("Denver-CO", "Tampa-FL", "Charlotte-NC"),
+    `Tenure Days` = c(0, 0, 0),
+    `At Risk (#)` = c(50, 50, 50),
+    `Termed (#)` = c(0, 0, 0),
+    `Retained (%)` = c(1, 1, 1)
+  )) |> 
+  mutate(Facility = factor(Facility,
+                           levels = c("Denver-CO",
+                                      "Tampa-FL",
+                                      "Charlotte-NC"))) |> 
+  ggplot(aes(x = `Tenure Days`, y = `Retained (%)`,
+             color = Facility, group = Facility)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(
+    x = "Seniority Days",
+    color = "Facility",
+    y = "Cumulative Retention",
+    title = "Denver Employees Retain the Longest",
+   # title = "Employee Retention Varies by Work Facility"
+  ) -> pk2b
+
+pk2b 
+
+
+
+#####################
+# HIRE DATE
+
+# KM Surv ~ Hire Date
+survfit(surv_status ~ hire_date_grp,
+        data = dat1surv) -> survmod_hiredate
+
+
+
+# Summary gives GROUP_SPECIFIC survival tables
+summary(survmod_hiredate)
+
+# Print gives median retention time of each facility
+print(survmod_hiredate)
+
+
+
+# PREDICT
+# "Predict" Survival past specific times BY FACILITY
+## -> Again, KM is non-parametric so only get preds for times observed
+### -> Extrapolating to non-observed times just fills previous t-value
+summary(survmod_hiredate, times = c(30, 60, 90, 150, 180, 365))
+
+
+
+
+
+# SURVIVAL TABLE
+
+# extract results to a data.frame
+fortify(survmod_hiredate) |> 
+  mutate(across(.cols = c(surv, std.err, upper, lower),
+                .fns = ~round(.x, 2))) |> 
+  select( `Hire Class` = strata,
+          `Tenure Days` = time,
+          `At Risk (#)` = n.risk,
+          `Termed (#)` = n.event,
+          #  n_censor = n.censor,
+          `Retained (%)` = surv,
+          #  std_err = std.err,
+          `Conf Int (L)` = lower,
+          `Conf Int (H)` = upper) -> survtab_hiredate
+
+## Check
+survtab_hiredate |> head()
+
+# Wide Form for easy comparison of Retention Rates
+survtab_hiredate |> 
+  select(`Hire Class`, `Tenure Days`, `Retained (%)`) |> 
+  pivot_wider(names_from = `Hire Class`,
+              values_from = `Retained (%)`) |> 
+  arrange(`Tenure Days`) |> 
+  bind_rows(tibble(
+    `Tenure Days` = c(0),
+    `January-2024` = c(1),
+    `June-2023` = c(1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  select(`Tenure Days`, `June-2023`,`January-2024`) |> 
+  fill(`June-2023`) |> 
+  fill(`January-2024`) -> survtab_hiredate_wide
+
+
+# PRINT
+survtab_hiredate_wide |> 
+  mutate(across(.cols = 2:3,
+                .fns = ~paste0(.x*100, "%"))) |> 
+  filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 150)) |> 
+  gt() |> 
+  cols_align(align = "center") |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  tab_header(title = md("**Employee Retention by Hire Class**"))
+
+
+
+
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+
+## LOG RANK (CHI SQ TEST OF IND) TEST
+### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
+survdiff(surv_status ~ hire_date_grp,
+         data = dat1surv)
+
+
+
+
+# PLOT
+## A) Off-Shelf
+survfit2(surv_status ~ hire_date_grp,
+         data = dat1surv) |> 
+  ggsurvfit(size = 0.85) +
+  # add_confidence_interval() + 
+  #  add_pvalue() +
+  theme1 +
+  scale_x_continuous(limits = c(0, 365),
+                     breaks = seq(0, 365,30)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+   # title = "Employee Retention Varies by Hire Class",
+   title = "June '23 Hires Are More Likely to Retain Than Jan '24 Hires",
+   color = "Hire Class"
+  ) -> pk2c
+
+pk2c
+
+
+
+## B) Manual Alternative
+# Manual Plot Alternative from Summary Survival Table
+survtab_hiredate |> 
+  select(-c(`Conf Int (H)`, `Conf Int (L)`)) |> 
+  bind_rows(tibble(
+    `Hire Class` = c("June-2023", "January-2024"),
+    `Tenure Days` = c(0, 0),
+    `At Risk (#)` = c(75, 75),
+    `Termed (#)` = c(0, 0),
+    `Retained (%)` = c(1, 1)
+  )) |> 
+  mutate(`Hire Class` = factor(`Hire Class`,
+                               levels = c("June-2023","January-2024"))) |> 
+  arrange(`Tenure Days`) |> 
+  ggplot(aes(x = `Tenure Days`, y = `Retained (%)`,
+             color = `Hire Class`, group = `Hire Class`)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(
+    x = "Seniority Days",
+    color = "Hire Class",
+    y = "Cumulative Retention",
+    title = "June '23 Hires Are More Likely to Retain Than Jan '24 Hires"
+  #  title = "Employee Retention Varies by Hire Class"
+  ) -> pk2d
+
+pk2d
+
+
+
+
+##################
+
+# MANAGER
+
+
+# KM Surv ~ MAnager
+survfit(surv_status ~ manager,
+        data = dat1surv) -> survmod_manager
+
+
+
+# Summary gives GROUP_SPECIFIC survival tables
+summary(survmod_manager)
+
+# Print gives median retention time of each manager
+print(survmod_manager)
+
+
+
+# PREDICT
+# "Predict" Survival past specific times BY MAnager
+## -> Again, KM is non-parametric so only get preds for times observed
+### -> Extrapolating to non-observed times just fills previous t-value
+summary(survmod_manager, times = c(30, 60, 90, 150, 180, 365))
+
+
+
+
+
+# SURVIVAL TABLE
+
+# extract results to a data.frame
+fortify(survmod_manager) |> 
+  mutate(across(.cols = c(surv, std.err, upper, lower),
+                .fns = ~round(.x, 2))) |> 
+  select( Manager = strata,
+          `Tenure Days` = time,
+          `At Risk (#)` = n.risk,
+          `Termed (#)` = n.event,
+          #  n_censor = n.censor,
+          `Retained (%)` = surv,
+          #  std_err = std.err,
+          `Conf Int (L)` = lower,
+          `Conf Int (H)` = upper) -> survtab_manager
+
+## Check
+survtab_manager |> head()
+
+# Wide Form for easy comparison of Retention Rates
+survtab_manager |> 
+  select(Manager, `Tenure Days`, `Retained (%)`) |> 
+  pivot_wider(names_from = Manager,
+              values_from = `Retained (%)`) |> 
+  arrange(`Tenure Days`) |> 
+  bind_rows(tibble(
+    `Tenure Days` = c(0),
+    Jacob = c(1),
+    Susan = c(1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  select(`Tenure Days`, Jacob, Susan) |> 
+  fill(Jacob) |> 
+  fill(Susan) -> survtab_manager_wide
+
+
+# PRINT
+survtab_manager_wide |> 
+  mutate(across(.cols = 2:3,
+                .fns = ~paste0(.x*100, "%"))) |> 
+  filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 180, 365)) |> 
+  gt() |> 
+  cols_align(align = "center") |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  tab_header(title = md("**Employee Retention by Manager**"))
+
+
+
+
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+
+## LOG RANK (CHI SQ TEST OF IND) TEST
+### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
+survdiff(surv_status ~ manager,
+         data = dat1surv)
+
+
+
+
+# PLOT
+## A) Off-Shelf
+survfit2(surv_status ~ manager,
+         data = dat1surv) |> 
+  ggsurvfit(size = 0.85) +
+  # add_confidence_interval() + 
+  #  add_pvalue() +
+  theme1 +
+  scale_x_continuous(limits = c(0, 365),
+                     breaks = seq(0, 365,30)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+    title = "Employee Retention Does *Not* Vary by Manager",
+    color = "Manager"
+  ) -> pk2e
+
+pk2e
+
+
+
+## B) Manual Alternative
+# Manual Plot Alternative from Summary Survival Table
+survtab_manager |> 
+  select(-c(`Conf Int (H)`, `Conf Int (L)`)) |> 
+  bind_rows(tibble(
+    Manager = c("Jacob","Susan"),
+    `Tenure Days` = c(0, 0),
+    `At Risk (#)` = c(75, 75),
+    `Termed (#)` = c(0, 0),
+    `Retained (%)` = c(1, 1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  ggplot(aes(x = `Tenure Days`, y = `Retained (%)`,
+             color = Manager, group = Manager)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(
+    x = "Seniority Days",
+    color = "Manager",
+    y = "Cumulative Retention",
+    title = "Employee Retention Does *Not* Vary by Manager"
+  ) -> pk2f
+
+pk2f
+
+
+
+
+#######################
+
+# PAY BAND
+
+
+# KM Surv ~ pay band
+survfit(surv_status ~ pay_quintile,
+        data = dat1surv) -> survmod_payband
+
+
+
+# Summary gives GROUP_SPECIFIC survival tables
+summary(survmod_payband)
+
+# Print gives median retention time of each manager
+print(survmod_payband)
+
+
+
+# PREDICT
+# "Predict" Survival past specific times BY MAnager
+## -> Again, KM is non-parametric so only get preds for times observed
+### -> Extrapolating to non-observed times just fills previous t-value
+summary(survmod_payband, times = c(30, 60, 90, 150, 180, 365))
+
+
+
+
+
+# SURVIVAL TABLE
+
+# extract results to a data.frame
+fortify(survmod_payband) |> 
+  mutate(across(.cols = c(surv, std.err, upper, lower),
+                .fns = ~round(.x, 2))) |> 
+  select( `Pay Band` = strata,
+          `Tenure Days` = time,
+          `At Risk (#)` = n.risk,
+          `Termed (#)` = n.event,
+          #  n_censor = n.censor,
+          `Retained (%)` = surv,
+          #  std_err = std.err,
+          `Conf Int (L)` = lower,
+          `Conf Int (H)` = upper) -> survtab_payband
+
+## Check
+survtab_payband |> head()
+
+# Wide Form for easy comparison of Retention Rates
+survtab_payband |> 
+  select(`Pay Band`, `Tenure Days`, `Retained (%)`) |> 
+  pivot_wider(names_from = `Pay Band`,
+              values_from = `Retained (%)`) |> 
+  arrange(`Tenure Days`) |> 
+  bind_rows(tibble(
+    `Tenure Days` = c(0),
+    `A: Bottom 20%` = c(1),
+    `B: 20-40%` = c(1),
+    `C: 40-60%` = c(1),
+    `D: 60-80%` = c(1),
+    `E: Top 20%` = c(1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  select(`Tenure Days`, `A: Bottom 20%`, `B: 20-40%`, `C: 40-60%`,
+         `D: 60-80%`,`E: Top 20%`) |> 
+  fill(2:6) -> survtab_payband_wide
+
+
+# PRINT
+survtab_payband_wide |> 
+  mutate(across(.cols = 2:3,
+                .fns = ~paste0(.x*100, "%"))) |> 
+  filter(`Tenure Days` %in% c(1, 2,3, 7, 30, 90, 180, 365)) |> 
+  gt() |> 
+  cols_align(align = "center") |> 
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_column_labels()
+  ) |> 
+  tab_header(title = md("**Employee Retention by Pay Band**"))
+
+
+
+
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+
+## LOG RANK (CHI SQ TEST OF IND) TEST
+### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
+survdiff(surv_status ~ pay_quintile,
+         data = dat1surv)
+
+
+
+
+# PLOT
+## A) Off-Shelf
+survfit2(surv_status ~ pay_quintile,
+         data = dat1surv) |> 
+  ggsurvfit(size = 0.85) +
+  # add_confidence_interval() + 
+  # add_pvalue() +
+  theme1 +
+  scale_x_continuous(limits = c(0, 365),
+                     breaks = seq(0, 365,30)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_brewer(palette = "Set1") +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Retention",
+    title = "Top Earners Retain Longer Than Bottom Earners",
+  #  title = "Employee Retention Varies by Pay Band",
+    color = "Pay Band"
+  ) -> pk2g
+
+pk2g
+
+
+
+
+## B) Manual Alternative
+# Manual Plot Alternative from Summary Survival Table
+survtab_payband |> 
+  select(-c(`Conf Int (H)`, `Conf Int (L)`)) |> 
+  bind_rows(tibble(
+    `Pay Band` = c("A: Bottom 20%", "B: 20-40%",
+                   "C: 40-60%","D: 60-80%","E: Top 20%"),
+    `Tenure Days` = c(0, 0,0,0,0),
+    `At Risk (#)` = c(31, 35, 24, 31, 29),
+    `Termed (#)` = c(0, 0,0,0,0),
+    `Retained (%)` = c(1, 1,1,1,1)
+  )) |> 
+  arrange(`Tenure Days`) |> 
+  ggplot(aes(x = `Tenure Days`, y = `Retained (%)`,
+             color = `Pay Band`, group = `Pay Band`)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    x = "Seniority Days",
+    color = "Pay Band",
+    y = "Cumulative Retention",
+    title = "Top Earners Retain Longer Than Bottom Earners",
+  #  title = "Employee Retention Varies by Pay Band"
+  ) -> pk2h
+
+pk2h
+
+
+```
+
+**Importantly,** *Kaplan-Meier curves can only tell us whether or not various factors are generally independent of employee retention times* (e.g. "Emp Retention is **not** independent of pay band.")
+
+-   If we want to actually **quantify the effect of a variable** upon an **employee's risk of termination**, we need to turn to the **Cox Proportional Hazards Model**
+
+------------------------------------------------------------------------
+
+### Cox Proportional Hazards
+
+#### Cox Prop Hazards by Work Facility
+
+Below, we can see the output from a **Cox regression model** estimating the **impact of work facility** upon **termination likelihood**, and a plot of **estimated retention probabilities** over time.
+
+-   **Tampa** **employees are 1.6x more likely to terminate** than Denver employees (reference group).
+
+-   **Charlotte employees are 2.4x more likely to terminate** than Denver employees.
+
+-   **Predicted retention probabilities** **over time** **differ by facility** (see the curve separation).
+
+![Cox termination risk ratios and predicted retention probabilities over time for emps in different facilities.](images/coxmod_pcox_facility.png){#fig-7}
+
+```{r}
+#| label: coxmod_facility
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# Cox PH Hazard ~ Work Facility
+coxmod_facility <- coxph(Surv(time = seniority_days,
+                              event = termination) ~ facility,
+                         data = dat1surv)
+
+
+## Base Summary => exp(coef) = Hazard Ratio estimates
+summary(coxmod_facility, digits = 3)
+
+
+## Interpretation Example: 
+### "Emps in Tampa are 1.62x more likely to turnover than emps in Denver"
+### "Emps in CLT are 2.38x more likely to turnover than emps in Denver"
+
+
+## Tidy output + addition of exponentiated estimate
+tidy(coxmod_facility) |> 
+  mutate(exp_estimate = exp(estimate), 
+         .after = estimate) |> 
+  mutate(across(where(is.numeric), ~round(.x, 3))) |> 
+  select(
+    Variable = term,
+    `Odds Ratio` = exp_estimate,
+    p.value
+  )
+
+## Publication-style output
+coxmod_facility |> 
+  gtsummary::tbl_regression(exp = T,
+                            label = list(facility = "Facility")) 
+
+## ANOVA test of model fit impact by sequentially adding predictors
+anova(coxmod_facility)
+
+# Visualize HR's and their Confidence Intervals
+survminer::ggforest(coxmod_facility) 
+
+# Check Prop Hazards Assumption 
+##  Test whether HRs for each covariate remain constant over time 
+##   => e.g. tests whether or not there is a Time::Predictor interaction
+cox.zph(coxmod_facility)
+
+
+# Conrodance Index = evaluates discriminative ability
+## model's ability to correctly rank the survival times of pairs of individuals
+concordance(coxmod_facility)
+
+## Concordance Interpretation
+### "60% of  employee pairs have predicted order of surv imes consistent w/ actual survtimes"
+
+
+
+# Cox PH Prections = Relative Risk or Risk Rankings
+
+## Relative Risk = Linear Predictor = Risk Score = LOG RELATIVE HAZARD for individual
+## => Weighted Sum of Covariates = Bo + B1*x1 + B2* x2 + ...
+
+## Relative Hazard = Exp(Linear Predictor) = "1.5x the hazard of the baseline individual"
+## => Exponeniated Weighted Sum of Covariates = EXP(Bo + B1*X1 + ...)
+
+# "New"/Dummy Data of 2 emps who differ by facility
+dummy1 <-data.frame(facility=c("Denver-CO", "Tampa-FL","Charlotte-NC"), seniority_days = c(100,100, 100))
+dummy1
+
+## Linear Predictor Prediction (LOG Relative Hazard)
+predict(coxmod_facility, newdata = dummy1, type = "lp")
+
+## Exponeniated Lin Pred = Relative Hazard
+exp(predict(coxmod_facility, newdata = dummy1, type = "lp")) 
+predict(coxmod_facility, newdata = dummy1, type = "risk")  # Direct Equivalent
+
+## Fitted survival curves based on model fit and "new" data
+newfit_dummy1 <- survfit(coxmod_facility, newdata = dummy1)
+
+### Yields survival probability tables side-by-side
+newfit_dummy1 |> 
+  tidy() 
+
+
+## Plot comparison using GGPLOT customization
+newfit_dummy1 |> 
+  tidy() |> 
+  select(time, 
+         `Denver-CO` = estimate.1, 
+         `Tampa-FL` = estimate.2,
+         `Charlotte-NC` = estimate.3) |> 
+  pivot_longer(cols = 2:4,
+               names_to = "facility",
+               values_to = "surv_prob") |> 
+  ggplot(aes(x = time, y = surv_prob, color = facility, group = facility)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Predicted Retention Probability",
+    title = "Denver-based Employees Are Most Likely to Retain Over Time",
+    color = "Facility"
+  ) -> pc1facility
+
+pc1facility
+
+
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Cox Prop Hazards by Pay Band
+
+Next we'll use a **Cox model** to examine the **impact of pay bands** upon **termination likelihood**:
+
+-   **Top 20% earners are only 0.13x as likely (87% *less* likely) to terminate** than employees in the bottom 20% of earners (reference group)
+
+-   Even the **lower 20-40% earners are 0.6x as likely (40% *less* likely) to terminate** than employees in the very bottom band.
+
+-   *Predicted retention probabilities* vary greatly by pay band, with **almost none of the lower 40% of earners predicted to retain past the 1yr mark**.
+
+![Cox termination risk ratios and predicted retention probabilities over time for emps in different pay bands.](images/coxmod_pcox_payband.png){#fig-8}
+
+```{r}
+#| label: coxmod_payband
+#| warning: false
+#| message: false
+#| eval: false
+
+# Cox PH Hazard ~ Pay Band
+
+
+# Cox PH Hazard ~ Pay Band
+coxmod_pay_quantiles <- coxph(Surv(time = seniority_days,
+                                   event = termination) ~ pay_quintile,
+                              data = dat1surv)
+
+
+## Base Summary => exp(coef) = Hazard Ratio estimates
+summary(coxmod_pay_quantiles, digits = 3)
+
+
+## Interpretation Example: 
+### "Emps in Bottom 20% are ref group"
+### "Emps in 20-40% are .58x as likely to churn (42% less likely)
+### "Emps in 40-60% are .24x as likely to churn (76% less likely)
+### "Emps in 60-80% are .23x as likely to churn (77% less likely)
+### "Emps in top 20% are 0.13x as likely as bottom (87% less likely)
+
+## Tidy output + addition of exponentiated estimate
+tidy(coxmod_pay_quantiles) |> 
+  mutate(exp_estimate = exp(estimate), 
+         .after = estimate) |> 
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+## Publication-style output
+coxmod_pay_quantiles |> 
+  gtsummary::tbl_regression(exp = T,
+                            label = list(pay_quintile = "Pay Band")) 
+
+## ANOVA test of model fit impact by sequentially adding predictors
+anova(coxmod_pay_quantiles)
+
+# Visualize HR's and their Confidence Intervals
+survminer::ggforest(coxmod_pay_quantiles)
+
+# Check Prop Hazards Assumption 
+##  Test whether HRs for each covariate remain constant over time 
+##   => e.g. tests whether or not there is a Time::Predictor interaction
+cox.zph(coxmod_pay_quantiles)
+
+
+# Conrodance Index = evaluates discriminative ability
+## model's ability to correctly rank the survival times of pairs of individuals
+concordance(coxmod_pay_quantiles)
+
+## Concordance Interpretation
+### "72% of  employee pairs have predicted order of surv imes consistent w/ actual survtimes"
+
+
+
+# Cox PH Prections = Relative Risk or Risk Rankings
+
+## Relative Risk = Linear Predictor = Risk Score = LOG RELATIVE HAZARD for individual
+## => Weighted Sum of Covariates = Bo + B1*x1 + B2* x2 + ...
+
+## Relative Hazard = Exp(Linear Predictor) = "1.5x the hazard of the baseline individual"
+## => Exponeniated Weighted Sum of Covariates = EXP(Bo + B1*X1 + ...)
+
+# "New"/Dummy Data of 2 emps who differ by hire_date
+dummy1 <-data.frame(pay_quintile=c(levels(dat1surv$pay_quintile)),
+                    seniority_days = c(100, 100, 100, 100, 100))
+
+dummy1
+
+
+## Linear Predictor Prediction (LOG Relative Hazard)
+predict(coxmod_pay_quantiles, newdata = dummy1, type = "lp")
+
+## Exponeniated Lin Pred = Relative Hazard
+exp(predict(coxmod_pay_quantiles, newdata = dummy1, type = "lp")) 
+predict(coxmod_pay_quantiles, newdata = dummy1, type = "risk")  # Direct Equivalent
+
+## Fitted survival curves based on model fit and "new" data
+newfit_dummy1 <- survfit(coxmod_pay_quantiles, newdata = dummy1)
+
+### Yields survival probability tables side-by-side
+newfit_dummy1 |> tidy()
+
+## Plot comparison using GGPLOT customization
+newfit_dummy1 |> 
+  tidy() |> 
+  select(tenure_days = time, 
+         `A: Bottom 20%` = estimate.1, 
+         `B: 20-40%` = estimate.2,
+         `C: 40-60%` = estimate.3,
+         `D: 60-80%` = estimate.4,
+         `E: Top 20%` = estimate.5) |> 
+  pivot_longer(cols = 2:6,
+               names_to = "pay_quintile",
+               values_to = "surv_prob") |> 
+  mutate(quintile = factor(pay_quintile,
+                           levels = c("A: Bottom 20%", 
+                                      "B: 20-40%", 
+                                      "C: 40-60%", 
+                                      "D: 60-80%",
+                                      "E: Top 20%"))) |> 
+  ggplot(aes(x = tenure_days, y = surv_prob, 
+             color = pay_quintile, group = pay_quintile)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_brewer(palette = "Set1") +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Predicted Probability of Retaining",
+    title = "Higher Earners Are More Likely to Retain",
+    color = "Pay Band"
+  ) -> pc1payband
+
+pc1payband
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Cox Prop Hazards by Hire Date
+
+Now we'll use **Cox models** to estimate the **impact of hire class** upon **termination likelihood**:
+
+-   **Employees hired in Jan '24 are almost 2.5x more likely terminate** than June '23 hires!
+
+-   **Less than 5% of Jan '24 employees are predicted to retain past 1yr** (vs \~25% of June '23 emps).
+
+![Cox termination risk ratios and predicted retention probabilities over time for emps in different hire dates.](images/coxmod_pcox_hiredate.png){#fig-9}
+
+```{r}
+#| label: coxmod_hiredate
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# Cox PH Hazard ~ Hire Date Cohort
+
+# Rename
+
+# Cox PH Hazard ~ Work Hire Date
+coxmod_hire_date <- coxph(Surv(time = seniority_days,
+                               event = termination) ~ hire_date_grp,
+                          data = dat1surv)
+
+
+## Base Summary => exp(coef) = Hazard Ratio estimates
+summary(coxmod_hire_date, digits = 3)
+
+
+## Interpretation Example: 
+### "Emps Hired on June 2023 are 0.4x as likely to terminate
+### "..." are 60% less likely to terminate
+
+## Tidy output + addition of exponentiated estimate
+tidy(coxmod_hire_date) |> 
+  mutate(exp_estimate = exp(estimate), 
+         .after = estimate) |> 
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+## Publication-style output
+coxmod_hire_date |> 
+  gtsummary::tbl_regression(exp = T,
+                           label = list(hire_date_grp = "Hire Class")) 
+
+## ANOVA test of model fit impact by sequentially adding predictors
+anova(coxmod_hire_date)
+
+# Visualize HR's and their Confidence Intervals
+survminer::ggforest(coxmod_hire_date)
+
+# Check Prop Hazards Assumption 
+##  Test whether HRs for each covariate remain constant over time 
+##   => e.g. tests whether or not there is a Time::Predictor interaction
+cox.zph(coxmod_hire_date)
+
+
+# Conrodance Index = evaluates discriminative ability
+## model's ability to correctly rank the survival times of pairs of individuals
+concordance(coxmod_hire_date)
+
+## Concordance Interpretation
+### "59% of  employee pairs have predicted order of surv imes consistent w/ actual survtimes"
+
+
+
+# Cox PH Prections = Relative Risk or Risk Rankings
+
+## Relative Risk = Linear Predictor = Risk Score = LOG RELATIVE HAZARD for individual
+## => Weighted Sum of Covariates = Bo + B1*x1 + B2* x2 + ...
+
+## Relative Hazard = Exp(Linear Predictor) = "1.5x the hazard of the baseline individual"
+## => Exponeniated Weighted Sum of Covariates = EXP(Bo + B1*X1 + ...)
+
+# "New"/Dummy Data of 2 emps who differ by hire_date
+dummy1 <-data.frame(hire_date_grp=c(unique(dat1surv$hire_date_grp)[1],
+                                    unique(dat1surv$hire_date_grp)[2]),
+                    seniority_days = c(100, 100))
+
+dummy1
+
+
+## Linear Predictor Prediction (LOG Relative Hazard)
+predict(coxmod_hire_date, newdata = dummy1, type = "lp")
+
+## Exponeniated Lin Pred = Relative Hazard
+exp(predict(coxmod_hire_date, newdata = dummy1, type = "lp")) 
+predict(coxmod_hire_date, newdata = dummy1, type = "risk")  # Direct Equivalent
+
+## Fitted survival curves based on model fit and "new" data
+newfit_dummy1 <- survfit(coxmod_hire_date, newdata = dummy1)
+
+### Yields survival probability tables side-by-side
+newfit_dummy1 |> tidy()
+
+## Plot comparison using GGPLOT customization
+newfit_dummy1 |> 
+  tidy() |> 
+  select(tenure_days = time, 
+         `June-2023` = estimate.1, 
+         `January-2024` = estimate.2) |> 
+  pivot_longer(cols = 2:3,
+               names_to = "hire_date",
+               values_to = "surv_prob") |> 
+  ggplot(aes(x = tenure_days, y = surv_prob, 
+             color = hire_date, group = hire_date)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Predicted Probability of Retaining",
+    title = "Employees Hired in Jan '24 Are Less Likely to Retain Over Time",
+    color = "Hire Class"
+  ) -> pc1hireclass
+
+pc1hireclass
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Cox Prop Hazards by Manager
+
+Finally, we use a Cox model to measure the effect of **managers** upon **termination likelihood:**
+
+-   **Employees under Jacob are equally likely to terminate** over time as those reporting to Susan.
+
+-   **Employees under Jacob have identical predicted retention probabilities** to those under Susan.
+
+![Cox termination risk ratios and predicted retention probabilities over time for emps under different managers.](images/coxmod_pcox_manager.png){#fig-10}
+
+```{r}
+#| label: coxmod_manager
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# Cox PH Hazard ~ Manager
+coxmod_manager <- coxph(Surv(time = seniority_days,
+                             event = termination) ~ manager,
+                        data = dat1surv)
+
+
+## Base Summary => exp(coef) = Hazard Ratio estimates
+summary(coxmod_manager, digits = 3)
+
+
+## Interpretation Example: 
+### "Emps on Jacob's team are ref group"
+### "Emps on Susan's team are equally as likely to terminate"
+
+## Tidy output + addition of exponentiated estimate
+tidy(coxmod_manager) |> 
+  mutate(exp_estimate = exp(estimate), 
+         .after = estimate) |> 
+  mutate(across(where(is.numeric), ~round(.x, 3)))
+
+## Publication-style output
+coxmod_manager |> 
+  gtsummary::tbl_regression(exp = T,
+                            label = list(manager = "Manager")) 
+
+## ANOVA test of model fit impact by sequentially adding predictors
+anova(coxmod_manager)
+
+# Visualize HR's and their Confidence Intervals
+survminer::ggforest(coxmod_manager)
+
+# Check Prop Hazards Assumption 
+##  Test whether HRs for each covariate remain constant over time 
+##   => e.g. tests whether or not there is a Time::Predictor interaction
+cox.zph(coxmod_pay_quantiles)
+
+
+# Conrodance Index = evaluates discriminative ability
+## model's ability to correctly rank the survival times of pairs of individuals
+concordance(coxmod_manager)
+
+## Concordance Interpretation
+### "72% of  employee pairs have predicted order of surv imes consistent w/ actual survtimes"
+
+
+
+# Cox PH Prections = Relative Risk or Risk Rankings
+
+## Relative Risk = Linear Predictor = Risk Score = LOG RELATIVE HAZARD for individual
+## => Weighted Sum of Covariates = Bo + B1*x1 + B2* x2 + ...
+
+## Relative Hazard = Exp(Linear Predictor) = "1.5x the hazard of the baseline individual"
+## => Exponeniated Weighted Sum of Covariates = EXP(Bo + B1*X1 + ...)
+
+# "New"/Dummy Data of 2 emps who differ by hire_date
+dummy1 <-data.frame(manager=c(levels(dat1surv$manager)),
+                    seniority_days = c(100, 100))
+
+dummy1
+
+
+## Linear Predictor Prediction (LOG Relative Hazard)
+predict(coxmod_manager, newdata = dummy1, type = "lp")
+
+## Exponeniated Lin Pred = Relative Hazard
+exp(predict(coxmod_manager, newdata = dummy1, type = "lp")) 
+predict(coxmod_manager, newdata = dummy1, type = "risk")  # Direct Equivalent
+
+## Fitted survival curves based on model fit and "new" data
+newfit_dummy1 <- survfit(coxmod_manager, newdata = dummy1)
+
+### Yields survival probability tables side-by-side
+newfit_dummy1 |> tidy()
+
+## Plot comparison using GGPLOT customization
+newfit_dummy1 |> 
+  tidy() |> 
+  select(tenure_days = time, 
+         "Jacob" = estimate.1, 
+         "Susan" = estimate.2) |> 
+  pivot_longer(cols = 2:3,
+               names_to = "manager",
+               values_to = "surv_prob") |> 
+  ggplot(aes(x = tenure_days, y = surv_prob, 
+             color = manager, group = manager)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_brewer(palette = "Set1") +
+  #  scale_fill_manual(values = c("#663171", "#ea7428","#0c7156")) +
+  labs(
+    x = "Seniority Days",
+    y = "Predicted Probability of Retaining",
+    title = "Employees Reporting to Jacob & Susan Have Identical Retention Outlooks",
+    color = "Manager"
+  ) -> pc1manager
+
+pc1manager
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Cox PH Recap
+
+We used Cox models to investigate termination risk factors and predict retention outlooks and found that:
+
+-   **Work facility**, **pay differences**, and **hire class membership** are all *significant predictors* of **termination likelihood** and **differential retention outlooks**.
+
+-   **Managers** ***do not***have a significant impact upon termination/retention likelihood.
+
+For our final section, we'll review how to model **voluntary vs involuntary turnover** with **competing risks models.**
+
+```{r}
+#| label: coxmod_combo
+#| warning: false
+#| message: false
+#| eval: false
+
+# 4-way side-by-side
+## pay band, facility, manager, hire class
+
+(pc1facility + pc1hireclass) / (pc1manager + pc1payband)
+
+
+# Adjusted to fit patchwork better
+
+pc1facility + theme(legend.title = element_text(size = rel(0.8)),
+                    legend.text = element_text(size = rel(0.7))) -> pc1facility_v2
+pc1hireclass + theme(legend.title = element_text(size = rel(0.8)),
+                     legend.text = element_text(size = rel(0.7))) -> pc1hireclass_v2
+pc1manager + theme(legend.title = element_text(size = rel(0.8)),
+                   legend.text = element_text(size = rel(0.7))) -> pc1manager_v2
+pc1payband + theme(legend.title = element_text(size = rel(0.8)),
+                   legend.text = element_text(size = rel(0.7))) -> pc1payband_v2
+
+
+(pc1facility_v2 + pc1hireclass_v2) / (pc1manager_v2 + pc1payband_v2)
+
+
+```
+
+------------------------------------------------------------------------
+
+### Competing Risks
+
+#### Baseline Competing Risks
+
+We'll start by taking a look at our **baseline competing risks** for all 150 employees, where we can see the *overall cumulative (running) probability of each termination event type:*
+
+-   **Voluntary Exit:** Displays the running probability of a **voluntary exit *on or before*** each time point, and shows that **around 55% of emps are expected to voluntarily exit by the 1yr mark.**
+
+-   **Involuntary Exit:** Displays the running probability of an **involuntary exit *on or before*** each time point, and shows that **\~28% of emps are expected to involuntary exit by the 1yr mark.**
+
+-   **No Termination:** Displays the running probability of **retaining** past each time point, and shows that roughly **80% of employees retain past 30d**, and **fewer than 20% retain past 1yr.**
+
+![Baseline Competing Risks Curve showing the separate cumulative probabilities of each event type.](images/comprisk1.png){#fig-11}
+
+```{r}
+#| label: comprisk_baseline
+#| warning: false
+#| message: false
+#| eval: false
+
+
+
+# Competing Risks: Intercept Model via Kap Meier
+
+
+# Fancy Name: Kaplan-Meier-based cause-specific competing risks model
+
+# estimates the cumulative incidence function (CIF) for each event type separately.
+
+# While we are modeling competing risks, we are still using a Kap Meier model currently
+## -> means we are just calculating separate curves for event event effectively (e.g. stratified)
+
+
+# IMPORTANT INTEPRETATION OF KM COMP RISKS: 
+# "The probability of experiencing voluntary termination over time, 
+# assuming that involuntary terminations never happen 
+# (i.e., treating them as independent right-censoring)."
+
+dat1surv |> names() |> sort()
+
+dat1surv |> count(termination_type_num)
+
+# Competing Risks Model ~ Intercept
+comprisk1 <- survfit(term_event_status ~ 1, 
+                     data=dat1surv)
+
+# Summary
+summary(comprisk1)
+
+# Tidy Summary = Cumulative Incidence Probabilities by Term Type
+tidy(comprisk1) |> head()
+
+
+# PRed Tab
+comprisk1 |> 
+  tidy() |> 
+  select(`Tenure Days` = time,
+         `At Risk (#)` = n.risk,
+         `Termed (#)` = n.event,
+         #   n_censor = n.censor,
+         `Retained (%)` = estimate,
+         `Conf Int (L)` = conf.low,
+         `Conf Int (H)` = conf.high,
+         `Term Event` = state) |> 
+  mutate(`Term Event` = case_when(`Term Event` == "(s0)" ~ "No Term",
+                                  `Term Event` == "Involuntary" ~ "Involuntary",
+                                  `Term Event` == "Voluntary" ~ "Voluntary")) |> 
+  mutate(`Term Event` = factor(`Term Event`,
+                               levels = c("No Term",
+                                          "Involuntary",
+                                          "Voluntary"))) -> comprisktab1
+
+
+## Check
+comprisktab1 |> head()
+
+
+# Plot: Competing Risks of Event Type (separate KM curves for each event type)
+## NOTE: Event type Probs do NOT necessarily add up
+
+## Plot
+comprisktab1 |>
+  ggplot(aes(x = `Tenure Days`, 
+             y = `Retained (%)`, 
+             color = `Term Event`, 
+             group = `Term Event`)) +
+  geom_step(linewidth = 0.85) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  scale_color_manual(values = c(colors$palette[3], colors$palette[2], colors$palette[5])) +
+  labs(
+    x = "Seniority Days",
+    y = "Cumulative Probability",
+    title = "Baseline Competing Risk Curves",
+    color = "Event"
+  ) -> pcr1_termtype
+
+pcr1_termtype
+
+
+
+
+###########3 Competing Risks: Intercept Model via Fine-Gray
+
+# Comp Risk Model: non-parametric estimate of the cumulative incidence of the event of interest. 
+## For all time points, the sum of the individual event cumincs = total cumic of ANY event
+### -> This was NOT true for the Kap Meier competing risks
+
+## Gray’s test is a modified Chi-squared test used to compare 2 or more groups.
+
+# adjust for competing risks by directly modeling the subdistribution hazard.
+
+
+# IMPORTANT INTEPRETATION OF FINE-GRAY COMP RISKS: 
+# "The probability of experiencing voluntary termination over time, 
+# accounting for the fact that some emps will turnover involuntary instead"
+
+names(dat1surv)
+
+
+# BASELINE POOLED
+
+## Output
+cuminc(term_event_status ~ 1, data = dat1surv) 
+cuminc(term_event_status ~ 1, data = dat1surv) |> 
+  tbl_cuminc(
+    times = c(0, 30, 90, 180, 360),
+    label_header = "**{time}d**") 
+
+## Plot
+cuminc(term_event_status ~ 1, data = dat1surv) |> 
+  ggcuminc(outcome = c("Involuntary","Voluntary"), size = 0.9) + 
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  theme1 +
+  labs(
+    x = "Tenure Days",
+    title = "Cumulative Probabilities"
+  ) -> pcr_finegray
+
+pcr_finegray
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Competing Termination Risks by Subgroup
+
+Next, we can use **Competing Risk** models to analyze whether the risk of voluntary and involuntary exits *varies significantly by facility, hire class, or pay band.*
+
+In doing so, we'll leverage 2 main Competing Risk visuals:
+
+-   **Risk Table:** Displays the c*umulative Voluntary vs Involuntary exit probabilities over time for each variable* (e.g. the probability of a Vol vs Invol termination on or before Day 30 by facility)
+
+-   **Risk Curve**: *Visual representation of the risk table in a curve/step function*, where each time point with an observed term type raises the running probability of experiencing that event.
+
+------------------------------------------------------------------------
+
+#### Competing Termination Risks by Facility
+
+The plot below shows a **risk table** (left) and **risk curve** (right) of **cumulative Vol vs Invol probabilities by facility** through the 1mon, 3mon, 6mon, and 1yr tenure milestones:
+
+-   Cumulative Risk of **Involuntary** Termination ***does not*** vary significantly by **facility** over time.
+
+-   Cumulative Risk of **Voluntary** Termination ***does*** vary significantly by **facility** over time.
+
+-   **Charlotte employees have the highest cumulative risk of voluntary turnover through the 1yr mark, with about 70% experiencing a voluntary exit** (vs 50% for Tampa and 42% for Denver).
+
+![Side-by-side risk table and risk curve for voluntary vs involuntary terminations over time by facility.](images/comprisk_facility.png){#fig-12}
+
+```{r}
+#| label: comprisk_facility
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# Competing Risks Model: Facility Added 
+
+# Cumulative Term Event Incident Risk ~ Facility
+
+
+## Output Table of Cume Inc Prob by Event Type
+cuminc(term_event_status ~ facility, data = dat1surv) |> 
+  tbl_cuminc(
+    label = "Facility",
+    statistic = "{estimate}%",
+    outcomes = c("Voluntary","Involuntary"),
+    times = c(0, 30, 90, 180, 360),
+    label_header = "**{time}d**") |>  
+  add_p()
+
+
+
+## Plot ~ Facility
+cuminc(term_event_status ~ facility, data = dat1surv) |> 
+  ggcuminc(outcome = c("Involuntary","Voluntary"), size = 0.9) + 
+  #  facet_wrap(~strata) +
+  facet_wrap(~outcome) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+ theme_comprisk +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(
+    x = "Tenure Days",
+    title = "Cumulative Risk of Termination by Facility & Term Type"
+  ) -> pcr2_facility
+
+pcr2_facility
+
+```
+
+------------------------------------------------------------------------
+
+#### Competing Risks by Hire Date
+
+Now we'll estimate our **risk tables** (left) and **risk curves** (right) by **Hire Date:**
+
+-   Cumulative Risk of **Involuntary** termination ***does*** vary significantly by **hire class** over time.
+
+-   Cumulative Risk of **Voluntary** termination ***does not*** vary significantly by **hire class** over time.
+
+-   **Employees hired in Jan '24 have a higher cumulative risk of Involuntary turnover through the 90d mark**, **with 31% experiencing an involuntary exit** (vs 24% of June '23 hires).
+
+**Note:** The risk curves only show **observed time points** for each hire class, so while the Jan '24 Voluntary risk curve *looks* to be higher, that difference is not expected to last through 1yr.
+
+![Side-by-side risk table and risk curve for voluntary vs involuntary terminations over time by hire date](images/comprisk_hiredate.png){#fig-13}
+
+```{r}
+#| label: comprisk_hiredate
+#| warning: false
+#| message: false
+#| eval: false
+
+
+# Cumulative Term Event Incident Risk ~ HIRE DATE
+
+
+## Output Table of Cume Inc Prob by Event Type
+cuminc(term_event_status ~ hire_date_grp, data = dat1surv) |> 
+  tbl_cuminc(
+    label = "Hire Class",
+    statistic = "{estimate}%",
+    outcomes = c("Voluntary","Involuntary"),
+    times = c(0, 30, 90, 180, 360),
+    label_header = "**{time}d**") |>  
+  add_p()
+
+
+
+## Plot ~ Facility
+cuminc(term_event_status ~ hire_date_grp, data = dat1surv) |> 
+  ggcuminc(outcome = c("Involuntary","Voluntary"), size = 0.9) + 
+  #  facet_wrap(~strata) +
+  facet_wrap(~outcome) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  theme_comprisk +
+  scale_color_manual(values = c(colors$palette[1], colors$palette[2], colors$palette[3])) +
+  labs(
+    x = "Tenure Days",
+    title = "Cumulative Risk of Termination by Hire Class & Term Type"
+  ) -> pcr2_hiredate
+
+pcr2_hiredate
+
+
+
+```
+
+------------------------------------------------------------------------
+
+#### Competing Risks by Pay Band
+
+For our last comparison, we'll estimate our **risk tables** (left) and **risk curves** (right) by **Pay Band:**
+
+-   **Cumulative Risk of *both* Voluntary and Involuntary turnover varies significantly by pay band**.
+
+-   The risk table shows that **Top 20% earners have significantly lower cumulative risks of Voluntary and Involuntary turnover compared to Bottom 20% earners across all time points**.
+
+-   Ex**:** Through the 1yr mark, **(Top 20% vs Bottom 20%)** earners have a **(23% vs 45%) Involuntary** cumulative risk, and a **(48% vs 28%)** **Voluntary** cumulative risk of termination.
+
+**Note:** This one gets a little messy. Because the sample size is limited (\~150 employees), slicing the data by 2 exit types across 5 pay bands introduces noise and instability. In practice, larger sample sizes would be necessary to reliably estimate differences at this level of granularity.
+
+![Side-by-side risk table and risk curve for voluntary vs involuntary terminations over time by pay band](images/comprisk_payband.png){#fig-14}
+
+```{r}
+#| label: comprisk_payband
+#| warning: false
+#| message: false
+#| eval: false
+
+
+
+# Cumulative Term Event Incident Risk ~ PAY BAND
+
+
+## Output Table of Cume Inc Prob by Event Type
+cuminc(term_event_status ~ pay_quintile, data = dat1surv) |> 
+  tbl_cuminc(
+    label = "Pay Band",
+    statistic = "{estimate}%",
+    outcomes = c("Voluntary","Involuntary"),
+    times = c(0, 30, 90, 180, 360),
+    label_header = "**{time}d**") |>  
+  add_p()
+
+
+
+## Plot ~ Pay Band
+cuminc(term_event_status ~ pay_quintile, data = dat1surv) |> 
+  ggcuminc(outcome = c("Involuntary","Voluntary"), size = 0.9) + 
+  #  facet_wrap(~strata) +
+  facet_wrap(~outcome) +
+  scale_x_continuous(breaks = seq(0, 365, 30),
+                     limits = c(0, 365),
+                     expand = c(0, .01)) +
+  scale_y_continuous(labels = scales::label_percent(),
+                     breaks = seq(0, 1, .1),
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     sec.axis = sec_axis(~.,
+                                         breaks = seq(0, 1, .1),
+                                         labels = scales::label_percent(),
+                                         name = NULL)) +
+  theme_comprisk +
+  scale_color_brewer(palette = "Set1") +
+  labs(
+    x = "Tenure Days",
+    title = "Cumulative Risk of Termination by Pay Band & Term Type"
+  ) -> pcr2_payband
+
+pcr2_payband
+
+
+
+```
+
+```{r}
+#| label: comprisk_compare_models
+#| warning: false
+#| message: false
+#| eval: false
+
+
+
+# 2 approaches to CR Reg
+
+## a) Cause-Specific
+### -> instant rate of occurrence of event of interest in those w/o ANY EVENT yet
+#####    -> e.g. those who are ENTIRELY & COMPLETELY event free
+### -> Cox PH Reg Model
+
+## b) Subdistribution Hazard
+### -> instant rate of event of interest in those not yet experienced EVENT OF INTEREST
+#### -> but MAY HAVE experienced COMPETING EVENT
+##### -> e.g. rate of INVOL for those who have not INVOL termed 
+##### ->  e.g. those who either COMPLETELY ACTIVE or who have VOL TERMED ONLY
+### -> Fine-Gray Model
+
+# Hire Date = Non-Sig for Vol but Sig for Invol (Jan less likely to Invol)
+crr(term_event_status ~ hire_date_grp, data = dat1surv, failcode = "Involuntary")
+crr(term_event_status ~ hire_date_grp, data = dat1surv, failcode = "Voluntary")
+
+# Facility = Sig for Charlotte for Vol but NOT Invol (2)
+crr(term_event_status ~ facility, data = dat1surv, failcode = "Involuntary")
+crr(term_event_status ~ facility, data = dat1surv, failcode = "Voluntary")
+
+# Hourly Pay = Sig Lower Hazard for TOP QUINTILE for BOTH invol and vol
+crr(term_event_status ~ pay_rate_hourly, data = dat1surv, failcode = "Involuntary")
+crr(term_event_status ~ pay_rate_hourly, data = dat1surv, failcode = "Voluntary")
+
+## Add Table with Exp Coeff Estimates
+### -> Most are sig for Invol (Top has .37x hazard as Bottom, and sig for other top3)
+### -> Only Top Quintile is sig diff for Voluntary (.3x hazard of bottom)
+crr(term_event_status ~ pay_quintile, data = dat1surv, failcode = "Involuntary") |> 
+  tbl_regression(exp = T,
+                 label = list(pay_quintile = "Pay Band"))
+
+# NOTE IMPORTANT: CUMINC vs CRR
+
+# CUMINC = comparing  cumulative incidence curves for the different groups (Aalen-Johansen estimator)
+## -> determining if there is a sigdiff in  cume probsof  event occurring across those groups
+
+# FINE-GRAY REGRESSION = testing whether subdistribution hazard of event differs across groups
+## -> directly estimates the effects of covariate upon the subdistro hazard
+
+
+
+
+# Compare Fine-Gray Regression to Cause-Specific (Cox PH)
+## -> Sig lower hazard for June 23 compared to Jan 24 (Fine-Gray was non-sig)
+#### => DISCREPANCY b/c Cox PH (and KM) treat competing risks as censoring
+####### => OVERESTIMATES HAZARD PROBS for event type 1 and 2
+
+## COX shows Vol HR of 1.94 for Jan 2024 vs June 2023
+coxph(
+  Surv(seniority_days, ifelse(termination_type_num == "Voluntary", 1, 0)) ~ hire_date_grp, 
+  data = dat1surv
+) |> 
+  tbl_regression(exp = TRUE)
+
+
+
+## Fine Gray shows a NONSIG Vol HR of 1.16 for Jan 2024 vs June 2023 
+crr(term_event_status ~ hire_date_grp, data = dat1surv, failcode = "Voluntary") |> 
+  tbl_regression(exp = T)
+```
+
+------------------------------------------------------------------------
+
+# Executive Summary
+
+Let's summarize the insights we've gathered for our CPO:
+
+-   Overall, **fewer than 20% of employees can be expected to retain past 1 year after hire**, with **\~55% expected to terminate voluntarily**, and **\~30% involuntarily.**
+
+-   **Denver is the only facility consistently meeting the staffing goals** of 35 emps per facility. Hiring patterns (class date and size) are identical, so **headcount fluctuations must be driven by differences in employee retention.**
+
+-   **Retention varies significantly by work facility, hire class, and pay band**, but not by manager. **Working in Denver, having a hire date of June '23, and earning more than one's peers** are all significant predictors of a better retention outlook over time.
+
+-   **Voluntary and Involuntary terminations have different risk profiles.** Factors that influence the overall risk of termination don't always impact voluntary vs involuntary risks equally.
+
+------------------------------------------------------------------------
+
+# Recommended Resources
+
+Thanks so much for sticking around!
+
+Here's a list of references I've found useful and that I recommend for anyone wanting to learn more about survival analysis, employee retention, or coding in R:
+
+-   [**Survival Analysis in R**](https://www.emilyzabor.com/survival-analysis-in-r.html) by Emily Zabor
+
+-   [**R for Data Science**](https://r4ds.hadley.nz/) by Hadley Wickham
+
+-   [**Survival Analysis R package vignette**](https://cran.r-project.org/web/packages/survival/vignettes/survival.pdf) by Terry Therneau
