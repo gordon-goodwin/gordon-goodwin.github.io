@@ -8,7 +8,7 @@ Below you'll find a sample of professional and personal projects I've created ov
 ### People Analytics Projects
 
 - [Survival Analysis & Employee Retention](/R_projects/Survival_Analysis_Employee_Retention/Survival_Analysis_Employee_Retention.html)
-  - Guide illustrating how survival analysis can be employed to model workforce retention
+  - Guide illustrating how survival analysis can be employed to model workforce retention using R
 - [Simpson's Paradox](/R_projects/Simpsons_Paradox/Simpsons_Paradox_at_Work.html)
   - Guide illustrating Simpson's Paradox with 2 People Analytics case studies
 - [Psychometric Review of Python Competency Assessment](/R_projects/Psychometric_Validation/Redacted%20Report.pdf)
