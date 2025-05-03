@@ -126,7 +126,7 @@ Survival analysis techniques seek to model the **distribution** of $(t)$, or the
 
 #### Survival Function
 
-The **survival function** $S(t)$ is simply the *probability of surviving (retaining) past time* $t$*.*
+The **survival function** $S(t)$ is simply the *cumulative probability of surviving (retaining) past time* $t$*.*
 
 Or, written more formally:
 
@@ -135,6 +135,12 @@ $$ S(t) = P(T>t)$$
 **Example:** If we estimate that the probability of an employee retaining past Day 90 is 80%, then we can write the **survival function** as:
 
 $$ S(90) = P(T > 90) = 0.8 $$
+
+::: callout-note
+## Survival probabilities are cumulative because retaining past a later time point (e.g., Day 10) requires surviving every prior time point (e.g., Day 1, Day 2, … up to Day 10). Each probability builds on the one before it.
+:::
+
+------------------------------------------------------------------------
 
 The survival function can also be expressed as the *complement* of the **cumulative distribution function (CDF)** $F(t)$, which represents the *probability of the event (termination) occurring on or before time* $t$:
 
@@ -220,17 +226,81 @@ We'll be using 3 main **survival techniques** for our tutorial:
 
 ------------------------------------------------------------------------
 
-## Kaplan-Meier
+## Kaplan-Meier Curves
+
+**Kaplan-Meier (KM)** curves provide **nonparametric** estimates of the **survival function**, which gives the running probability of surviving (retaining) over time.
+
+### KM Survival Estimates
+
+Under the Kaplan-Meier framework, the probability of surviving beyond $t$ is estimated by multiplying *the conditional survival probabilities* for each prior time point $t_i \leq t$:
+
+$$
+\hat{KM}(t) = S(t) = p(T > t) = \prod_{t_i \leq t} \left(1 - {\frac{d_i}{n_i}} \right),
+$$
+
+where:
+
+-    $n_i$ is the number of subjects **at-risk of the event** (active emps at-risk of termination);
+
+-   $d_i$ is the number of subjects at-risk who **experienced the event** (terminated);
+
+-   $(1 - \frac{d_i}{n_i})$ is the **proportion of at-risk subjects** who ***did not*** experience the event;
+
+In other words, the KM estimator is a **step function** that multiplies the conditional probabilities of surviving each time point $t_i$ up to and including time $t$.
+
+------------------------------------------------------------------------
+
+**Kaplan-Meier** estimates are **nonparametric** methods because they are entirely **data-driven:**
+
+-   No underlying assumptions about how the survival data is distributed are made, and no parameters are estimated.
+
+-   Survival probabilities are updated only at time points where events (e.g., terminations) occur, using only the observed proportion of individuals who survived at each event time.
 
 ::: callout-caution
-## Work in Progress! This is a temporary placeholder section for the math underlying the Kaplan Meier model.
+## While the non-parametric nature of the KM estimator makes it intuitive and transparent ("e.g. it lets the data speak for itself"), this comes at a price. KM models \*do not\* quantify effects or explain differences.
 :::
 
-**Kaplan-Meier (KM) Survival Curves** allow us to estimate the **cumulative probability of** **retaining over time** (e.g. the probability of retaining past each tenure day after-hire).
+------------------------------------------------------------------------
 
--   For each time point where a termination was observed, the KM curve estimates the *proportion of employees that can be expected to retain (survive) past that time point.*
+### KM Significance Testing
 
--   When we say "***cumulative***", we mean that the probability of retaining through Day 10 combines the probabilities of first surviving Day 1, then Day 2, ... , all the way through Day 10.
+Significance testing of differences in KM survival curves across groups is possible, wherein the **null hypothesis** ($H_0$) is that the **survival functions are equal across groups.**
+
+Put more formally, for Groups (1) and (2), and for all time points $t$, our null hypothesis $H_0$ is:
+
+$$
+H_0: S_1(t) = S_2(t)
+$$
+
+The most common significance test for KM curves is the **log-rank test**, which is a **global test** of the group differences in **observed vs expected** events, accumulated **over all time points**:
+
+$$
+\chi^2 = \frac{\left[ \sum_{j} (O_{1j} - E_{1j}) \right]^2}{\sum_{j} V_{1j}},
+$$
+
+where:
+
+-   $\chi^2$: test statistic following a *Chi-sq* distribution over $(k) groups-1$ degrees of freedom
+
+-   $j$ indexes over all time points
+
+-   $O_{1j}$ is the number of **observed** events in Group 1 at time $t_j$
+
+-   $E_{1j}$ is the number of **expected** events in Group 1 at time $t_j$
+
+-   $V_{1j}$ is the variance of the difference at time $t_j$
+
+**Under the null-hypothesis of equivalent survival functions**, the expected \# of events at any given time ($E_{1j}$), is just the the number of *total* events observed ($d_j$) weighted by the proportion of *total* at-risk subjects *that belong to Group 1*:
+
+$$
+E_{1j} = \frac{n_{1j}}{n_j}*d_j
+$$
+
+In other words, the log-rank test evaluates the **time-accumulated difference** between the number of events ***actually*** observed in Group 1, and the number of events we would ***expect*** to see based on Group 1's share of the at-risk subject pool, if survival probabilities were equivalent (e.g. if group size was the only determinant factor in group-level event counts).
+
+-    **Significant log-rank results imply that survival is likely *not* independent of group membership**. Our observed group-level differences in event counts over time are highly improbable if survival probabilities were truly equivalent.
+
+-   **Non-significant log-rank results imply that survival *is* likely independent of group membership**. Our observed group-level differences in event counts over time are within a reasonable range of what we would expect if group survival curves were truly equivalent.
 
 ------------------------------------------------------------------------
 
@@ -307,6 +377,12 @@ library(GGally)
 library(gt)
 
 
+# IMPORTANT NOTE: FONT AND THEME SET-UP IS OPTIONAL!!!!
+## You only NEED to load the packages here
+
+### -> Font and Theme set up is only for visual customization if desired
+### -> Font settings are notoriously finicky across PCs
+
 # Fonts (place the font and theme files in your working directory)
 source("font_setup.R")
 
@@ -375,10 +451,7 @@ theme_set(theme1)
 
 
 
-
-
-
-### SEPARATE THEME FOR COMPETING RISKS
+## SEPARATE THEME FOR COMPETING RISKS MODELS (Used at end)
 theme_bw() +
   theme(legend.position = "top",
         strip.background = element_roundrect(fill = "#1a318b",color = NA, r = 0.15),
@@ -431,7 +504,11 @@ Our first dataset contains monthly headcount data by facility, with 1 row (HC va
 #| warn: false
 #| message: false
 
-# OVERVIEW: Headcount data has monthly headcounts by grouping vars
+
+# DATA OVERVIEW: Monthly Headcount data by work facility
+
+# NOTE: This is only needed for the optional headcount trends section
+## -> You do NOT need to load HC data to run survival/retention
 
 # Load Headcount Data 
 dat1head <- read_csv("headcount_trend_pa_tutorial.csv") 
@@ -466,8 +543,9 @@ Our second dataset contains retention and HR data, with 1 row per employee. We h
 
 
 # OVERVIEW: Basic Employee data that can be used to model retention
+## DATA FORMAT: 1 row per employee representing the latest recorded time
 
-# Load Headcount Data 
+# Load Retention Data 
 dat1surv <- read_csv("survival_analysis_pa_tutorial.csv") 
 
 # Clean Col Names
@@ -520,7 +598,8 @@ dat1surv |>
 
 
 
-## NUMERIC CODING FOR TERMINATION TYPE
+## NUMERIC CODING FOR TERMINATION TYPE 
+### -> Used for competing risk model at end
 dat1surv |> 
   mutate(termination_type_num = case_when(is.na(termination_type) ~ 0,
                                           termination_type == "Voluntary" ~ 1,
@@ -531,15 +610,17 @@ dat1surv |>
                                                   "Involuntary"))) -> dat1surv
 
 ## Surv() function creates a survival object based on (Time, Status) pairs
-## (Time = time observed, Status = event occurred or not, censors denoted via +)
+## (Time = latest time observed, Status = event occurred or not, censors denoted via +)
 
-# OVERALL SURVIVAL OBJECT (Time, Status): ANY TERM TYPE/EVENT
+# OVERALL SURVIVAL OBJECT (Time, Status): 
+## All term types included/treated same, (time, 0 = Active vs 1 = Termed)
 dat1surv |> 
   ## Survival Object created
   mutate(surv_status = Surv(time = seniority_days, event = termination),
          .after = seniority_days) -> dat1surv
 
 # COMPETING RISKS SURVIVAL OBJECT: SEPARATES VOL VS INVOL VS ACTIVE
+## Still (Time, Status), but now status: (0 = Active, 1 = Vol, 2 = Invol)
 dat1surv |> 
   ## Survival Object created
   mutate(term_event_status = Surv(time = seniority_days,event = termination_type_num),
@@ -594,6 +675,7 @@ We'll start with a simple plot of headcount over time, where we see that **headc
 
 
 # GOAL: Visualize headcount fluctuations over time by work facility
+## NOTE: if u did not load the font/theme setup, u can swap color palette
 
 ## Plot
 dat1head |> 
@@ -619,7 +701,7 @@ dat1head |>
   labs(x = "Date", y = "Headcount", 
        color = "Facility", title = "Headcount by Work Facility") -> p1heads
 
-# View with annotation
+# View with annotation for Staffing Goal
 p1heads + 
   annotate("segment", 
            x = as_date("2023-08-01"),
@@ -665,7 +747,6 @@ When we review the company's **baseline termination rate**, we see that **roughl
 
 
 # OVERALL (All Emps)
-
 
 dat1surv |> 
   count(termination_status) |> 
@@ -714,8 +795,7 @@ Our next step is to identify possible **termination risk factors** to investigat
 #| #out-width: 100%
 #| #fig-format: svg
 
-
-
+# NOTE: Create the 4 sub plots first and then combine to 4-panel plot
 
 # FACILITY
 dat1surv |> 
@@ -741,6 +821,8 @@ dat1surv |>
   labs(x = "Work Facility", y = "Employees (%)", fill = "Status",
        title = "Termination Rates Vary by Work Facility") -> p2status_facility
 
+## View
+p2status_facility
 
 
 # MANAGER
@@ -767,6 +849,9 @@ dat1surv |>
   scale_fill_manual(values = c(colors$palette[12],colors$palette[7])) +
   labs(x = "Manager", y = "Employees (%)", fill = "Status",
        title = "Termination Rates Do *Not* Vary by Manager") -> p2status_manager
+
+## View
+p2status_manager
 
 
 
@@ -796,6 +881,9 @@ dat1surv |>
   labs(x = "Hire Class", y = "Employees (%)", fill = "Status",
        title = "Termination Rates Vary Slightly by Hire Class") -> p2status_hireclass
 
+## View
+p2status_hireclass
+
 
 
 # HOURLY PAY DENSITY
@@ -814,17 +902,22 @@ dat1surv |>
   labs(x = "Hourly Pay", fill = "Status", y = NULL,
        title = "Lower Earners Appear More Likely to Terminate") -> p2status_pay
 
+## View
+p2status_pay
+
 
 
 
 # 4-way Status Plot Combo
+
+## Edit individual plots to remove legend 
 p2status_facility + theme(legend.position = "none") -> p2status_facility
 p2status_manager + theme(legend.position = "none") -> p2status_manager
 p2status_hireclass + theme(legend.position = "none") -> p2status_hireclass
 p2status_pay + theme(legend.position = "none") -> p2status_pay
 
 
-# Option 1 (all slices + pay)
+## Combine into 4-panel
 (p2status_facility + p2status_pay) / (p2status_manager + p2status_hireclass)
 
 ```
@@ -885,17 +978,14 @@ survfit(surv_status ~ 1,
 ## e.g. across all employees, T = 111 days is where surv prob dips below 50%
 print(survmod_overall)
 
-# Summary - default survival table (not usable as DF)
+# Summary - default survival table (not usable as dataframe)
 ## For each observed time point, gives the estimated prob of surviving past T = t
 summary(survmod_overall)
 
 
 
-
-
 # SURVIVAL TABLE
-
-# extract results to a data.frame
+# extract model results to a data.frame that we can clean up/prettify
 fortify(survmod_overall) |> 
   mutate(across(.cols = c(surv, std.err, upper, lower),
                 .fns = ~round(.x, 3))) |> 
@@ -1213,13 +1303,13 @@ survfit(surv_status ~ hire_date_grp,
 # Summary gives GROUP_SPECIFIC survival tables
 summary(survmod_hiredate)
 
-# Print gives median retention time of each facility
+# Print gives median retention time of each hire class
 print(survmod_hiredate)
 
 
 
 # PREDICT
-# "Predict" Survival past specific times BY FACILITY
+# "Predict" Survival past specific times BY HIRE CLASS
 ## -> Again, KM is non-parametric so only get preds for times observed
 ### -> Extrapolating to non-observed times just fills previous t-value
 summary(survmod_hiredate, times = c(30, 60, 90, 150, 180, 365))
@@ -1280,7 +1370,7 @@ survtab_hiredate_wide |>
 
 
 
-# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of HIRE CLASS?"
 
 ## LOG RANK (CHI SQ TEST OF IND) TEST
 ### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
@@ -1368,7 +1458,7 @@ pk2d
 # MANAGER
 
 
-# KM Surv ~ MAnager
+# KM Surv ~ MANAGER
 survfit(surv_status ~ manager,
         data = dat1surv) -> survmod_manager
 
@@ -1383,7 +1473,7 @@ print(survmod_manager)
 
 
 # PREDICT
-# "Predict" Survival past specific times BY MAnager
+# "Predict" Survival past specific times BY MANAGER
 ## -> Again, KM is non-parametric so only get preds for times observed
 ### -> Extrapolating to non-observed times just fills previous t-value
 summary(survmod_manager, times = c(30, 60, 90, 150, 180, 365))
@@ -1444,7 +1534,7 @@ survtab_manager_wide |>
 
 
 
-# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of MANAGER?"
 
 ## LOG RANK (CHI SQ TEST OF IND) TEST
 ### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
@@ -1537,13 +1627,13 @@ survfit(surv_status ~ pay_quintile,
 # Summary gives GROUP_SPECIFIC survival tables
 summary(survmod_payband)
 
-# Print gives median retention time of each manager
+# Print gives median retention time of each PAY BAND
 print(survmod_payband)
 
 
 
 # PREDICT
-# "Predict" Survival past specific times BY MAnager
+# "Predict" Survival past specific times BY PAY BAND
 ## -> Again, KM is non-parametric so only get preds for times observed
 ### -> Extrapolating to non-observed times just fills previous t-value
 summary(survmod_payband, times = c(30, 60, 90, 150, 180, 365))
@@ -1607,7 +1697,7 @@ survtab_payband_wide |>
 
 
 
-# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of Facility?"
+# STATISTICAL SIG TEST: "Is termination occurrence INDEPENDENT of PAY BAND?"
 
 ## LOG RANK (CHI SQ TEST OF IND) TEST
 ### Compares Obs vs Exp AT EACH TIME POINT and then WEIGHTS TIME POINTS EQUAL
@@ -2004,7 +2094,7 @@ Now we'll use **Cox models** to estimate the **impact of hire class** upon **ter
 
 # Rename
 
-# Cox PH Hazard ~ Work Hire Date
+# Cox PH Hazard ~ Hire Date
 coxmod_hire_date <- coxph(Surv(time = seniority_days,
                                event = termination) ~ hire_date_grp,
                           data = dat1surv)
@@ -2189,7 +2279,7 @@ concordance(coxmod_manager)
 ## Relative Hazard = Exp(Linear Predictor) = "1.5x the hazard of the baseline individual"
 ## => Exponeniated Weighted Sum of Covariates = EXP(Bo + B1*X1 + ...)
 
-# "New"/Dummy Data of 2 emps who differ by hire_date
+# "New"/Dummy Data of 2 emps who differ by Manager
 dummy1 <-data.frame(manager=c(levels(dat1surv$manager)),
                     seniority_days = c(100, 100))
 
@@ -2267,11 +2357,7 @@ For our final section, we'll review how to model **voluntary vs involuntary turn
 # 4-way side-by-side
 ## pay band, facility, manager, hire class
 
-(pc1facility + pc1hireclass) / (pc1manager + pc1payband)
-
-
-# Adjusted to fit patchwork better
-
+# Adjusted individual plots to fit combo plot better
 pc1facility + theme(legend.title = element_text(size = rel(0.8)),
                     legend.text = element_text(size = rel(0.7))) -> pc1facility_v2
 pc1hireclass + theme(legend.title = element_text(size = rel(0.8)),
@@ -2281,7 +2367,7 @@ pc1manager + theme(legend.title = element_text(size = rel(0.8)),
 pc1payband + theme(legend.title = element_text(size = rel(0.8)),
                    legend.text = element_text(size = rel(0.7))) -> pc1payband_v2
 
-
+# 4-way panel
 (pc1facility_v2 + pc1hireclass_v2) / (pc1manager_v2 + pc1payband_v2)
 
 
@@ -2567,7 +2653,7 @@ cuminc(term_event_status ~ hire_date_grp, data = dat1surv) |>
 
 
 
-## Plot ~ Facility
+## Plot ~ Hire Date
 cuminc(term_event_status ~ hire_date_grp, data = dat1surv) |> 
   ggcuminc(outcome = c("Involuntary","Voluntary"), size = 0.9) + 
   #  facet_wrap(~strata) +
