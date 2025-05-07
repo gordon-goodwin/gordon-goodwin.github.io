@@ -44,13 +44,13 @@ In the following guide, we'll use a **people analytics case study** to illustrat
 
 -   What is the **predicted probability** that an employee **retains past a given milestone**?
 
-::: callout-important
-## The first section is a detailed overview of survival analysis and some of the underlying math. If you prefer, feel free to skip the technical stuff and jump straight to the math-free case study and R code!
-:::
-
 ------------------------------------------------------------------------
 
 # Survival Analysis Overview
+
+::: callout-important
+## Math Alert!! The first section is a detailed overview of survival analysis and the underlying math. If you're mainly interested in the case study or the R code, feel free to skip ahead to the Case Study section!
+:::
 
 **Survival Analysis**: a collection of statistical techniques specifically designed to handle **time-to-event** data, where the outcome of interest is the **time recorded before some event occurs**.
 
@@ -58,7 +58,21 @@ In the following guide, we'll use a **people analytics case study** to illustrat
 -   **Machine run-time hours** elapsed before **failure**
 -   **Days survived** after a cancer diagnosis before **death**
 
-*So what's the big deal? Why do we need a special set of techniques for that?*
+**Time-to-event data** (commonly called **survival data**) is typically structured as follows:
+
+-   **1 row per subject** representing the subject's *latest recorded time point.*
+
+-   **(Time, Status)** pair encoding the **time-to-event** component
+
+    -   **Time** = latest recorded time point (e.g. latest tenure day)
+
+    -   **Status** = binary (0/1) indicator of event occurrence (e.g. 1 = termed)
+
+-   **Metadata** as of latest time recorded (e.g. employee's latest Department or Manager)
+
+------------------------------------------------------------------------
+
+*So what's the big deal? Why do we need a special set of techniques for time-to-event data?*
 
 ------------------------------------------------------------------------
 
@@ -101,8 +115,6 @@ Survival techniques are uniquely valuable because they are specifically designed
 ------------------------------------------------------------------------
 
 ## Survival Modeling Framework
-
-Now we'll quickly review some of the key survival concepts and techniques.
 
 The key outcome of interest in **survival analysis** is the **time-to-event**, written in **(** $t=time$, $\delta=status$ **)** format. Each subject & study period (e.g. employee & employment period) are represented with a single ($t=time$, $\delta=status$) record that reflects the **latest time of observation** (e.g. last day employed).
 
@@ -236,11 +248,9 @@ Under the Kaplan-Meier framework, the probability of surviving beyond $t$ is est
 
 $$
 \hat{KM}(t) = S(t) = p(T > t) = \prod_{t_i \leq t} \left(1 - {\frac{d_i}{n_i}} \right),
-$$
+$$where:
 
-where:
-
--    $n_i$ is the number of subjects **at-risk of the event** (active emps at-risk of termination);
+-   $n_i$ is the number of subjects **at-risk of the event** (active emps at-risk of termination);
 
 -   $d_i$ is the number of subjects at-risk who **experienced the event** (terminated);
 
@@ -298,9 +308,13 @@ $$
 
 In other words, the log-rank test evaluates the **time-accumulated difference** between the number of events ***actually*** observed in Group 1, and the number of events we would ***expect*** to see based on Group 1's share of the at-risk subject pool, if survival probabilities were equivalent (e.g. if group size was the only determinant factor in group-level event counts).
 
--    **Significant log-rank results imply that survival is likely *not* independent of group membership**. Our observed group-level differences in event counts over time are highly improbable if survival probabilities were truly equivalent.
+-   **Significant log-rank results imply that survival is likely *not* independent of group membership**. Our observed group-level differences in event counts over time are highly improbable if survival probabilities were truly equivalent.
 
 -   **Non-significant log-rank results imply that survival *is* likely independent of group membership**. Our observed group-level differences in event counts over time are within a reasonable range of what we would expect if group survival curves were truly equivalent.
+
+::: callout-caution
+## While KM curves allow for multiple grouping factors to be evaluated simultaneously, the contrasts are always *univariate* and require a complete partitioning of the sample space (e.g. modeling 2 Managers and 2 Departments requires 4 separate KM curves). *Covariate impacts are not actually modeled!*
+:::
 
 ------------------------------------------------------------------------
 
@@ -310,15 +324,41 @@ In other words, the log-rank test evaluates the **time-accumulated difference** 
 ## Work in Progress! This is a temporary placeholder section for the math underlying the Cox Proportional Hazards model.
 :::
 
-The **Cox Proportional Hazards (CPH)** regression model allows us to assess how different risk factors **increase or decrease the likelihood of an employee terminating**.
+**Cox Proportional Hazards (CPH)** regression models provide a **semi-parametric** approach to estimating the **impact of covariates** upon the **hazard function** $h(t,X)$.
 
--   Because termination and retention are *complementary*, Cox models also give us the ability to **predict retention probabilities and times,** and to generate **retention curves**.
+-   $h(t,X)$ = instantaneous risk of experiencing an event at time $t$ given covariates $X$ and prior survival up to that point.
 
--   Cox models estimate **odds ratios** (also called **hazard ratios**), which estimate **how likely employees in one subgroup are to terminate** relative to employees in another subgroup.
+Rather than directly modeling the underlying event risk over time, Cox models estimate how covariates influence the ***relative risk*** of the event, or the ***relative*** ***likelihood of event occurrence***.
 
-::: callout-note
-## \*\*\*Note: Cox models require an assumption of proportional hazards over time. At a high level this just means that if Denver employees have a 4x greater risk of termination than Charlotte employees, then we assume that 4:1 risk ratio is constant over all tenure time points after hire.
-:::
+------------------------------------------------------------------------
+
+### Cox Proportional Hazards Estimation
+
+Cox models are **semi-parametric** because they express each subject's hazard at time $t$, or $h(t,X)$, as the **product** of an *unspecified baseline hazard* $h_0(t)$ and a *scaling factor* determined by the subject's covariate values $X$:
+
+![](images/formula_coxph.png)
+
+### Hazard Ratios
+
+When we fit a Cox model, our coefficients can be interpreted as follows:
+
+-   **Log Hazard Ratios** = "raw" coefficients $\beta_p$ = e*xpected change in the log hazard associated with a 1-unit increase in* $X_p$.
+
+-   **Hazard Ratios =** exponentiated coefficients = $e^{(\beta_p)}$= *expected change in the hazard associated with a 1-unit change in* $X_p$.
+
+This stems from the observation that under the general Cox model of the hazard function $h(t,X) = h_0(t)*e^{(\beta_pX_p)}$, the **linear predictor** $(X^T\beta)$ being directly modeled as a function of the covariates is the **log hazard**:
+
+$$
+loghazard = ln[h(t,X)] = ln[h_0(t)] + \beta_1X_1 + \beta_2X_2 + ... + \beta_pX_p
+$$
+
+------------------------------------------------------------------------
+
+### Proportional Hazards Assumption
+
+### Cox Predictions
+
+Because termination and retention are *complementary*, Cox model hazard estimates also allow us to generate **predicted retention probabilities over time**.
 
 ------------------------------------------------------------------------
 
