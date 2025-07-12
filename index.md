@@ -14,6 +14,9 @@ Below you'll find a sample of professional and personal projects I've created ov
 - [Psychometric Review of Python Competency Assessment](/R_projects/Psychometric_Validation/Redacted%20Report.pdf)
   - Work sample of a psychometric validation I carried out upon a Python competency assessment
 
+### Research Projects
+- [Bayesian Model Averaging & Workforce Optimization](/research/Bayesian_Model_Averaging_in_IO_Thesis.pdf)
+
 ### Personal Hobby Projects
 
 - [Airline Profitability](/R_projects/Airlines/Flights%20Analysis.html)
