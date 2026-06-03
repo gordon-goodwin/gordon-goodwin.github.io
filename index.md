@@ -11,6 +11,8 @@ Below you'll find a sample of professional and personal projects I've created ov
   - Guide illustrating how survival analysis can be employed to model workforce retention using R
 - [Simpson's Paradox](/R_projects/Simpsons_Paradox/Simpsons_Paradox_at_Work.html)
   - Guide illustrating Simpson's Paradox with 2 People Analytics case studies
+- [When Rational Employees Lose: Performance Stack Ranking & The Prisoner's Dilemma](https://www.linkedin.com/pulse/when-rational-employees-lose-performance-stack-ranking-gordon-goodwin-ozlzc)
+  - Article exploring performance stack ranking through a Game Theory Lens
 - [Psychometric Review of Python Competency Assessment](/R_projects/Psychometric_Validation/Redacted%20Report.pdf)
   - Work sample of a psychometric validation I carried out upon a Python competency assessment
 
